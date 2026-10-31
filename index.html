@@ -75,6 +75,12 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        #btnSinPracticas.active {
+            background-color: #007849 !important;
+            color: white !important;
+            border-color: #007849 !important;
+        }
     </style>
 <script type="importmap">
 {
@@ -355,6 +361,59 @@
             help: `<svg class="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
         };
 
+        // --- Cálculo rápido de antigüedad ---
+        function togglePracticas() {
+            const btn = document.getElementById('btnSinPracticas');
+            const input = document.getElementById('anoPracticas');
+            const isActive = btn.classList.contains('active');
+
+            if (!isActive) {
+                btn.classList.add('active');
+                btn.textContent = 'Sí';
+                input.disabled = true;
+                input.value = '';
+                input.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = 'No';
+                input.disabled = false;
+                input.classList.remove('opacity-50', 'cursor-not-allowed');
+                const anoC = parseInt(document.getElementById('anoCarrera').value);
+                input.value = isNaN(anoC) ? 2010 : Math.max(1980, anoC - 1);
+            }
+            actualizarAntiguedadRapida();
+        }
+
+        function actualizarAntiguedadRapida() {
+            const btn = document.getElementById('btnSinPracticas');
+            const sinPracticas = btn ? btn.classList.contains('active') : false;
+            const anoP = parseInt(document.getElementById('anoPracticas')?.value);
+            const anoC = parseInt(document.getElementById('anoCarrera')?.value);
+            const anoConv = 2026;
+
+            let anosServicio = 0;
+            if (sinPracticas) {
+                if (!Number.isNaN(anoC)) anosServicio = Math.max(0, anoConv - anoC);
+            } else {
+                if (!Number.isNaN(anoP)) anosServicio = Math.max(0, anoConv - anoP);
+            }
+
+            const resultado = document.getElementById('resultadoAntiguedad');
+            if (resultado) {
+                resultado.innerHTML = `Años de servicio en el cuerpo hasta 2026: <strong class="text-primary">${anosServicio}</strong>`;
+            }
+
+            state.s1_2_1_years = anosServicio;
+            state.s1_2_1_months = 0;
+
+            const inputYears = document.querySelector('input[name="s1_2_1_years"]');
+            const inputMonths = document.querySelector('input[name="s1_2_1_months"]');
+            if (inputYears) inputYears.value = anosServicio;
+            if (inputMonths) inputMonths.value = 0;
+
+            updateCalculations();
+        }
+
         // Components
         const SectionTitle = (title, ptsId) => `
             <div class="flex justify-between items-center mb-4">
@@ -413,6 +472,38 @@
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('1. Antigüedad', 'score-s1')}
                     ${InfoBox('Introduce la antigüedad como funcionario/a de carrera en años y meses completos. No se cuentan las prácticas.')} 
+
+                    <div class="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">
+                            Cálculo rápido de antigüedad
+                        </label>
+
+                        <div class="grid grid-cols-3 gap-3 items-end">
+                            <div class="flex flex-col">
+                                <label for="anoPracticas" class="text-xs text-gray-600 mb-1 text-center">Año ingreso prácticas</label>
+                                <input type="number" id="anoPracticas" value="2010" min="1980" max="2026"
+                                       oninput="actualizarAntiguedadRapida()"
+                                       class="w-full p-2 text-center border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+
+                            <div class="flex flex-col items-center">
+                                <label class="text-xs text-gray-600 mb-1">Estabilización</label>
+                                <button type="button" id="btnSinPracticas" onclick="togglePracticas()"
+                                        class="h-[42px] w-[60px] rounded-md border border-gray-300 bg-white text-gray-600 font-semibold text-sm hover:bg-gray-50 transition">
+                                    No
+                                </button>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label for="anoCarrera" class="text-xs text-gray-600 mb-1 text-center">Año funcionario/a</label>
+                                <input type="number" id="anoCarrera" value="2011" min="1980" max="2026"
+                                       oninput="actualizarAntiguedadRapida()"
+                                       class="w-full p-2 text-center border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                        </div>
+
+                        <p id="resultadoAntiguedad" class="mt-3 text-xs text-center text-gray-600"></p>
+                    </div>
                     
                     ${SubTitle('1.1 Antigüedad en el centro', 'score-s11')}
                     ${YMInput('1.1.1 ¿Desde cuándo estás como funcionario/a de carrera (sin contar prácticas)?', 's1_1_1_years', 's1_1_1_months')}
@@ -713,7 +804,7 @@
             activeTabId = id;
             renderNavigation();
             renderMainContent();
-            updateCalculations(); // Ensure DOM values are current
+            updateCalculations();
         }
 
         function handleInput(element) {
@@ -798,14 +889,11 @@
 
         // Visit Counter Logic
         (function initCounter() {
-            // Using counterapi.dev which is a free, simple counter service.
-            // We use a specific namespace for this calculator to track visits cumulatively.
             const namespace = 'maestrorafa-traslados-2025-v2';
             const key = 'visits';
             const el = document.getElementById('visit-count');
             
             if(el) {
-                // The 'up' endpoint increments the counter and returns the new value.
                 fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`)
                     .then(res => res.json())
                     .then(data => { 
@@ -821,6 +909,7 @@
         // Initialize
         renderNavigation();
         renderMainContent();
+        actualizarAntiguedadRapida();
         updateCalculations();
 
     </script>
