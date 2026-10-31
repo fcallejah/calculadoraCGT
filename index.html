@@ -3,308 +3,799 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Concurso de Traslado 2025</title>
+    <title>Calculadora Concurso Traslados 2026 - Andalucía</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23007849'/%3E%3Crect x='17' y='10' width='30' height='44' rx='4' fill='white'/%3E%3Crect x='22' y='15' width='20' height='10' rx='2' fill='%23cce8da'/%3E%3Cg fill='%23007849'%3E%3Ccircle cx='24' cy='32' r='3'/%3E%3Ccircle cx='32' cy='32' r='3'/%3E%3Ccircle cx='40' cy='32' r='3'/%3E%3Ccircle cx='24' cy='41' r='3'/%3E%3Ccircle cx='32' cy='41' r='3'/%3E%3Crect x='37' y='38' width='6' height='12' rx='2'/%3E%3Ccircle cx='24' cy='50' r='3'/%3E%3Ccircle cx='32' cy='50' r='3'/%3E%3C/g%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#007849',
-                        secondary: '#2c3e50',
-                    }
-                }
-            }
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#007849', secondary: '#2c3e50' } } }
         }
     </script>
     <style>
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background-color: white; }
-            #app-content { padding: 0; }
+            html, body { background: white !important; color: black !important; font-size: 9pt !important; }
+            #main-content { max-width: none !important; width: 100%; padding: 0 !important; }
+            #main-content > div { max-width: none !important; }
+            .print-breakdown-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem 1rem; }
+            .print-breakdown-section { break-inside: avoid; page-break-inside: avoid; }
+            .print-breakdown-row { font-size: 8pt !important; line-height: 1.2 !important; }
+            #main-content table { font-size: 9pt; }
+            #main-content th, #main-content td { padding-top: 0.2rem !important; padding-bottom: 0.2rem !important; }
+            #main-content .shadow-lg { box-shadow: none !important; }
+            #main-content .rounded-xl { border-radius: 0.5rem !important; }
+            #main-content .print-breakdown-grid li span:first-child { overflow-wrap: anywhere; }
+            .print-only { color: #333 !important; }
+            .print-summary-header { background: #f3f4f6 !important; color: #1f2937 !important; border-bottom: 1px solid #d1d5db; }
+            .print-summary-title { color: #1f2937 !important; }
+            .print-summary-muted, .print-summary-total-label, .print-summary-table-heading,
+            .print-summary-points, .print-summary-max { color: #374151 !important; opacity: 1 !important; }
+            .print-meta { color: #374151 !important; }
+            #main-content .print-summary-card { border: 1px solid #9abfa7 !important; border-radius: 0.5rem !important; overflow: hidden; }
+            #main-content .print-summary-card .rounded-lg { border-radius: 0.4rem !important; }
+            @page { margin: 1.2cm; }
         }
         .print-only { display: none; }
-        
-        /* Custom Tooltip Styles */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 0.25rem;
-        }
+        button[aria-label="Borrar puntuación"] svg:nth-of-type(2) { display: none; }
+        #main-content button[onclick="resetAll()"] svg:nth-of-type(2) { display: none; }
+        .tooltip-container { position: relative; display: inline-block; vertical-align: middle; margin-left: 0.25rem; }
         .tooltip-text {
-            visibility: hidden;
-            width: 220px;
-            background-color: #1f2937;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 8px;
-            position: absolute;
-            z-index: 50;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -110px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.75rem;
-            pointer-events: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            visibility: hidden; width: 280px; background-color: #1f2937; color: #fff;
+            text-align: center; border-radius: 6px; padding: 8px; position: absolute;
+            z-index: 50; bottom: 125%; left: 50%; margin-left: -140px; opacity: 0;
+            transition: opacity 0.3s; font-size: 0.75rem; pointer-events: none;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
         .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #1f2937 transparent transparent transparent;
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+            border-width: 5px; border-style: solid; border-color: #1f2937 transparent transparent transparent;
         }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Hide scrollbar for tabs */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        #btnSinPracticas.active {
-            background-color: #007849 !important;
-            color: white !important;
-            border-color: #007849 !important;
+        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-scroll-control { display: none; }
+        @media (max-width: 640px) {
+            .tab-scroll-control { display: flex; }
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-gray-50 text-slate-800 font-sans">
+<body class="bg-gray-50 text-slate-800 font-sans dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
 
-    <!-- Landing Page Overlay -->
-    <div id="landing-page" class="fixed inset-0 z-50 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 relative">
+    <div id="landing-page" class="fixed inset-0 z-50 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+            <button onclick="toggleDarkMode()" title="Cambiar modo diurno/nocturno"
+                    class="absolute top-3 right-3 p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+                <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
+
             <div class="mb-6 flex justify-center">
                 <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 7h.01M15 7h.01"/></svg>
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                 </div>
             </div>
-            
-            <h1 class="text-3xl font-bold text-gray-800 mb-1">Calculadora Concurso de Traslados 2025</h1>
-            <p class="text-sm text-primary font-semibold mb-2">Creada por MaestroRafa</p>
-            <p class="text-gray-500 mb-8">Cuerpo de Maestros y Secundaria</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">Calculadora Concurso de Traslados 2026</h1>
+            <p class="text-xs text-primary font-semibold mb-1 leading-snug">
+                Creada originalmente por MaestroRafa.<br>Modificada por fcallejah.
+            </p>
+            <p class="text-gray-500 dark:text-gray-400 mb-2">Cuerpo de Maestros y Secundaria</p>
+            <p class="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full px-3 py-1 mb-6">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                Junta de Andalucía · Consejería de Educación
+            </p>
 
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-left text-sm text-yellow-800 mb-8 rounded-r">
-                <p class="font-bold mb-1 text-base uppercase">⚠️ Aviso Importante</p>
-                <p>Esta aplicación es una herramienta de simulación <strong>NO OFICIAL</strong> desarrollada para facilitar el cálculo del baremo.</p>
-                <p class="mt-2">El autor <strong>no se hace responsable</strong> de posibles errores en los cálculos ni de las decisiones que se tomen basándose en los resultados obtenidos aquí.</p>
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 p-4 text-left text-sm text-yellow-800 dark:text-yellow-200 mb-5 rounded-r">
+                <p class="font-bold mb-1 text-base uppercase">⚠️ Aviso importante</p>
+                <p>Herramienta <strong>NO OFICIAL</strong> de simulación. Los autores no se responsabilizan de errores. Consulta siempre el BOJA.</p>
             </div>
 
-            <div class="mb-6 text-center text-xs text-gray-500 leading-relaxed">
-                <p>Calculadora creada por MaestroRafa.</p>
-                <p>Modificada por fcallejah a través de GitHub Copilot y DeepSeek.</p>
-            </div>
+            <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer"
+               class="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-secondary dark:text-gray-200 font-semibold py-2.5 px-4 rounded-xl border-2 border-secondary/20 dark:border-gray-500 transition mb-3 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Ver Resolución oficial en BOJA
+                <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
 
-            <button onclick="closeLanding()" class="w-full bg-primary hover:bg-[#00623b] text-white font-bold py-3 px-6 rounded-xl shadow-md transform transition hover:scale-[1.02] active:scale-[0.98]">
+            <button onclick="closeLanding()" class="w-full bg-primary hover:bg-[#00623b] text-white font-bold py-3 px-6 rounded-xl shadow-md mb-6">
                 Entendido, acceder a la calculadora
             </button>
 
-            <!-- Visit Counter -->
-            <div class="flex justify-center mt-6">
-                <div class="bg-gray-50 border border-gray-100 rounded-full px-4 py-1 flex items-center gap-2 shadow-sm">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <p class="text-xs text-gray-500 font-medium">
-                        Visitas: <span id="visit-count" class="font-mono font-bold text-primary">...</span>
-                    </p>
-                </div>
+            <div class="flex justify-center">
+                <a href="https://github.com/fcallejah/calculadoraCGT" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-full px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 transition"
+                   title="Ver el repositorio del proyecto en GitHub (se abre en nueva pestaña)">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>github.com/fcallejah/calculadoraCGT</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Main App -->
     <div id="app-container" class="min-h-screen flex flex-col transition-opacity duration-500 opacity-0">
-        
-        <!-- Header -->
-        <header class="bg-white shadow-sm sticky top-0 z-40 no-print">
-            <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-primary flex items-center gap-2">
-                    <span class="bg-primary text-white p-1 rounded text-sm">2025</span>
-                    <span class="hidden sm:inline">Calculadora Concurso Traslados</span>
-                    <span class="sm:hidden">CGT 2025</span>
+        <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 no-print">
+            <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center gap-2">
+                <h1 class="text-base sm:text-xl font-bold text-primary flex items-center gap-2 min-w-0">
+                    <span class="bg-primary text-white px-1.5 py-0.5 rounded text-xs font-bold shrink-0">2026</span>
+                    <div class="min-w-0 leading-tight">
+                        <div class="hidden sm:block truncate">Calculadora Concurso Traslados</div>
+                        <div class="sm:hidden truncate text-sm">CGT 2026</div>
+                        <div class="text-[10px] font-medium text-gray-500 dark:text-gray-400 tracking-wide uppercase">Andalucía</div>
+                    </div>
                 </h1>
-                <div class="text-right">
-                    <div class="text-xs text-gray-500 uppercase tracking-wider">Puntos Totales</div>
-                    <div class="text-xl font-bold text-secondary leading-none" id="header-total-score">0.0000</div>
+
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer"
+                       class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-md border border-primary/25 transition"
+                       title="Ver resolución oficial en BOJA (se abre en nueva pestaña)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>BOJA oficial</span>
+                        <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                    <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer"
+                       class="md:hidden inline-flex items-center justify-center p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-md border border-primary/25 transition"
+                       title="Ver resolución oficial en BOJA (nueva pestaña)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </a>
+
+                    <button onclick="toggleDarkMode()" title="Cambiar modo diurno/nocturno" class="p-2 text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+
+                    <div class="flex gap-0.5 sm:gap-1">
+                        <button onclick="printReport()" title="Imprimir / Guardar PDF" class="p-2 text-secondary dark:text-gray-300 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                        </button>
+                        <button onclick="resetAll()" title="Borrar puntuación" aria-label="Borrar puntuación" class="inline-flex items-center gap-1.5 p-2 text-secondary dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20h16"/>
+                                <g transform="rotate(-42 12 10)">
+                                    <rect x="8" y="3" width="8" height="14" rx="1.5" stroke-width="1.8"/>
+                                    <path stroke-linecap="round" stroke-width="1.5" d="M8.5 12h7"/>
+                                </g>
+                            </svg>
+                            <span class="hidden sm:inline text-xs font-semibold whitespace-nowrap">Borrar puntuación</span>
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Navigation Tabs -->
-            <div class="max-w-5xl mx-auto px-4 overflow-x-auto scrollbar-hide">
-                <nav class="flex space-x-1 border-b border-gray-200" id="tabs-container">
-                    <!-- Tabs injected by JS -->
-                </nav>
+            <div class="max-w-5xl mx-auto px-4 pb-2">
+                <div class="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 px-3 py-2 backdrop-blur-md">
+                    <span class="text-xs sm:text-sm font-medium text-secondary dark:text-gray-300">Puntuación total estimada</span>
+                    <span class="text-base sm:text-lg font-bold tabular-nums text-primary" id="header-total-score" aria-live="polite">0,0000</span>
+                </div>
+            </div>
+            <div class="max-w-5xl mx-auto px-4 relative">
+                <button id="tabs-scroll-left" onclick="scrollTabs(-1)" aria-label="Desplazar pestañas a la izquierda"
+                        class="tab-scroll-control absolute left-4 top-0 bottom-0 z-10 items-center justify-center w-8 text-secondary/70 dark:text-gray-200/70 bg-white/75 dark:bg-gray-800/75 backdrop-blur-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div id="tabs-scroll-wrapper" class="overflow-x-auto scrollbar-hide">
+                    <nav class="flex space-x-1 border-b border-gray-200 dark:border-gray-700" id="tabs-container" aria-label="Apartados de la calculadora"></nav>
+                </div>
+                <button id="tabs-scroll-right" onclick="scrollTabs(1)" aria-label="Desplazar pestañas a la derecha"
+                        class="tab-scroll-control absolute right-4 top-0 bottom-0 z-10 items-center justify-center w-8 text-secondary/70 dark:text-gray-200/70 bg-white/75 dark:bg-gray-800/75 backdrop-blur-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/></svg>
+                </button>
             </div>
         </header>
 
-        <!-- Print Header -->
         <div class="hidden print-only p-8 text-center border-b mb-4">
-            <h1 class="text-3xl font-bold text-primary">Informe de Baremación</h1>
-            <p class="text-gray-600">Concurso General de Traslados 2025</p>
-            <p class="text-xs text-gray-400 mt-2">Documento no oficial / Creada por MaestroRafa</p>
+            <h1 class="text-3xl font-bold text-primary">Informe de baremación</h1>
+            <p class="text-gray-600">Concurso General de Traslados 2026 · Andalucía</p>
+            <p class="text-2xl font-bold text-primary mt-2">Total: <span id="print-total">0,0000</span> ptos.</p>
         </div>
 
-        <!-- Content Area -->
-        <main class="max-w-5xl mx-auto px-4 py-6 pb-20 flex-grow w-full" id="main-content">
-            <!-- Section content injected by JS -->
-        </main>
-
+        <main class="max-w-5xl mx-auto px-4 py-6 pb-20 flex-grow w-full" id="main-content"></main>
     </div>
 
-    <footer class="bg-slate-100 border-t border-slate-200 py-4 px-4 no-print">
-        <div class="max-w-5xl mx-auto text-center text-xs text-slate-500 leading-relaxed">
-            <p>Calculadora creada por MaestroRafa.</p>
-            <p>Modificada por fcallejah a través de GitHub Copilot y DeepSeek.</p>
+    <div id="reset-confirmation" class="hidden fixed inset-0 z-[60] items-center justify-center bg-black/50 p-4 no-print"
+         role="dialog" aria-modal="true" aria-labelledby="reset-confirmation-title" aria-describedby="reset-confirmation-description"
+         onclick="if (event.target === this) closeResetConfirmation()">
+        <div class="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <h2 id="reset-confirmation-title" class="text-lg font-bold text-gray-900 dark:text-gray-100">¿Borrar todos los datos?</h2>
+            <p id="reset-confirmation-description" class="mt-2 text-sm text-gray-600 dark:text-gray-300">Se eliminarán los méritos introducidos en esta calculadora. Esta acción no se puede deshacer.</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeResetConfirmation()" class="rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-100 transition">Cancelar</button>
+                <button type="button" onclick="confirmResetAll()" class="rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2.5 font-semibold text-white transition">Borrar datos</button>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <div id="seniority-wizard" class="hidden fixed inset-0 z-[60] items-center justify-center bg-black/50 p-4 no-print"
+         role="dialog" aria-modal="true" aria-labelledby="seniority-wizard-title"
+         onclick="if (event.target === this) closeSeniorityWizard()">
+        <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <h2 id="seniority-wizard-title" class="text-xl font-bold text-gray-900 dark:text-gray-100">Cuestionario de antigüedad</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Las fechas se calculan hasta el 31 de octubre de 2026. El cuestionario rellena una estimación; después podrás revisar y ajustar cada apartado manualmente.</p>
+            <div class="mt-5">
+                <p id="wizard-progress" class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400" aria-live="polite"></p>
+                <div data-wizard-step>
+                    <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Situación actual</h3>
+                    <label for="wizard-status" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Cuál es tu situación actual?</label>
+                    <select id="wizard-status" onchange="updateSeniorityWizardVisibility()" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <option value="">Selecciona una situación...</option>
+                        <option value="definitive">Tengo destino definitivo</option>
+                        <option value="provisional">Soy funcionario/a de carrera y estoy esperando destino definitivo</option>
+                        <option value="practice">Soy funcionario/a en prácticas</option>
+                        <option value="other">Otra situación (rellenaré el 1.1 manualmente)</option>
+                    </select>
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Antigüedad en la situación actual</h3>
+                    <label id="wizard-current-date-label" for="wizard-current-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">Fecha desde la que se calcula la situación</label>
+                    <input id="wizard-current-start" type="date" max="2026-10-31" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Si tienes destino definitivo, indica la toma de posesión de tu último destino definitivo.</p>
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Antigüedad en el cuerpo</h3>
+                    <label for="wizard-body-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde qué fecha acumulas servicios docentes en este mismo cuerpo?</label>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Incluye interinidad, prácticas y carrera, aunque hayas trabajado en distintas especialidades del cuerpo.</p>
+                    <input id="wizard-body-start" type="date" max="2026-10-31" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Interrupciones del servicio</h3>
+                    <label for="wizard-body-gap-months" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-3">Meses completos sin servicio en ese cuerpo que deban descontarse (si los hay)</label>
+                    <input id="wizard-body-gap-months" type="number" min="0" step="1" value="0" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Especial dificultad</h3>
+                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica el tiempo completo que corresponda. Si no tienes, deja ambos campos a cero.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años de especial dificultad" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <input id="wizard-hardship-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses de especial dificultad" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    </div>
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.2.2 · Otros cuerpos del mismo o superior subgrupo</h3>
+                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica el tiempo completo que corresponda. Si no tienes, deja ambos campos a cero.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="wizard-other-equal-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años en otros cuerpos del mismo o superior subgrupo" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <input id="wizard-other-equal-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses en otros cuerpos del mismo o superior subgrupo" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    </div>
+                </div>
+                <div data-wizard-step class="hidden">
+                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.2.3 · Otros cuerpos de subgrupo inferior</h3>
+                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica el tiempo completo que corresponda. Si no tienes, deja ambos campos a cero.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="wizard-other-lower-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años en otros cuerpos de subgrupo inferior" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <input id="wizard-other-lower-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses en otros cuerpos de subgrupo inferior" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">No dupliques un mismo período de servicio entre apartados.</p>
+                </div>
+                <p id="seniority-wizard-error" class="hidden text-sm font-medium text-red-600 dark:text-red-400" role="alert"></p>
+            </div>
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <button type="button" onclick="closeSeniorityWizard()" class="rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-100 transition">Cancelar</button>
+                <div class="flex gap-2">
+                    <button id="wizard-back" type="button" onclick="moveSeniorityWizard(-1)" class="hidden rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-100 transition">Atrás</button>
+                    <button id="wizard-next" type="button" onclick="moveSeniorityWizard(1)" class="rounded-lg bg-primary hover:bg-[#00623b] px-4 py-2.5 font-semibold text-white transition">Siguiente</button>
+                    <button id="wizard-apply" type="button" onclick="applySeniorityWizard()" class="hidden rounded-lg bg-primary hover:bg-[#00623b] px-4 py-2.5 font-semibold text-white transition">Aplicar respuestas</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // --- STATE MANAGEMENT ---
+        const STORAGE_KEY = 'cgt2026_v1';
+        const THEME_KEY = 'cgt2026_theme';
+
+        const IDIOMAS_EOI = ['Alemán', 'Árabe', 'Chino', 'Francés', 'Griego moderno', 'Inglés', 'Italiano', 'Japonés', 'Portugués', 'Ruso'];
+        const ACLES_CERTIFICATES = {
+            Alemán: [
+                ['CertAcles B1', 'B1'], ['CertAcles B2', 'B2'], ['CertAcles C1', 'C1'], ['CertAcles C2', 'C2'],
+                ['CLES 1', 'B1'], ['CLES 2', 'B2'], ['CLES 3', 'C1'],
+                ['DSH-1', 'B2'], ['DSH-2', 'C1'], ['DSH-3', 'C2'],
+                ['Deutsches Sprachdiplom DSD I', 'B1'], ['Deutsches Sprachdiplom DSD II', 'B2'], ['Deutsches Sprachdiplom DSD II', 'C1'],
+                ['Goethe-Zertifikat B1', 'B1'], ['Goethe-Zertifikat B1 für Jugendliche', 'B1'], ['Goethe-Zertifikat B2', 'B2'], ['Zertifikat Deutsch für den Beruf (ZDfB)', 'B2'], ['Goethe-Zertifikat C1', 'C1'], ['Prüfung Wirtschaftsdeutsch International (PWD)', 'C1'], ['Goethe-Zertifikat C2', 'C2'], ['Großes Deutsches Sprachdiplom (GDS)', 'C2'], ['Kleines Deutsches Sprachdiplom (KDS)', 'C2'],
+                ['ÖSD Zertifikat Deutsch (ZD)', 'B1'], ['ÖSD Mittelstufe Deutsch (MD)', 'B2'], ['ÖSD Oberstufe Deutsch (OD)', 'C1'], ['ÖSD Wirtschaftssprache Deutsch (WD)', 'C2'],
+                ['TestDaF TDN 3', 'B1'], ['TestDaF TDN 4 (B2+)', 'B2'], ['TestDaF TDN 4 (C1)', 'C1'], ['TestDaF TDN 5', 'C2'],
+                ['telc Deutsch B1', 'B1'], ['telc Deutsch B2', 'B2'], ['telc Deutsch C1', 'C1'],
+                ['UNICERT Level 1', 'B1'], ['UNICERT Level 2', 'B2'], ['UNICERT Level 3/4', 'C1'],
+                ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1']
+            ],
+            Francés: [
+                ['CertAcles B1', 'B1'], ['CertAcles B2', 'B2'], ['CertAcles C1', 'C1'], ['CertAcles C2', 'C2'],
+                ['CLES 1', 'B1'], ['CLES 2', 'B2'], ['CLES 3', 'C1'],
+                ['DELF B1', 'B1'], ['DELF B2', 'B2'], ['DALF C1', 'C1'], ['DALF C2', 'C2'],
+                ['Alliance Française — Diplôme de Langue Française (DLF)', 'B1'], ['Alliance Française — Diplôme Supérieur d’Études Françaises Modernes (DS)', 'B2'], ['Alliance Française — Diplôme de Hautes Études Françaises (DHEF)', 'C1'],
+                ['TCF Niveau 3 (300–399 puntos)', 'B1'], ['TCF Niveau 4 (400–499 puntos)', 'B2'], ['TCF Niveau 5 (500–599 puntos)', 'C1'], ['TCF Niveau 6 (600–699 puntos)', 'C2'],
+                ['TEF 3 (361–540 puntos)', 'B1'], ['TEF 4 (541–698 puntos)', 'B2'], ['TEF 5 (699–833 puntos)', 'C1'], ['TEF 6 (834–900 puntos)', 'C2'],
+                ['telc Français B1', 'B1'], ['telc Français B2', 'B2'],
+                ['DFP B1 (Secretaría, Turismo o Científico)', 'B1'], ['DFP B2 (Secretaría, Médico o Jurídico)', 'B2'],
+                ['DFP Affaires B2', 'B2'], ['DFP Affaires C1', 'C1'], ['DFP Affaires C2', 'C2'], ['DFP Généraliste B1', 'B1'],
+                ['UNICERT Level 1', 'B1'], ['UNICERT Level 2', 'B2'], ['UNICERT Level 3/4', 'C1'],
+                ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1']
+            ],
+            Inglés: [
+                ['CertAcles B1', 'B1'], ['CertAcles B2', 'B2'], ['CertAcles C1', 'C1'], ['CertAcles C2', 'C2'],
+                ['CLES 1', 'B1'], ['CLES 2', 'B2'], ['CLES 3', 'C1'],
+                ['Cambridge Preliminary English Test (PET)', 'B1'], ['Cambridge First Certificate in English (FCE)', 'B2'], ['Cambridge Certificate in Advanced English (CAE)', 'C1'], ['Cambridge Certificate of Proficiency in English (CPE)', 'C2'],
+                ['Cambridge BEC Preliminary', 'B1'], ['Cambridge BEC Vantage', 'B2'], ['Cambridge BEC Higher', 'C1'],
+                ['Cambridge ICFE Vantage', 'B2'], ['Cambridge ICFE Effective Operational Proficiency', 'C1'],
+                ['IELTS 4.0–5.0', 'B1'], ['IELTS 5.5–6.5', 'B2'], ['IELTS 7.0–8.0', 'C1'], ['IELTS 8.5 o superior', 'C2'],
+                ['Linguaskill B1', 'B1'], ['Linguaskill B2', 'B2'], ['Linguaskill C1', 'C1'], ['Linguaskill C2', 'C2'],
+                ['Linguaskill Business B1', 'B1'], ['Linguaskill Business B2', 'B2'], ['Linguaskill Business C1', 'C1'], ['Linguaskill Business C2', 'C2'],
+                ['Occupational English Test (OET) B2', 'B2'], ['Occupational English Test (OET) C1', 'C1'], ['Occupational English Test (OET) C2', 'C2'],
+                ['TOEFL iBT 42–71', 'B1'], ['TOEFL iBT 72–94', 'B2'], ['TOEFL iBT 95–113', 'C1'], ['TOEFL iBT 114–120', 'C2'],
+                ['TOEIC (4 destrezas), nivel B1', 'B1'], ['TOEIC (4 destrezas), nivel B2', 'B2'], ['TOEIC (4 destrezas), nivel C1', 'C1'], ['TOEIC (4 destrezas), nivel C2', 'C2'],
+                ['telc English B1', 'B1'], ['telc English B2', 'B2'], ['telc English C1', 'C1'],
+                ['Trinity ISE I (B1)', 'B1'], ['Trinity ISE II (B2)', 'B2'], ['Trinity ISE III (C1)', 'C1'], ['Trinity ISE IV (C2)', 'C2'],
+                ['University of Michigan Certificate of Competency in English', 'B2'], ['University of Michigan Certificate of Proficiency in English', 'C2'],
+                ['Pearson English International Certificate (PEIC) — ESOL Level 1', 'B1'], ['Pearson English International Certificate (PEIC) — ESOL Level 2', 'B2'], ['Pearson English International Certificate (PEIC) — ESOL Level 3', 'C1'],
+                ['Pearson PTE Academic 43–58', 'B1'], ['Pearson PTE Academic 59–75', 'B2'], ['Pearson PTE Academic 76–84', 'C1'], ['Pearson PTE Academic 85–90', 'C2'],
+                ['LCCI English for Business 2', 'B1'], ['LCCI English for Business 3', 'B2'], ['LCCI English for Business 4', 'C1'],
+                ['Oxford Test of English 51–80', 'B1'], ['Oxford Test of English 81–110', 'B2'], ['Oxford Test of English 111–140', 'C1'],
+                ['Oxford Test of English Advanced B2', 'B2'], ['Oxford Test of English Advanced C1', 'C1'],
+                ['Anglia Intermediate', 'B1'], ['Anglia Intermediate Business English', 'B2'], ['Anglia Advanced / Advanced in Business English', 'C1'], ['Anglia Accept Proficiency / Masters Proficiency in Business English', 'C2'],
+                ['LanguageCert International ESOL Communicator (B2)', 'B2'], ['LanguageCert International ESOL Expert (C1)', 'C1'], ['LanguageCert International ESOL Mastery (C2)', 'C2'],
+                ['LanguageCert General B1 (40–59)', 'B1'], ['LanguageCert General B2 (60–74)', 'B2'], ['LanguageCert General C1 (75 o superior)', 'C1'],
+                ['LanguageCert Academic B1 (40–59)', 'B1'], ['LanguageCert Academic B2 (60–74)', 'B2'], ['LanguageCert Academic C1 (75–89)', 'C1'], ['LanguageCert Academic C2 (90 o superior)', 'C2'],
+                ['SERMO Acert B2', 'B2'], ['SERMO Acert C1', 'C1'],
+                ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1'],
+                ['LRN ESOL Level 1', 'B1'], ['LRN ESOL Level 2', 'B2'], ['LRN ESOL Level 3', 'C1'],
+                ['Euroexam International B2', 'B2'], ['Euroexam International C1', 'C1']
+            ],
+            Italiano: [
+                ['CertAcles B1', 'B1'], ['CertAcles B2', 'B2'], ['CertAcles C1', 'C1'], ['CertAcles C2', 'C2'],
+                ['CLES 1', 'B1'], ['CLES 2', 'B2'], ['CLES 3', 'C1'],
+                ['CELI 2', 'B1'], ['CELI 3', 'B2'], ['CELI 4', 'C1'], ['CELI 5', 'C2'],
+                ['CIC 1', 'B1'], ['CIC A', 'B2'],
+                ['CILS Uno B1', 'B1'], ['CILS Due B2', 'B2'], ['CILS Tre C1', 'C1'], ['CILS Quattro C2', 'C2'],
+                ['CERT.IT — nivel B1', 'B1'], ['CERT.IT — nivel B2', 'B2'], ['CERT.IT — nivel C1', 'C1'], ['CERT.IT — nivel C2', 'C2'],
+                ['PLIDA B1', 'B1'], ['PLIDA B2', 'B2'], ['PLIDA C1', 'C1'], ['PLIDA C2', 'C2'],
+                ['telc Italiano B1', 'B1'], ['telc Italiano B2', 'B2'],
+                ['UNICERT Level 1', 'B1'], ['UNICERT Level 2', 'B2'], ['UNICERT Level 3/4', 'C1'],
+                ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1']
+            ],
+            Chino: [
+                ['Hanyu Shuiping Kaoshi (HSK) 3', 'B1'], ['Hanyu Shuiping Kaoshi (HSK) 4', 'B2'], ['Hanyu Shuiping Kaoshi (HSK) 5', 'C1'], ['Hanyu Shuiping Kaoshi (HSK) 6', 'C2']
+            ],
+            Griego: [
+                ['Certificate of Attainment in Modern Greek — Level A’', 'A2'], ['Certificate of Attainment in Modern Greek — Level B’', 'B1'], ['Certificate of Attainment in Modern Greek — Level C’', 'B2'], ['Certificate of Attainment in Modern Greek — Level D’', 'C1'],
+                ['Veveosi Ellinomatheias — Elemental', 'B1'], ['Veveosi Ellinomatheias — Vantage', 'B2']
+            ],
+            Portugués: [
+                ['Diploma Elementar de Português Língua Estrangeira (DEPLE)', 'B1'], ['Diploma Intermédio de Português Língua Estrangeira (DIPLE)', 'B2'],
+                ['Diploma Avançado de Português Língua Estrangeira (DAPLE)', 'C1'], ['Diploma Universitário de Português Língua Estrangeira (DUPLE)', 'C2'],
+                ['telc Português B1', 'B1'], ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1']
+            ],
+            Rumano: [['telc Română B1', 'B1'], ['telc Română B2', 'B2']],
+            Ruso: [
+                ['State Testing System — Pervyj', 'B1'], ['State Testing System — Vtoroi', 'B2'], ['State Testing System — Tretij', 'C1'], ['State Testing System — Chetvertyj', 'C2'],
+                ['telc Русский B1', 'B1'], ['telc Русский B2', 'B2'],
+                ['SLP 1111 (STANAG 6001)', 'B1'], ['SLP 2222 (STANAG 6001)', 'B2'], ['SLP 3333 (STANAG 6001)', 'C1']
+            ],
+            Turco: [['telc Türkçe B1', 'B1'], ['telc Türkçe B2', 'B2']]
+        };
+        const IDIOMAS_ACLES = Object.keys(ACLES_CERTIFICATES);
+        const CUTOFF_DATE = '2026-10-31';
+        const normalizeLanguageName = (name) => String(name || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const isSpanishLanguage = (name) => {
+            const normalizedName = normalizeLanguageName(name);
+            return ['espanol', 'spanish', 'castellano'].includes(normalizedName) ||
+                normalizedName.startsWith('espanol ') || normalizedName.startsWith('spanish ');
+        };
+
         const INITIAL_STATE = {
-            // 1. Antigüedad
             s1_1_1_years: 0, s1_1_1_months: 0,
             s1_1_2_years: 0, s1_1_2_months: 0,
             s1_1_3_years: 0, s1_1_3_months: 0,
             s1_2_1_years: 0, s1_2_1_months: 0,
             s1_2_2_years: 0, s1_2_2_months: 0,
             s1_2_3_years: 0, s1_2_3_months: 0,
-            // 2. Catedráticos
+            seniorityWizard: { status: '', currentStartDate: '', bodyStartDate: '', bodyGapMonths: 0 },
             s2_catedratico: false,
-            // 3. Académicos
-            s3_1_1_doctor: false,
+            s3_1_1_doctor: 0,
             s3_1_2_masters: 0,
-            s3_1_3_dea: false,
+            s3_1_3_dea: 0,
             s3_1_4_premio_doctor: false,
             s3_2_1_grados: 0,
             s3_2_2_primer_ciclo: 0,
             s3_2_3_segundo_ciclo: 0,
-            // 3.3 Idiomas (Dropdown)
-            s3_3_idiomas_nivel: 'none',
-            s3_3_titulo_arte: 0,   // Artes Plásticas
-            s3_3_titulo_musica: 0, // Música o Danza
-            // 4. Cargos
+            idiomas: [],
+            s3_3_titulo_arte: 0,
+            s3_3_titulo_musica: 0,
             s4_1_director_years: 0, s4_1_director_months: 0,
             s4_2_vicedir_years: 0, s4_2_vicedir_months: 0,
-            s4_3_coord_years: 0, s4_3_coord_months: 0, // Unified 4.3 input
-            // 5. Formación
+            s4_3_coord_years: 0, s4_3_coord_months: 0,
             s5_1_horas: 0,
             s5_2_horas: 0,
             s5_3_especialidades: 0,
             s5_4_competencia_digital: 'none',
-            // 6. Otros
             s6_1_libros_autor: 0,
             s6_1_libros_coautor: 0,
             s6_1_libros_3autores: 0,
             s6_1_libros_4autores: 0,
             s6_1_libros_5autores: 0,
             s6_1_libros_mas5autores: 0,
+            s6_1_obras_literarias_autor: 0,
+            s6_1_obras_literarias_coautor: 0,
+            s6_1_obras_literarias_3autores: 0,
+            s6_1_obras_literarias_ilustrador: 0,
             s6_1_revistas_autor: 0,
             s6_1_revistas_coautor: 0,
             s6_1_revistas_3mas: 0,
-            // 6.2
             s6_2_intl_1: 0, s6_2_intl_2: 0, s6_2_intl_3: 0,
             s6_2_nat_1: 0, s6_2_nat_2: 0, s6_2_nat_3: 0,
             s6_2_auto_1: 0, s6_2_auto_2: 0, s6_2_auto_3: 0,
+            s6_2_coord_plan_igualdad_years: 0,
             s6_2_coord_proyectos_years: 0,
             s6_2_part_proyectos_years: 0,
-            // 6.3
-            s6_3_meritos_artisticos: 0,
-            // 6.4-6.6
+            s6_2_investigacion_projects: 0,
+            s6_3_premios_intl: 0,
+            s6_3_premios_nat: 0,
+            s6_3_premios_auto: 0,
+            s6_3_espectaculos_gran: 0,
+            s6_3_espectaculos_peq: 0,
+            s6_3_otras_composiciones: 0,
+            s6_3_actuaciones_destacadas: 0,
+            s6_3_actuaciones_secundarias: 0,
+            s6_3_exposiciones: 0,
+            s6_3_conservador_dir: 0,
+            s6_3_conservador_part: 0,
+            s6_3_deportista_nivel: 0,
+            s6_3_deportista_rendimiento: 0,
             s6_4_puestos_admin_years: 0, s6_4_puestos_admin_months: 0,
             s6_5_tribunales: 0,
-            s6_6_tutor_master: 0,
-            s6_6_tutor_practicas: 0
+            s6_6_tutor_master_grado: 0,
+            s6_6_tutor_aspirantes: 0
         };
 
         let state = { ...INITIAL_STATE };
         let activeTabId = 1;
 
-        // --- CALCULATION LOGIC ---
+        function applyTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === 'dark') document.documentElement.classList.add('dark');
+            else if (saved === 'light') document.documentElement.classList.remove('dark');
+            else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('dark');
+        }
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem(THEME_KEY, 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem(THEME_KEY, 'dark');
+            }
+        }
+
+        function toggleWarningBox() {
+            const content = document.getElementById('warning-content');
+            const chevron = document.getElementById('warning-chevron');
+            if (content) content.classList.toggle('hidden');
+            if (chevron) chevron.classList.toggle('rotate-180');
+        }
+        function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {} }
+        function parseSeniorityDate(dateValue) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateValue || '')) return null;
+            const [year, month, day] = dateValue.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
+        }
+        function completeMonthsSince(dateValue) {
+            const start = parseSeniorityDate(dateValue);
+            const end = parseSeniorityDate(CUTOFF_DATE);
+            if (!start || !end || start > end) return null;
+            let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
+            if (end.getDate() < start.getDate()) months--;
+            return Math.max(0, months);
+        }
+        function setYearMonthFields(prefix, totalMonths) {
+            state[`${prefix}_years`] = Math.floor(totalMonths / 12);
+            state[`${prefix}_months`] = totalMonths % 12;
+        }
+        function openSeniorityWizard() {
+            const wizard = state.seniorityWizard || INITIAL_STATE.seniorityWizard;
+            document.getElementById('wizard-status').value = wizard.status || '';
+            document.getElementById('wizard-current-start').value = wizard.currentStartDate || '';
+            document.getElementById('wizard-body-start').value = wizard.bodyStartDate || '';
+            document.getElementById('wizard-body-gap-months').value = wizard.bodyGapMonths || 0;
+            document.getElementById('wizard-hardship-years').value = state.s1_1_3_years;
+            document.getElementById('wizard-hardship-months').value = state.s1_1_3_months;
+            document.getElementById('wizard-other-equal-years').value = state.s1_2_2_years;
+            document.getElementById('wizard-other-equal-months').value = state.s1_2_2_months;
+            document.getElementById('wizard-other-lower-years').value = state.s1_2_3_years;
+            document.getElementById('wizard-other-lower-months').value = state.s1_2_3_months;
+            document.getElementById('seniority-wizard-error').classList.add('hidden');
+            const dialog = document.getElementById('seniority-wizard');
+            dialog.dataset.stepIndex = '0';
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+            renderSeniorityWizardStep();
+            document.getElementById('wizard-status').focus();
+        }
+        function closeSeniorityWizard() {
+            const dialog = document.getElementById('seniority-wizard');
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+        }
+        function getSeniorityWizardSteps() {
+            const steps = [...document.querySelectorAll('#seniority-wizard [data-wizard-step]')];
+            const status = document.getElementById('wizard-status').value;
+            if (status === 'other') steps.splice(1, 1);
+            return steps;
+        }
+        function renderSeniorityWizardStep() {
+            const dialog = document.getElementById('seniority-wizard');
+            const steps = getSeniorityWizardSteps();
+            const stepIndex = Math.min(Number(dialog.dataset.stepIndex) || 0, steps.length - 1);
+            dialog.dataset.stepIndex = String(stepIndex);
+            steps.forEach((step, index) => step.classList.toggle('hidden', index !== stepIndex));
+            document.getElementById('wizard-progress').textContent = `Paso ${stepIndex + 1} de ${steps.length}`;
+            document.getElementById('wizard-back').classList.toggle('hidden', stepIndex === 0);
+            document.getElementById('wizard-next').classList.toggle('hidden', stepIndex === steps.length - 1);
+            document.getElementById('wizard-apply').classList.toggle('hidden', stepIndex !== steps.length - 1);
+            document.getElementById('seniority-wizard-error').classList.add('hidden');
+            const focusable = steps[stepIndex].querySelector('select, input');
+            if (focusable) focusable.focus();
+        }
+        function validateSeniorityWizardStep(step) {
+            const status = document.getElementById('wizard-status').value;
+            if (step.querySelector('#wizard-status')) {
+                if (!status) return 'Selecciona tu situación actual para continuar.';
+            } else if (step.querySelector('#wizard-current-start')) {
+                if (completeMonthsSince(document.getElementById('wizard-current-start').value) === null) {
+                    return 'Introduce una fecha válida que no sea posterior al 31 de octubre de 2026.';
+                }
+            } else if (step.querySelector('#wizard-body-start')) {
+                if (completeMonthsSince(document.getElementById('wizard-body-start').value) === null) {
+                    return 'Introduce la fecha en la que empezaste a prestar servicios en este cuerpo; debe ser anterior o igual al 31 de octubre de 2026.';
+                }
+            } else {
+                const invalidInput = [...step.querySelectorAll('input[type="number"]')].find(input => !input.checkValidity());
+                if (invalidInput) return 'Introduce años y meses válidos en los campos indicados.';
+            }
+            return '';
+        }
+        function moveSeniorityWizard(direction) {
+            const dialog = document.getElementById('seniority-wizard');
+            const steps = getSeniorityWizardSteps();
+            let stepIndex = Number(dialog.dataset.stepIndex) || 0;
+            if (direction > 0) {
+                const errorMessage = validateSeniorityWizardStep(steps[stepIndex]);
+                const error = document.getElementById('seniority-wizard-error');
+                if (errorMessage) {
+                    error.textContent = errorMessage;
+                    error.classList.remove('hidden');
+                    return;
+                }
+                if (stepIndex < steps.length - 1) stepIndex++;
+            } else if (stepIndex > 0) {
+                stepIndex--;
+            }
+            dialog.dataset.stepIndex = String(stepIndex);
+            renderSeniorityWizardStep();
+        }
+        function updateSeniorityWizardVisibility() {
+            const status = document.getElementById('wizard-status').value;
+            const labels = {
+                definitive: '¿Desde cuándo ocupas tu último destino definitivo?',
+                provisional: '¿Desde cuándo estás esperando tu destino definitivo?',
+                practice: '¿Desde cuándo eres funcionario/a en prácticas?'
+            };
+            document.getElementById('wizard-current-date-label').textContent = labels[status] || 'Fecha desde la que se calcula la situación';
+        }
+        function applySeniorityWizard() {
+            const status = document.getElementById('wizard-status').value;
+            const currentStart = document.getElementById('wizard-current-start').value;
+            const bodyStart = document.getElementById('wizard-body-start').value;
+            const currentMonths = ['definitive', 'provisional', 'practice'].includes(status) ? completeMonthsSince(currentStart) : 0;
+            const bodyMonths = completeMonthsSince(bodyStart);
+            const error = document.getElementById('seniority-wizard-error');
+            let errorMessage = '';
+            if (!status) errorMessage = 'Selecciona tu situación actual para continuar.';
+            else if (['definitive', 'provisional', 'practice'].includes(status) && currentMonths === null) errorMessage = 'Introduce una fecha válida que no sea posterior al 31 de octubre de 2026.';
+            else if (bodyMonths === null) errorMessage = 'Introduce la fecha en la que empezaste a prestar servicios en este cuerpo; debe ser anterior o igual al 31 de octubre de 2026.';
+            if (errorMessage) {
+                error.textContent = errorMessage;
+                error.classList.remove('hidden');
+                return;
+            }
+
+            if (status === 'definitive') {
+                setYearMonthFields('s1_1_1', currentMonths);
+                setYearMonthFields('s1_1_2', 0);
+            } else if (status === 'provisional') {
+                setYearMonthFields('s1_1_1', 0);
+                setYearMonthFields('s1_1_2', currentMonths);
+            } else if (status === 'practice') {
+                setYearMonthFields('s1_1_1', 0);
+                setYearMonthFields('s1_1_2', 0);
+            }
+
+            const bodyGapMonths = Math.max(0, Math.floor(Number(document.getElementById('wizard-body-gap-months').value) || 0));
+            setYearMonthFields('s1_2_1', Math.max(0, bodyMonths - bodyGapMonths));
+            setYearMonthFields('s1_1_3', Math.max(0, Number(document.getElementById('wizard-hardship-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-hardship-months').value) || 0)));
+            setYearMonthFields('s1_2_2', Math.max(0, Number(document.getElementById('wizard-other-equal-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-equal-months').value) || 0)));
+            setYearMonthFields('s1_2_3', Math.max(0, Number(document.getElementById('wizard-other-lower-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-lower-months').value) || 0)));
+            state.seniorityWizard = { status, currentStartDate: currentStart, bodyStartDate: bodyStart, bodyGapMonths };
+            saveState();
+            closeSeniorityWizard();
+            renderMainContent();
+            updateCalculations();
+        }
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    state = { ...INITIAL_STATE, ...parsed };
+                    if (!Array.isArray(state.idiomas)) state.idiomas = [];
+                    state.seniorityWizard = { ...INITIAL_STATE.seniorityWizard, ...(parsed.seniorityWizard || {}) };
+                    ['s3_1_1_doctor', 's3_1_3_dea'].forEach(name => {
+                        if (typeof state[name] === 'boolean') state[name] = Number(state[name]);
+                    });
+                    Object.keys(INITIAL_STATE).forEach(name => {
+                        if (typeof INITIAL_STATE[name] === 'number') {
+                            const value = Number(String(state[name]).replace(',', '.'));
+                            state[name] = Number.isFinite(value) ? value : 0;
+                        }
+                    });
+                    state.idiomas.forEach(language => {
+                        const normalizedName = normalizeLanguageName(language.idioma);
+                        if (normalizedName === 'arabe' && language.origen === 'ACLES') language.origen = 'EOI';
+                        if (normalizedName === 'griego' && language.origen === 'EOI') language.idioma = 'Griego moderno';
+                        if (['rumano', 'turco'].includes(normalizedName) && language.origen === 'EOI') language.origen = 'ACLES';
+                    });
+                    state.idiomas = state.idiomas.filter(language => !isSpanishLanguage(language.idioma));
+                }
+            } catch(e) {}
+        }
+        function resetAll() {
+            const dialog = document.getElementById('reset-confirmation');
+            if (!dialog) return;
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+            dialog.querySelector('button').focus();
+        }
+        function closeResetConfirmation() {
+            const dialog = document.getElementById('reset-confirmation');
+            if (!dialog) return;
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+        }
+        function confirmResetAll() {
+            state = { ...INITIAL_STATE, idiomas: [] };
+            saveState();
+            closeResetConfirmation();
+            renderMainContent();
+            updateCalculations();
+        }
+        function formatPrintTime(date) {
+            const formattedDate = new Intl.DateTimeFormat('es-ES', {
+                timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', year: 'numeric'
+            }).format(date);
+            const parts = new Intl.DateTimeFormat('es-ES', {
+                timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hourCycle: 'h23'
+            }).formatToParts(date);
+            const time = Object.fromEntries(parts.filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+            return { date: formattedDate, hour: time.hour, minute: time.minute, second: time.second };
+        }
+        async function getPrintTime() {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 1500);
+            try {
+                const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Madrid', {
+                    cache: 'no-store',
+                    credentials: 'omit',
+                    signal: controller.signal
+                });
+                if (!response.ok) throw new Error(`Time server returned ${response.status}`);
+                const data = await response.json();
+                if (data.timeZone !== 'Europe/Madrid' ||
+                    ![data.year, data.month, data.day, data.hour, data.minute, data.seconds].every(Number.isFinite)) {
+                    throw new Error('Time server returned an invalid response');
+                }
+                const pad = value => String(value).padStart(2, '0');
+                return {
+                    date: `${pad(data.day)}/${pad(data.month)}/${data.year}`,
+                    hour: pad(data.hour),
+                    minute: pad(data.minute),
+                    second: pad(data.seconds),
+                    source: 'servidor horario web'
+                };
+            } catch (error) {
+                return { ...formatPrintTime(new Date()), source: 'reloj del dispositivo (servidor no disponible)' };
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+        function updatePrintTimestamp(time) {
+            const timestamp = document.getElementById('print-timestamp');
+            if (!timestamp) return;
+            timestamp.textContent = `Calculado el ${time.date} a las ${time.hour} h ${time.minute} min ${time.second} s. Hora: ${time.source}.`;
+        }
+        async function printReport() {
+            if (activeTabId !== 7) {
+                const prev = activeTabId;
+                activeTabId = 7; renderNavigation(); renderMainContent(); updateCalculations();
+                setTimeout(async () => {
+                    const time = await getPrintTime();
+                    updatePrintTimestamp(time);
+                    window.print();
+                    activeTabId = prev; renderNavigation(); renderMainContent(); updateCalculations();
+                }, 100);
+            } else {
+                const time = await getPrintTime();
+                updatePrintTimestamp(time);
+                window.print();
+            }
+        }
+
         const calcTime = (years, months, ptsPerYear, ptsPerMonth) => (years * ptsPerYear) + (months * ptsPerMonth);
+        const PTS_IDIOMA = { B1: 1, B2: 2, C1: 3, C2: 4 };
+        const formatPoints = (value) => Number(value).toFixed(4).replace('.', ',');
+        const formatDecimal = (value) => String(value).replace('.', ',');
+
+        const calc111 = (s) => {
+            let y = s.s1_1_1_years, m = s.s1_1_1_months;
+            y += Math.floor(m / 12); m %= 12;
+            let pts = 0;
+            for (let i = 1; i <= y; i++) pts += (i <= 2 ? 4.0 : (i === 3 ? 6.0 : 8.0));
+            let rate = (y + 1 <= 2) ? 0.3333 : (y + 1 === 3 ? 0.5000 : 0.6666);
+            pts += m * rate;
+            return pts;
+        };
+
+        function getIdiomasBreakdown(s) {
+            const grouped = {};
+            (s.idiomas || []).forEach(l => {
+                const key = (l.idioma || '').trim().toLowerCase();
+                const normalizedName = normalizeLanguageName(key);
+                const normalizedKey = normalizedName === 'griego moderno' ? 'griego' : normalizedName;
+                if (!key || isSpanishLanguage(key)) return;
+                let level = l.nivel;
+                let certificate = '';
+                if (l.origen === 'ACLES') {
+                    if (!l.certificado) return;
+                    const match = (ACLES_CERTIFICATES[l.idioma] || []).find(item => item[0] === l.certificado && item[1] === l.nivel);
+                    if (!match) return;
+                    level = match[1];
+                    certificate = match[0];
+                }
+                const pts = PTS_IDIOMA[level] || 0;
+                if (!grouped[normalizedKey] || grouped[normalizedKey].pts < pts) {
+                    grouped[normalizedKey] = { pts, origen: l.origen || 'EOI', nivel: level, nombre: l.idioma, certificado: certificate };
+                }
+            });
+            let eoi = 0, acles = 0;
+            Object.values(grouped).forEach(g => { if (g.origen === 'EOI') eoi += g.pts; else acles += g.pts; });
+            return { eoi, acles, grouped };
+        }
 
         const Calculators = {
-            // Sec 1
-            calc11: (s) => {
-                let y = s.s1_1_1_years, m = s.s1_1_1_months;
-                y += Math.floor(m / 12); m %= 12;
-                let pts = 0;
-                for (let i = 1; i <= y; i++) pts += (i <= 2 ? 4.0 : (i === 3 ? 6.0 : 8.0));
-                let rate = (y + 1 <= 2) ? 0.3333 : (y + 1 === 3 ? 0.5000 : 0.6666);
-                pts += m * rate;
-                pts += calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333);
-                pts += calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333);
-                return pts;
-            },
-            calc12: (s) => {
-                return calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666) +
-                       calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250) +
-                       calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625);
-            },
+            calc11: (s) => calc111(s) +
+                           calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333) +
+                           calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333),
+            calc12: (s) => calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666) +
+                           calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250) +
+                           calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625),
             section1: (s) => parseFloat((Calculators.calc11(s) + Calculators.calc12(s)).toFixed(4)),
-
-            // Sec 2
             section2: (s) => s.s2_catedratico ? 5.0000 : 0,
-
-            // Sec 3
             calc31: (s) => {
                 let pts = 0;
-                if (s.s3_1_1_doctor) pts += 6.0;
+                pts += s.s3_1_1_doctor * 6.0;
                 pts += s.s3_1_2_masters * 3.0;
-                if (s.s3_1_3_dea) pts += 2.0;
+                pts += s.s3_1_3_dea * 2.0;
                 if (s.s3_1_4_premio_doctor) pts += 1.0;
                 return pts;
             },
             calc32: (s) => (s.s3_2_1_grados * 5.0) + (s.s3_2_2_primer_ciclo * 3.0) + (s.s3_2_3_segundo_ciclo * 3.0),
             calc33: (s) => {
-                let pts = 0;
-                switch (s.s3_3_idiomas_nivel) {
-                    case 'C2': pts += 4.0; break;
-                    case 'C1': pts += 3.0; break;
-                    case 'B2': pts += 2.0; break;
-                    case 'B1': pts += 1.0; break;
-                }
-                pts += s.s3_3_titulo_arte * 2.0;
-                pts += s.s3_3_titulo_musica * 2.0;
-                return pts;
+                const { eoi } = getIdiomasBreakdown(s);
+                return eoi + (s.s3_3_titulo_arte * 2.0) + (s.s3_3_titulo_musica * 2.0);
             },
             section3: (s) => Math.min(Calculators.calc31(s) + Calculators.calc32(s) + Calculators.calc33(s), 10.0),
-
-            // Sec 4
             calc41: (s) => calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750),
             calc42: (s) => calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500),
-            calc43: (s) => {
-                // All items in 4.3 (Coord, Jefe Dept, Tutor) are generally 1.5 pts/year in current Andalusia Baremo
-                return Math.min(calcTime(s.s4_3_coord_years, s.s4_3_coord_months, 1.5, 0.1250), 10.0);
-            },
+            calc43: (s) => Math.min(calcTime(s.s4_3_coord_years, s.s4_3_coord_months, 1.5, 0.1250), 10.0),
             section4: (s) => Math.min(Calculators.calc41(s) + Calculators.calc42(s) + Calculators.calc43(s), 30.0),
-
-            // Sec 5
             calc51: (s) => Math.min(Math.floor(s.s5_1_horas / 10) * 0.1, 9.0),
             calc52: (s) => Math.min(Math.floor(s.s5_2_horas / 3) * 0.1, 3.0),
             calc53: (s) => s.s5_3_especialidades * 1.0,
@@ -312,19 +803,20 @@
                 const map = { 'A1': 0.5, 'A2': 1.0, 'B1': 1.5, 'B2': 2.0, 'C1': 2.5, 'C2': 3.0 };
                 return map[s.s5_4_competencia_digital] || 0;
             },
-            section5: (s) => Math.min(Calculators.calc51(s) + Calculators.calc52(s) + Calculators.calc53(s) + Calculators.calc54(s), 15.0),
-
-            // Sec 6
+            calc55: (s) => getIdiomasBreakdown(s).acles,
+            section5: (s) => Math.min(Calculators.calc51(s) + Calculators.calc52(s) + Calculators.calc53(s) + Calculators.calc54(s) + Calculators.calc55(s), 15.0),
             calc61: (s) => {
                 let pts = 0;
-                // Books
                 pts += s.s6_1_libros_autor * 1.0;
                 pts += s.s6_1_libros_coautor * 0.5;
                 pts += s.s6_1_libros_3autores * 0.4;
                 pts += s.s6_1_libros_4autores * 0.3;
                 pts += s.s6_1_libros_5autores * 0.2;
                 pts += s.s6_1_libros_mas5autores * 0.1;
-                // Magazines
+                pts += s.s6_1_obras_literarias_autor * 1.0;
+                pts += s.s6_1_obras_literarias_coautor * 0.5;
+                pts += s.s6_1_obras_literarias_3autores * 0.4;
+                pts += s.s6_1_obras_literarias_ilustrador * 0.2;
                 pts += s.s6_1_revistas_autor * 0.2;
                 pts += s.s6_1_revistas_coautor * 0.1;
                 pts += s.s6_1_revistas_3mas * 0.05;
@@ -334,19 +826,28 @@
                 let pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
                           (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
                           (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1) +
-                          (s.s6_2_coord_proyectos_years * 0.5) + (s.s6_2_part_proyectos_years * 0.2);
+                          (s.s6_2_coord_plan_igualdad_years * 1.0) +
+                          (s.s6_2_coord_proyectos_years * 0.5) +
+                          (s.s6_2_part_proyectos_years * 0.2) +
+                          (s.s6_2_investigacion_projects * 0.2);
                 return Math.min(pts, 2.5);
             },
-            calc63: (s) => Math.min(s.s6_3_meritos_artisticos * 0.5, 2.5),
+            calc63: (s) => Math.min(
+                (s.s6_3_premios_intl * 1.5) + (s.s6_3_premios_nat * 1.0) + (s.s6_3_premios_auto * 0.5) +
+                (s.s6_3_espectaculos_gran * 1.0) + (s.s6_3_espectaculos_peq * 0.5) + (s.s6_3_otras_composiciones * 0.25) +
+                (s.s6_3_actuaciones_destacadas * 0.5) + (s.s6_3_actuaciones_secundarias * 0.2) +
+                (s.s6_3_exposiciones * 0.5) +
+                (s.s6_3_conservador_dir * 0.5) + (s.s6_3_conservador_part * 0.2) +
+                (s.s6_3_deportista_nivel * 1.0) + (s.s6_3_deportista_rendimiento * 0.5),
+                2.5
+            ),
             calc64: (s) => calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125),
             calc65: (s) => s.s6_5_tribunales * 0.5,
-            calc66: (s) => (s.s6_6_tutor_master * 0.1) + (s.s6_6_tutor_practicas * 0.1),
+            calc66: (s) => (s.s6_6_tutor_master_grado * 0.1) + (s.s6_6_tutor_aspirantes * 0.2),
             section6: (s) => Math.min(Calculators.calc61(s) + Calculators.calc62(s) + Calculators.calc63(s) + Calculators.calc64(s) + Calculators.calc65(s) + Calculators.calc66(s), 15.0),
-            
             total: (s) => Calculators.section1(s) + Calculators.section2(s) + Calculators.section3(s) + Calculators.section4(s) + Calculators.section5(s) + Calculators.section6(s)
         };
 
-        // --- UI GENERATORS ---
         const Tabs = [
             { id: 1, label: '1. Antigüedad' },
             { id: 2, label: '2. Catedráticos' },
@@ -357,161 +858,185 @@
             { id: 7, label: 'Resumen' },
         ];
 
-        const Icons = {
-            help: `<svg class="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
-        };
+        const Icons = { help: `<svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>` };
 
-        // --- Cálculo rápido de antigüedad ---
-        function togglePracticas() {
-            const btn = document.getElementById('btnSinPracticas');
-            const input = document.getElementById('anoPracticas');
-            const isActive = btn.classList.contains('active');
-
-            if (!isActive) {
-                btn.classList.add('active');
-                btn.textContent = 'Sí';
-                input.disabled = true;
-                input.value = '';
-                input.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                btn.classList.remove('active');
-                btn.textContent = 'No';
-                input.disabled = false;
-                input.classList.remove('opacity-50', 'cursor-not-allowed');
-                const anoC = parseInt(document.getElementById('anoCarrera').value);
-                input.value = isNaN(anoC) ? 2010 : Math.max(1980, anoC - 1);
-            }
-            actualizarAntiguedadRapida();
-        }
-
-        function actualizarAntiguedadRapida() {
-            const btn = document.getElementById('btnSinPracticas');
-            const sinPracticas = btn ? btn.classList.contains('active') : false;
-            const anoP = parseInt(document.getElementById('anoPracticas')?.value);
-            const anoC = parseInt(document.getElementById('anoCarrera')?.value);
-            const anoConv = 2026;
-
-            let anosServicio = 0;
-            if (sinPracticas) {
-                if (!Number.isNaN(anoC)) anosServicio = Math.max(0, anoConv - anoC);
-            } else {
-                if (!Number.isNaN(anoP)) anosServicio = Math.max(0, anoConv - anoP);
-            }
-
-            const resultado = document.getElementById('resultadoAntiguedad');
-            if (resultado) {
-                resultado.innerHTML = `Años de servicio en el cuerpo hasta 2026: <strong class="text-primary">${anosServicio}</strong>`;
-            }
-
-            state.s1_2_1_years = anosServicio;
-            state.s1_2_1_months = 0;
-
-            const inputYears = document.querySelector('input[name="s1_2_1_years"]');
-            const inputMonths = document.querySelector('input[name="s1_2_1_months"]');
-            if (inputYears) inputYears.value = anosServicio;
-            if (inputMonths) inputMonths.value = 0;
-
-            updateCalculations();
-        }
-
-        // Components
         const SectionTitle = (title, ptsId) => `
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-primary border-b-2 border-primary/20 pb-2">${title}</h2>
-                <span class="text-2xl font-bold text-primary" id="${ptsId}">0.0000 pts</span>
+                <span class="text-2xl font-bold text-primary" id="${ptsId}">0,0000 ptos.</span>
             </div>`;
 
         const SubTitle = (title, ptsId, tooltipText = '') => `
-            <h3 class="text-lg font-semibold text-secondary mt-6 mb-3 flex justify-between items-end border-b border-gray-100 pb-1">
-                <div class="flex items-center">
-                    ${title}
-                    ${tooltipText ? `<div class="tooltip-container">${Icons.help}<span class="tooltip-text">${tooltipText}</span></div>` : ''}
-                </div>
-                ${ptsId ? `<span class="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded" id="${ptsId}">0.0000 pts</span>` : ''}
+            <h3 class="text-lg font-semibold text-secondary dark:text-gray-200 mt-6 mb-3 flex justify-between items-end border-b border-gray-100 dark:border-gray-700 pb-1">
+                <div class="flex items-center">${title}${tooltipText ? `<div class="tooltip-container">${Icons.help}<span class="tooltip-text">${tooltipText}</span></div>` : ''}</div>
+                ${ptsId ? `<span class="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded" id="${ptsId}">0,0000 ptos.</span>` : ''}
             </h3>`;
 
-        const InfoBox = (text) => `<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm text-blue-700">${text}</div>`;
+        const InfoBox = (text) => `<div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-4 text-sm text-blue-700 dark:text-blue-200">${text}</div>`;
 
-        const NumInput = (label, name, step=1, max=999, className="flex-col") => `
+        const NumInput = (label, name, step=1, max=999, className="flex-col") => {
+            const decimalInput = step === 'any';
+            return `
             <div class="flex ${className}">
-                ${label ? `<label class="text-sm font-medium text-gray-700 mb-1">${label}</label>` : ''}
-                <input type="number" name="${name}" min="0" max="${max}" step="${step}" value="${state[name]}" 
-                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white" 
+                ${label ? `<label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${label}</label>` : ''}
+                <input type="${decimalInput ? 'text' : 'number'}" name="${name}" ${decimalInput ? 'inputmode="decimal" autocomplete="off"' : `min="0" max="${max}" step="${step}"`} value="${state[name] || 0}"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     oninput="handleInput(this)">
             </div>`;
-            
-        const GridInput = (label, name, pts) => `
-            <div class="bg-gray-50 p-3 rounded border border-gray-100">
-                <div class="text-xs text-gray-600 font-medium mb-1 h-8 flex items-end">${label}</div>
+        };
+
+        const GridInput = (label, name, pts, fractional = false) => {
+            const suffix = (pts === 1) ? 'pto.' : 'ptos.';
+            return `
+            <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-100 dark:border-gray-600">
+                <div class="text-xs text-gray-600 dark:text-gray-300 font-medium mb-1 h-8 flex items-end">${label}</div>
                 <div class="flex items-center gap-2">
-                    <input type="number" name="${name}" min="0" value="${state[name]}" class="w-full p-1.5 text-sm border rounded outline-none focus:ring-1 focus:ring-primary" oninput="handleInput(this)">
-                    <span class="text-xs text-primary font-bold whitespace-nowrap">${pts} pt</span>
+                    <input type="${fractional ? 'text' : 'number'}" name="${name}" ${fractional ? 'inputmode="decimal" autocomplete="off"' : 'min="0" step="1"'} value="${state[name] || 0}" class="w-full p-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" oninput="handleInput(this)">
+                    <span class="text-xs text-primary font-bold whitespace-nowrap">${formatDecimal(pts)} ${suffix}</span>
                 </div>
             </div>`;
+        };
 
         const YMInput = (label, yName, mName) => `
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-4">
-                <label class="block text-sm font-semibold text-gray-800 mb-2">${label}</label>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mb-4">
+                <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">${label}</label>
                 <div class="flex gap-4">
-                    ${NumInput('Años', yName, 1, 99, 'flex-1')}
-                    ${NumInput('Meses', mName, 1, 11, 'flex-1')}
+                    ${NumInput('Años', yName, 1, 99, 'flex-1 flex-col')}
+                    ${NumInput('Meses', mName, 1, 11, 'flex-1 flex-col')}
                 </div>
             </div>`;
 
         const Checkbox = (label, name) => `
-            <div class="flex items-center mt-4 mb-2 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                <input type="checkbox" name="${name}" ${state[name] ? 'checked' : ''} 
-                    class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+            <div class="flex items-center mt-4 mb-2 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <input type="checkbox" name="${name}" ${state[name] ? 'checked' : ''}
+                    class="w-5 h-5 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
                     onchange="handleCheck(this)">
-                <label class="ml-2 text-sm text-gray-800">${label}</label>
+                <label class="ml-2 text-sm text-gray-800 dark:text-gray-200">${label}</label>
             </div>`;
 
-        // Render Functions
+        function renderLanguageManagerForOrigin(origin) {
+            const allowedLanguages = origin === 'EOI' ? IDIOMAS_EOI : IDIOMAS_ACLES;
+            const filtered = (state.idiomas || []).map((l, i) => ({ ...l, _idx: i })).filter(l => (l.origen || 'EOI') === origin);
+            const rows = filtered.map(l => {
+                const opciones = allowedLanguages.map(idi => `<option value="${idi}" ${l.idioma === idi ? 'selected' : ''}>${origin === 'EOI' ? `${idi} por la EOI` : idi}</option>`).join('');
+                const aclesCerts = ACLES_CERTIFICATES[l.idioma] || [];
+                const availableAclesLevels = [...new Set(aclesCerts.map(([, level]) => level).filter(level => PTS_IDIOMA[level]))];
+                const filteredAclesCerts = aclesCerts
+                    .map((item, index) => ({ item, index }))
+                    .filter(({ item }) => PTS_IDIOMA[item[1]] && item[1] === l.nivelFiltro);
+                const selectedCertIndex = filteredAclesCerts.find(({ item }) => item[0] === l.certificado)?.index;
+                return `
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-gray-50 dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600 mb-2">
+                    <select aria-label="${origin === 'EOI' ? 'Idioma EOI' : 'Idioma acreditado por ACLES'}" onchange="updateIdioma(${l._idx}, 'idioma', this.value)" class="${origin === 'EOI' ? 'sm:col-span-6' : 'sm:col-span-3'} p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
+                        <option value="">Seleccionar idioma...</option>
+                        ${opciones}
+                    </select>
+                    ${origin === 'EOI'
+                        ? `<select aria-label="Nivel del certificado EOI" onchange="updateIdioma(${l._idx}, 'nivel', this.value)" class="sm:col-span-4 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
+                            <option value="B1" ${l.nivel==='B1'?'selected':''}>B1 (1 pto.)</option>
+                            <option value="B2" ${l.nivel==='B2'?'selected':''}>B2 (2 ptos.)</option>
+                            <option value="C1" ${l.nivel==='C1'?'selected':''}>C1 (3 ptos.)</option>
+                            <option value="C2" ${l.nivel==='C2'?'selected':''}>C2 (4 ptos.)</option>
+                        </select>`
+                        : `<select aria-label="Nivel del certificado ACLES" onchange="updateIdioma(${l._idx}, 'nivelFiltro', this.value)" class="sm:col-span-2 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
+                            <option value="">Nivel...</option>
+                            ${availableAclesLevels.map(level => `<option value="${level}" ${l.nivelFiltro === level ? 'selected' : ''}>${level}</option>`).join('')}
+                        </select>
+                        <select aria-label="Certificado ACLES reconocido" onchange="updateIdioma(${l._idx}, 'certificado', this.value)" class="sm:col-span-5 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none" ${l.nivelFiltro ? '' : 'disabled'}>
+                            <option value="">Selecciona el certificado reconocido...</option>
+                            ${filteredAclesCerts.map(({ item, index }) => `<option value="${index}" ${index === selectedCertIndex ? 'selected' : ''}>${item[0]} — ${item[1]} (${PTS_IDIOMA[item[1]] || 0} ptos.)</option>`).join('')}
+                        </select>`}
+                    <button onclick="removeIdioma(${l._idx})" class="sm:col-span-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded p-2 flex justify-center" title="Eliminar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </div>`;
+            }).join('');
+            const isEOI = origin === 'EOI';
+            return `
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div>${rows || `<p class="text-sm text-gray-400 dark:text-gray-500 italic mb-2">No hay idiomas ${isEOI ? 'EOI' : 'ACLES'} añadidos.</p>`}</div>
+                    <button onclick="addIdiomaForOrigin('${origin}')" class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-[#00623b] bg-primary/5 hover:bg-primary/10 px-3 py-2 rounded transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Añadir idioma ${isEOI ? 'EOI' : 'ACLES'}
+                    </button>
+                    ${isEOI
+                        ? '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Solo se valora el certificado de nivel más alto por idioma; el nivel mínimo baremable es B1 (A1 y A2 no puntúan). Los DLSE se incluyen en 3.3; los certificados de conocimiento del español no se bareman.</p>'
+                        : '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Selecciona idioma, nivel y certificado reconocido por ACLES. Solo se ofrecen niveles baremables (B1–C2) disponibles para el idioma elegido; A1 y A2 no puntúan. El nivel y los puntos se asignan automáticamente. ACLES exige examen presencial y evaluación de las cuatro destrezas. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-primary">tabla oficial de certificados reconocidos por ACLES (rev. 28/07/2025)</a>.</p>'}
+                </div>`;
+        }
+        function addIdiomaForOrigin(origin) {
+            if (!Array.isArray(state.idiomas)) state.idiomas = [];
+            state.idiomas.push({ idioma: '', nivel: origin === 'EOI' ? 'B1' : '', nivelFiltro: '', certificado: '', origen: origin });
+            saveState(); renderMainContent(); updateCalculations();
+        }
+        function removeIdioma(idx) {
+            state.idiomas.splice(idx, 1);
+            saveState(); renderMainContent(); updateCalculations();
+        }
+        function updateIdioma(idx, field, val) {
+            const language = state.idiomas[idx];
+            if (field === 'idioma') {
+                language.idioma = val;
+                if (language.origen === 'ACLES') {
+                    language.certificado = '';
+                    language.nivel = '';
+                    language.nivelFiltro = '';
+                }
+            } else if (field === 'nivelFiltro') {
+                language.nivelFiltro = val;
+                language.certificado = '';
+                language.nivel = '';
+            } else if (field === 'certificado') {
+                const certificate = val === '' ? null : (ACLES_CERTIFICATES[language.idioma] || [])[Number(val)];
+                language.certificado = certificate ? certificate[0] : '';
+                language.nivel = certificate ? certificate[1] : '';
+            } else {
+                language[field] = val;
+            }
+            saveState(); updateCalculations();
+            if (field === 'origen' || field === 'idioma' || field === 'nivelFiltro' || field === 'certificado') { renderMainContent(); updateCalculations(); }
+        }
+
         function renderSection1() {
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('1. Antigüedad', 'score-s1')}
-                    ${InfoBox('Introduce la antigüedad como funcionario/a de carrera en años y meses completos. No se cuentan las prácticas.')} 
-
-                    <div class="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                        <label class="block text-sm font-semibold text-gray-800 mb-3">
-                            Cálculo rápido de antigüedad
-                        </label>
-
-                        <div class="grid grid-cols-3 gap-3 items-end">
-                            <div class="flex flex-col">
-                                <label for="anoPracticas" class="text-xs text-gray-600 mb-1 text-center">Año ingreso prácticas</label>
-                                <input type="number" id="anoPracticas" value="2010" min="1980" max="2026"
-                                       oninput="actualizarAntiguedadRapida()"
-                                       class="w-full p-2 text-center border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-
-                            <div class="flex flex-col items-center">
-                                <label class="text-xs text-gray-600 mb-1">Estabilización</label>
-                                <button type="button" id="btnSinPracticas" onclick="togglePracticas()"
-                                        class="h-[42px] w-[60px] rounded-md border border-gray-300 bg-white text-gray-600 font-semibold text-sm hover:bg-gray-50 transition">
-                                    No
-                                </button>
-                            </div>
-
-                            <div class="flex flex-col">
-                                <label for="anoCarrera" class="text-xs text-gray-600 mb-1 text-center">Año funcionario/a</label>
-                                <input type="number" id="anoCarrera" value="2011" min="1980" max="2026"
-                                       oninput="actualizarAntiguedadRapida()"
-                                       class="w-full p-2 text-center border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                        </div>
-
-                        <p id="resultadoAntiguedad" class="mt-3 text-xs text-center text-gray-600"></p>
+                    ${InfoBox('Introduce la antigüedad en años y meses completos. El sistema calculará las fracciones automáticamente.')}
+                    <div class="mb-5 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4">
+                        <p class="text-sm text-gray-700 dark:text-gray-200">Responde unas preguntas para calcular automáticamente el tiempo hasta el <strong>31 de octubre de 2026</strong>. Después, podrás revisar o corregir cada campo manualmente.</p>
+                        <button type="button" onclick="openSeniorityWizard()" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-[#00623b] px-4 py-2.5 font-semibold text-white shadow-sm transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                            Abrir cuestionario de antigüedad
+                        </button>
                     </div>
-                    
-                    ${SubTitle('1.1 Antigüedad en el centro', 'score-s11')}
-                    ${YMInput('1.1.1 ¿Desde cuándo estás como funcionario/a de carrera (sin contar prácticas)?', 's1_1_1_years', 's1_1_1_months')}
-                    ${YMInput('1.1.2 Situación de provisionalidad', 's1_1_2_years', 's1_1_2_months')}
-                    ${YMInput('1.1.3 Especial dificultad (Se suma a lo anterior)', 's1_1_3_years', 's1_1_3_months')}
 
-                    ${SubTitle('1.2 Antigüedad en el Cuerpo', 'score-s12')}
-                    ${YMInput('1.2.1 Servicio activo en el cuerpo', 's1_2_1_years', 's1_2_1_months')}
+                    ${SubTitle('1.1 Antigüedad en el centro', 'score-s11')}
+                    <div class="bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-500 mb-4 text-sm text-amber-800 dark:text-amber-200 rounded-r">
+                        <button onclick="toggleWarningBox()" class="w-full flex justify-between items-center p-4 text-left hover:bg-amber-100 dark:hover:bg-amber-900/50 transition">
+                            <span class="font-bold flex items-center gap-1.5">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                Cómo rellenar el apartado 1.1
+                            </span>
+                            <svg id="warning-chevron" class="w-4 h-4 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div id="warning-content" class="px-4 pb-4 hidden">
+                            <p class="mb-2"><strong>Solo cuenta el tiempo transcurrido desde tu ÚLTIMO destino definitivo (el más reciente).</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste.</p>
+                            <ul class="list-disc list-inside space-y-1 ml-1 mb-2">
+                                <li><strong>Tienes destino definitivo ahora</strong> → rellena solo <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino.</li>
+                                <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → deja 1.1.1 en blanco y rellena solo <strong>1.1.2</strong>.</li>
+                                <li><strong>Eres funcionario/a en prácticas</strong> → deja <strong>todo el 1.1 en blanco</strong>; tu antigüedad va íntegra al <strong>1.2</strong>.</li>
+                                <li><strong>1.1.3</strong> (especial dificultad) se suma siempre al 1.1.1 o al 1.1.2, según corresponda.</li>
+                            </ul>
+                            <p class="text-xs italic mt-2 pt-2 border-t border-amber-200 dark:border-amber-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
+                        </div>
+                    </div>
+                    ${YMInput('1.1.1 Permanencia ininterrumpida (destino definitivo)', 's1_1_1_years', 's1_1_1_months')}
+                    ${YMInput('1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months')}
+                    ${YMInput('1.1.3 Especial dificultad (se suma a lo anterior)', 's1_1_3_years', 's1_1_3_months')}
+
+                    ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
+                    ${InfoBox('En <strong>1.2.1</strong> se computan todos los servicios en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas, Religión...).')}
+                    ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
                     ${YMInput('1.2.3 Otros cuerpos (subgrupo inferior)', 's1_2_3_years', 's1_2_3_months')}
                 </div>`;
@@ -521,52 +1046,35 @@
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2')}
-                    ${InfoBox('Pertenencia a los Cuerpos de Catedráticos de Enseñanza Secundaria, Música y Artes Escénicas, etc.')}
-                    ${Checkbox('Soy funcionario de carrera del Cuerpo de Catedráticos', 's2_catedratico')}
+                    ${InfoBox('Pertenencia a los Cuerpos de Catedráticos de Enseñanza Secundaria, Música y Artes Escénicas, EOI y Artes Plásticas y Diseño.')}
+                    ${Checkbox('Soy funcionario/a de carrera del Cuerpo de Catedráticos (5 ptos.)', 's2_catedratico')}
                 </div>`;
         }
 
         function renderSection3() {
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('3. Méritos Académicos (Máx 10)', 'score-s3')}
-                    ${InfoBox('<strong>Importante:</strong> No se puede valorar el título alegado para el ingreso en el cuerpo. Por ejemplo, si accediste con el Grado, ese Grado no cuenta puntos.')} 
-
-                    ${SubTitle('3.1 Doctorado, postgrados y premios extraordinarios', 'score-s31', 'Títulos de doctor, máster oficial, etc. El máster de secundaria (antiguo CAP) no puntúa si no es oficial.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
-                        ${Checkbox('3.1.1 Título de Doctor (6 pts)', 's3_1_1_doctor')}
-                        ${NumInput('3.1.2 Másteres Universitarios Oficiales (3 pts c/u)', 's3_1_2_masters')}
-                        ${Checkbox('3.1.3 Suficiencia investigadora / DEA (2 pts)', 's3_1_3_dea')}
-                        ${Checkbox('3.1.4 Premio extraordinario de doctorado (1 pt)', 's3_1_4_premio_doctor')}
+                    ${SectionTitle('3. Méritos académicos (máx. 10)', 'score-s3')}
+                    ${InfoBox('<strong>Importante:</strong> no se puede valorar el título alegado para el ingreso en el cuerpo. En 3.1.1-3.1.3 se valoran todos los títulos aportados.')}
+                    ${SubTitle('3.1 Doctorado, postgrados y premios extraordinarios', 'score-s31', 'El máster de secundaria (antiguo CAP) no puntúa si fue requisito de acceso. No se barema el máster que sea requisito de acceso al doctorado alegado.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                        ${NumInput('3.1.1 Títulos de Doctor (6 ptos. cada uno)', 's3_1_1_doctor')}
+                        ${NumInput('3.1.2 Másteres universitarios oficiales, distintos al de acceso y con ≥60 créditos (3 ptos. cada uno)', 's3_1_2_masters')}
+                        ${NumInput('3.1.3 Certificados de suficiencia investigadora / DEA (2 ptos. cada uno)', 's3_1_3_dea')}
+                        ${Checkbox('3.1.4 Premio extraordinario de doctorado o grado (1 pto. — solo uno)', 's3_1_4_premio_doctor')}
                     </div>
-
-                    ${SubTitle('3.2 Titulaciones de Nivel Superior', 'score-s32', 'Otras titulaciones universitarias distintas a la de ingreso.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
-                        ${NumInput('3.2.1 Grados Universitarios adicionales (5 pts)', 's3_2_1_grados')}
-                        ${NumInput('3.2.2 Diplomaturas / Primer ciclo (3 pts)', 's3_2_2_primer_ciclo')}
-                        ${NumInput('3.2.3 Licenciaturas / Segundo ciclo (3 pts)', 's3_2_3_segundo_ciclo')}
+                    ${SubTitle('3.2 Titulaciones de nivel superior', 'score-s32', 'En subgrupo A1 no cuentan los estudios necesarios para la primera licenciatura; en A2 no cuenta la primera diplomatura.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                        ${NumInput('3.2.1 Grados universitarios adicionales (5 ptos. cada uno)', 's3_2_1_grados')}
+                        ${NumInput('3.2.2 Diplomaturas / primer ciclo (3 ptos. cada uno — la 1.ª no puntúa)', 's3_2_2_primer_ciclo')}
+                        ${NumInput('3.2.3 Licenciaturas / segundo ciclo (3 ptos. cada uno)', 's3_2_3_segundo_ciclo')}
                     </div>
-
-                    ${SubTitle('3.3 Idiomas y Enseñanzas Artísticas', 'score-s33')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Certificados Escuelas Oficiales de Idiomas (EOI)
-                                <div class="tooltip-container">${Icons.help}<span class="tooltip-text">Solo se valora el certificado de nivel más alto aportado por idioma.</span></div>
-                            </label>
-                            <select name="s3_3_idiomas_nivel" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white">
-                                <option value="none" ${state.s3_3_idiomas_nivel === 'none' ? 'selected' : ''}>Seleccionar nivel acreditado...</option>
-                                <option value="C2" ${state.s3_3_idiomas_nivel === 'C2' ? 'selected' : ''}>Nivel C2 (4 pts)</option>
-                                <option value="C1" ${state.s3_3_idiomas_nivel === 'C1' ? 'selected' : ''}>Nivel C1 (3 pts)</option>
-                                <option value="B2" ${state.s3_3_idiomas_nivel === 'B2' ? 'selected' : ''}>Nivel B2 (2 pts)</option>
-                                <option value="B1" ${state.s3_3_idiomas_nivel === 'B1' ? 'selected' : ''}>Nivel B1 (1 pt)</option>
-                            </select>
-                        </div>
-
-                        <div class="border-t pt-4 space-y-3">
-                            ${NumInput('Títulos Profesionales de Música o Danza (2 pts)', 's3_3_titulo_musica')}
-                            ${NumInput('Título Técnico Superior Artes Plásticas/Diseño (2 pts)', 's3_3_titulo_arte')}
-                        </div>
+                    ${SubTitle('3.3 Idiomas (EOI) y enseñanzas artísticas', 'score-s33', 'Solo se valora el nivel más alto por idioma. Los DLSE (Diplomas de Lengua de Signos) puntúan aquí como un nivel de idioma.')}
+                    ${InfoBox('Los certificados <strong>EOI</strong> puntúan en 3.3. Los internacionales (<strong>ACLES</strong>) puntúan en 5.5. El español no se barema, de acuerdo con el BOJA.')}
+                    ${renderLanguageManagerForOrigin('EOI')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4 space-y-3">
+                        ${NumInput('Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
+                        ${NumInput('Título de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior, Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
                     </div>
                 </div>`;
         }
@@ -574,18 +1082,15 @@
         function renderSection4() {
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('4. Cargos Directivos (Máx 30)', 'score-s4')}
-                    ${InfoBox('<strong>Nota:</strong> No se pueden acumular puntos por el desempeño simultáneo de varios cargos. En caso de coincidencia, se valorará el más ventajoso.')}
-
-                    ${SubTitle('4.1 Dirección', 'score-s41', 'Director/a de centros públicos.')}
+                    ${SectionTitle('4. Cargos directivos (máx. 30)', 'score-s4')}
+                    ${InfoBox('No se pueden acumular ptos. por el desempeño simultáneo de varios cargos. Se valora el más ventajoso.')}
+                    ${SubTitle('4.1 Dirección', 'score-s41', 'Director/a de centros públicos, CEP, Agrupaciones de Lengua y Culturas, primer responsable de CEP.')}
                     ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months')}
-
-                    ${SubTitle('4.2 Vicedirección, Jefatura, Secretaría...', 'score-s42', 'Vicedirección, Subdirección, Secretaría, Jefatura de Estudios, Jefatura de Estudios Adjunta.')}
-                    ${YMInput('Cargos directivos (Vicedir, Jefatura, Secr.)', 's4_2_vicedir_years', 's4_2_vicedir_months')}
-
-                    ${SubTitle('4.3 Coordinación y otras funciones (Máx 10)', 'score-s43', 'Coordinaciones, jefaturas de departamento, tutorías, etc. Valorados a 1.5 puntos por año.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                        ${YMInput('Cargos de coordinación docente y función tutorial', 's4_3_coord_years', 's4_3_coord_months')}
+                    ${SubTitle('4.2 Vicedirección, jefatura, secretaría...', 'score-s42')}
+                    ${YMInput('Vicedirección, subdirección, secretaría, jefatura de estudios...', 's4_2_vicedir_years', 's4_2_vicedir_months')}
+                    ${SubTitle('4.3 Coordinación y otras funciones (máx. 10)', 'score-s43', 'Coordinación de ciclo, asesoría CEP, jefatura de departamento, coordinación didáctica, EOE, tutoría desde LOE 2006 (a partir del 1/9/2007).')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                        ${YMInput('Coordinación docente y función tutorial', 's4_3_coord_years', 's4_3_coord_months')}
                     </div>
                 </div>`;
         }
@@ -593,56 +1098,55 @@
         function renderSection5() {
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('5. Formación (Máx 15)', 'score-s5')}
-                    
-                    ${SubTitle('5.1 Formación superada (Máx 9)', 'score-s51')}
-                    ${InfoBox('Se puntúan 0,1 puntos por cada 10 horas de formación acreditada.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    ${SectionTitle('5. Formación (máx. 15)', 'score-s5')}
+                    ${SubTitle('5.1 Formación superada (máx. 9)', 'score-s51', 'No puntúan: CAP, TED, máster de secundaria (cuando sea requisito), cursos de formación novel, ni los cursos para la acreditación de competencia digital docente.')}
+                    ${InfoBox('0,1 ptos. por cada 10 horas. Los títulos propios y másteres no valorados en 3.1.2 se computan aquí por sus horas: <strong>1 crédito tradicional = 10 horas</strong>; <strong>1 crédito ECTS = 25 horas</strong>.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         ${NumInput('Total de horas de cursos recibidos', 's5_1_horas', 10)}
                     </div>
-
-                    ${SubTitle('5.2 Impartición de formación (Máx 3)', 'score-s52')}
-                    ${InfoBox('Se puntúan 0,1 puntos por cada 3 horas de formación impartida.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    ${SubTitle('5.2 Impartición de formación (máx. 3)', 'score-s52', 'Incluye dirección, impartición, tutorización y ponencias. La coordinación de formación va aquí.')}
+                    ${InfoBox('0,1 ptos. por cada 3 horas.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         ${NumInput('Total de horas impartidas', 's5_2_horas', 3)}
                     </div>
-
-                    ${SubTitle('5.3 Nuevas Especialidades', 'score-s53')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        ${NumInput('Nº de nuevas especialidades adquiridas (1 pt)', 's5_3_especialidades')}
+                    ${SubTitle('5.3 Nuevas especialidades', 'score-s53')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        ${NumInput('N.º de nuevas especialidades adquiridas (1 pto. cada una)', 's5_3_especialidades')}
                     </div>
-
-                    ${SubTitle('5.4 Competencia Digital (Máx 3)', 'score-s54')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nivel acreditado</label>
-                        <select name="s5_4_competencia_digital" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white">
-                            <option value="none" ${state.s5_4_competencia_digital === 'none' ? 'selected' : ''}>Seleccionar...</option>
-                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>A1 (0.5 pts)</option>
-                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>A2 (1.0 pts)</option>
-                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>B1 (1.5 pts)</option>
-                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>B2 (2.0 pts)</option>
-                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>C1 (2.5 pts)</option>
-                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>C2 (3.0 pts)</option>
+                    ${SubTitle('5.4 Competencia Digital Docente (CDD) (máx. 3)', 'score-s54')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nivel acreditado</label>
+                        <select name="s5_4_competencia_digital" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            <option value="none" ${state.s5_4_competencia_digital === 'none' ? 'selected' : ''}>Seleccionar nivel de CDD...</option>
+                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>A1 de CDD (0,5 ptos.)</option>
+                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>A2 de CDD (1,0 ptos.)</option>
+                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>B1 de CDD (1,5 ptos.)</option>
+                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>B2 de CDD (2,0 ptos.)</option>
+                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>C1 de CDD (2,5 ptos.)</option>
+                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>C2 de CDD (3,0 ptos.)</option>
                         </select>
                     </div>
+                    ${SubTitle('5.5 Idiomas acreditados por ACLES', 'score-s55', 'Certificados internacionales: Cambridge, TOEFL, IELTS, DELF, Goethe... Excluye EOI (va en 3.3).')}
+                    ${InfoBox('Los certificados de Escuelas Oficiales de Idiomas se introducen únicamente en 3.3 y puntúan desde B1 hasta C2. En 5.5, los certificados admitidos por ACLES puntúan en los niveles B1, B2, C1 y C2; se valora un solo certificado por idioma, el de nivel superior. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-blue-900 dark:hover:text-blue-100">tabla oficial de ACLES (rev. 28/07/2025)</a>.')}
+                    <div class="mb-4 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                        <strong>¡Atención!</strong> Ningún título de Aptis (Aptis ESOL General, Aptis Advanced, etc.) es reconocido como baremable para el concurso de traslados porque no aparece en ACLES. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)</a>.
+                    </div>
+                    ${renderLanguageManagerForOrigin('ACLES')}
                 </div>`;
         }
 
         function renderSection6() {
-            // Helper for the 6.2 grid
             const GridInputSmall = (name, pts) => `
                 <div class="flex flex-col items-center">
-                    ${NumInput('', name, 1, 99, 'w-full mb-0')}
-                    <span class="text-[10px] text-gray-400 mt-1">${pts} pts</span>
+                    ${NumInput('', name, 'any', 99, 'w-full mb-0')}
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">${pts} ptos.</span>
                 </div>`;
-
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('6. Otros Méritos (Máx 15)', 'score-s6')}
-
-                    ${SubTitle('6.1 Publicaciones (Máx 8)', 'score-s61', 'Libros con ISBN, revistas con ISSN. Se valora distinta puntuación si es autoría única o compartida.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                        <h4 class="text-sm font-bold text-secondary uppercase tracking-wide border-b pb-1">Libros</h4>
+                    ${SectionTitle('6. Otros méritos (máx. 15)', 'score-s6')}
+                    ${SubTitle('6.1 Publicaciones (máx. 8)', 'score-s61', 'Libros con ISBN, revistas con ISSN, obras literarias. La autoría de obras literarias sigue la misma tabla que los libros, más ilustraciones a 0,2.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1">Libros didácticos / científicos</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_libros_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_libros_coautor', 0.5)}
@@ -651,8 +1155,14 @@
                             ${GridInput('5 autores', 's6_1_libros_5autores', 0.2)}
                             ${GridInput('Más de 5', 's6_1_libros_mas5autores', 0.1)}
                         </div>
-                        
-                        <h4 class="text-sm font-bold text-secondary uppercase tracking-wide border-b pb-1 pt-2">Revistas</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">Obras literarias</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            ${GridInput('Autor único', 's6_1_obras_literarias_autor', 1.0)}
+                            ${GridInput('Coautor', 's6_1_obras_literarias_coautor', 0.5)}
+                            ${GridInput('3+ autores', 's6_1_obras_literarias_3autores', 0.4)}
+                            ${GridInput('Ilustrador/a', 's6_1_obras_literarias_ilustrador', 0.2)}
+                        </div>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">Revistas</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_revistas_autor', 0.2)}
                             ${GridInput('Coautor', 's6_1_revistas_coautor', 0.1)}
@@ -660,171 +1170,338 @@
                         </div>
                     </div>
 
-                    ${SubTitle('6.2 Premios y Proyectos (Máx 2.5)', 'score-s62')}
-                    ${InfoBox('Premios de ámbito autonómico, nacional o internacional y participación en planes y proyectos educativos de investigación/innovación.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-6">
+                    ${SubTitle('6.2 Premios y proyectos (máx. 2,5)', 'score-s62', 'Los premios se dividen por n.º de participantes. Si no se relacionan los participantes, se divide por el n.º de profesores del centro (mín. 0,05).')}
+                    ${InfoBox('Premios (DC Quinta.2): internacional 1,5/0,75/0,5 · nacional 1,0/0,5/0,25 · autonómico 0,5/0,25/0,1. Coordinación de proyectos: 0,5/curso (excepto Plan de Igualdad: 1,0/curso).')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
                         <div>
-                            <h4 class="text-sm font-bold text-secondary mb-2 uppercase tracking-wide flex items-center">
-                                Premios <div class="tooltip-container">${Icons.help}<span class="tooltip-text">Premios convocados por Administraciones Educativas.</span></div>
-                            </h4>
-                            <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 border-b pb-2 mb-2 text-center bg-gray-50 rounded-t py-2">
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">Premios</h4>
+                            <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-center bg-gray-50 dark:bg-gray-700 rounded-t py-2">
                                 <div class="text-left pl-2">Ámbito</div>
-                                <div>1º Premio</div>
-                                <div>2º Premio</div>
-                                <div>3º Premio</div>
+                                <div>1.º premio</div>
+                                <div>2.º premio</div>
+                                <div>3.º premio</div>
                             </div>
-                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 pb-2">
-                                <div class="text-sm font-medium text-gray-700 pl-2">Internac.</div>
-                                ${GridInputSmall('s6_2_intl_1', '1.5')}
-                                ${GridInputSmall('s6_2_intl_2', '0.75')}
-                                ${GridInputSmall('s6_2_intl_3', '0.5')}
+                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 dark:border-gray-700 pb-2">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Internac.</div>
+                                ${GridInputSmall('s6_2_intl_1', '1,5')}
+                                ${GridInputSmall('s6_2_intl_2', '0,75')}
+                                ${GridInputSmall('s6_2_intl_3', '0,5')}
                             </div>
-                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 pb-2">
-                                <div class="text-sm font-medium text-gray-700 pl-2">Nacional</div>
-                                ${GridInputSmall('s6_2_nat_1', '1.0')}
-                                ${GridInputSmall('s6_2_nat_2', '0.5')}
-                                ${GridInputSmall('s6_2_nat_3', '0.25')}
+                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 dark:border-gray-700 pb-2">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Nacional</div>
+                                ${GridInputSmall('s6_2_nat_1', '1,0')}
+                                ${GridInputSmall('s6_2_nat_2', '0,5')}
+                                ${GridInputSmall('s6_2_nat_3', '0,25')}
                             </div>
                             <div class="grid grid-cols-4 gap-2 items-center">
-                                <div class="text-sm font-medium text-gray-700 pl-2">Autonóm.</div>
-                                ${GridInputSmall('s6_2_auto_1', '0.5')}
-                                ${GridInputSmall('s6_2_auto_2', '0.25')}
-                                ${GridInputSmall('s6_2_auto_3', '0.1')}
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Autonóm.</div>
+                                ${GridInputSmall('s6_2_auto_1', '0,5')}
+                                ${GridInputSmall('s6_2_auto_2', '0,25')}
+                                ${GridInputSmall('s6_2_auto_3', '0,1')}
                             </div>
                         </div>
-                        
-                        <div class="border-t pt-4">
-                            <h4 class="text-sm font-bold text-secondary mb-3 uppercase tracking-wide">Proyectos de Investigación / Innovación</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                ${NumInput('Cursos coordinando proyectos (0.5 pts)', 's6_2_coord_proyectos_years')}
-                                ${NumInput('Cursos participando en proyectos (0.2 pts)', 's6_2_part_proyectos_years')}
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">Proyectos y planes</h4>
+                            ${NumInput('Cursos coordinando Plan de Igualdad (1,0 pto./año)', 's6_2_coord_plan_igualdad_years')}
+                            ${NumInput('Cursos coordinando otros proyectos/planes (0,5 ptos./año)', 's6_2_coord_proyectos_years')}
+                            ${NumInput('Cursos participando en proyectos/planes (0,2 ptos./año)', 's6_2_part_proyectos_years')}
+                        </div>
+                    </div>
+
+                    ${SubTitle('6.3 Méritos artísticos y deportivos (máx. 2,5)', 'score-s63', 'Las exposiciones colectivas y conservador-restaurador participante se dividen por n.º de participantes (mín. 0,05). No puntúan si >25 % del programa coincide con otro alegado.')}
+                    ${InfoBox('Estructura completa del BOJA (DC Quinta.5). Los premios se dividen por n.º de participantes.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                        <div>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Premios en exposiciones, concursos o certámenes</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                ${GridInput('Internacionales', 's6_3_premios_intl', 1.5, true)}
+                                ${GridInput('Nacionales', 's6_3_premios_nat', 1.0, true)}
+                                ${GridInput('Autonómicos', 's6_3_premios_auto', 0.5, true)}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Espectáculos, composiciones y grabaciones</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                ${GridInput('Gran formato (coro, orquesta, banda, ópera, zarzuela, circo, coreografía de danza)', 's6_3_espectaculos_gran', 1.0, true)}
+                                ${GridInput('Cámara / pequeños grupos (≤15 músicos, ≤6 bailarines)', 's6_3_espectaculos_peq', 0.5, true)}
+                                ${GridInput('Otras composiciones', 's6_3_otras_composiciones', 0.25, true)}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Actuaciones y conciertos</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${GridInput('Destacadas (dirección, solista, protagonista)', 's6_3_actuaciones_destacadas', 0.5, true)}
+                                ${GridInput('Secundarias (miembro, cuerpo de baile, secundario, dirección de escena/iluminación)', 's6_3_actuaciones_secundarias', 0.2, true)}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Exposiciones y conservación</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                ${GridInput('Exposiciones (individuales o colectivas)', 's6_3_exposiciones', 0.5, true)}
+                                ${GridInput('Conservador-restaurador director', 's6_3_conservador_dir', 0.5, true)}
+                                ${GridInput('Conservador-restaurador participante', 's6_3_conservador_part', 0.2, true)}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Deportista</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${GridInput('Deportista de alto nivel', 's6_3_deportista_nivel', 1.0)}
+                                ${GridInput('Deportista de alto rendimiento', 's6_3_deportista_rendimiento', 0.5)}
                             </div>
                         </div>
                     </div>
 
-                    ${SubTitle('6.3 Méritos Artísticos y Deportivos (Máx 2.5)', 'score-s63', 'Exposiciones, conciertos, premios artísticos, etc.')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        ${NumInput('Méritos artísticos (Exposiciones/Conciertos - 0.5 pts)', 's6_3_meritos_artisticos')}
-                    </div>
-
-                    ${SubTitle('6.4 Puestos Administración', 'score-s64', 'Servicios especiales, puestos en la administración educativa, etc.')}
+                    ${SubTitle('6.4 Puestos en la administración', 'score-s64', 'Puestos con complemento de destino igual o superior al del cuerpo.')}
                     ${YMInput('Tiempo en puestos de administración', 's6_4_puestos_admin_years', 's6_4_puestos_admin_months')}
-
-                    ${SubTitle('6.5 Tribunales', 'score-s65')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        ${NumInput('Tribunales de oposición (0.5 pts)', 's6_5_tribunales')}
+                    ${SubTitle('6.5 Tribunales', 'score-s65', 'Participación efectiva en órganos de selección a partir de 2007 (presidencia y vocalía).')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        ${NumInput('N.º de convocatorias como miembro de tribunal (0,5 ptos. cada convocatoria)', 's6_5_tribunales')}
                     </div>
+                    ${SubTitle('6.6 Tutorización', 'score-s66', 'La puntuación se otorga por cada curso académico en el que se tutoriza al menos un alumno, con independencia del número de alumnos tutorizados simultáneamente en ese curso.')}
+                    ${InfoBox('El mérito se computa <strong>por curso académico</strong>, no por alumno. Da igual tutorizar 1 o 10 alumnos en el mismo curso: cuenta una sola vez por ese curso.')}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                        ${NumInput('Cursos tutorizando prácticas de máster o grado (0,1 ptos. cada año, independientemente del n.º de alumnos tutorizados simultáneamente)', 's6_6_tutor_master_grado')}
+                        ${NumInput('Cursos tutorizando fase de prácticas de aspirantes seleccionados desde 2023/24 (0,2 ptos. cada año, independientemente del n.º de alumnos tutorizados simultáneamente)', 's6_6_tutor_aspirantes')}
+                    </div>
+                </div>`;
+        }
 
-                    ${SubTitle('6.6 Tutorización', 'score-s66')}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
-                        ${NumInput('Tutorización máster universitario (0.1 pts)', 's6_6_tutor_master')}
-                        ${NumInput('Tutorización prácticas (funcionarios/directores) (0.1 pts)', 's6_6_tutor_practicas')}
+        function renderBreakdown() {
+            const s = state;
+            const blocks = [];
+            const push = (arr, label, pts) => { if (pts > 0.00005) arr.push({ label, pts }); };
+
+            const b1 = [];
+            push(b1, `1.1.1 Permanencia ininterrumpida en destino definitivo (${s.s1_1_1_years} a, ${s.s1_1_1_months} m)`, calc111(s));
+            push(b1, `1.1.2 Provisionalidad (${s.s1_1_2_years} a, ${s.s1_1_2_months} m)`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
+            push(b1, `1.1.3 Especial dificultad (${s.s1_1_3_years} a, ${s.s1_1_3_months} m)`, calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333));
+            push(b1, `1.2.1 Servicio activo en el cuerpo (${s.s1_2_1_years} a, ${s.s1_2_1_months} m)`, calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666));
+            push(b1, `1.2.2 Otros cuerpos — mismo o superior subgrupo (${s.s1_2_2_years} a, ${s.s1_2_2_months} m)`, calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250));
+            push(b1, `1.2.3 Otros cuerpos — subgrupo inferior (${s.s1_2_3_years} a, ${s.s1_2_3_months} m)`, calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625));
+            if (b1.length) blocks.push({ title: '1. Antigüedad', rows: b1 });
+
+            if (s.s2_catedratico) {
+                blocks.push({ title: '2. Cuerpos de Catedráticos', rows: [{ label: 'Pertenencia al Cuerpo de Catedráticos', pts: 5.0 }] });
+            }
+
+            const b3 = [];
+            push(b3, `3.1.1 Títulos de Doctor (${formatDecimal(s.s3_1_1_doctor)})`, s.s3_1_1_doctor * 6.0);
+            push(b3, `3.1.2 Másteres universitarios oficiales (${formatDecimal(s.s3_1_2_masters)})`, s.s3_1_2_masters * 3.0);
+            push(b3, `3.1.3 Suficiencia investigadora / DEA (${formatDecimal(s.s3_1_3_dea)})`, s.s3_1_3_dea * 2.0);
+            if (s.s3_1_4_premio_doctor) push(b3, '3.1.4 Premio extraordinario de doctorado o grado', 1.0);
+            push(b3, `3.2.1 Grados universitarios adicionales (${formatDecimal(s.s3_2_1_grados)})`, s.s3_2_1_grados * 5.0);
+            push(b3, `3.2.2 Diplomaturas / primer ciclo (${formatDecimal(s.s3_2_2_primer_ciclo)})`, s.s3_2_2_primer_ciclo * 3.0);
+            push(b3, `3.2.3 Licenciaturas / segundo ciclo (${formatDecimal(s.s3_2_3_segundo_ciclo)})`, s.s3_2_3_segundo_ciclo * 3.0);
+            const { grouped } = getIdiomasBreakdown(s);
+            Object.values(grouped).forEach(g => {
+                if (g.origen === 'EOI') push(b3, `3.3 ${g.nombre} por la EOI — nivel ${g.nivel}`, g.pts);
+            });
+            push(b3, `Títulos profesionales de Música o Danza (${s.s3_3_titulo_musica})`, s.s3_3_titulo_musica * 2.0);
+            push(b3, `Títulos Técnico Superior APD / Deportivo / FP (${s.s3_3_titulo_arte})`, s.s3_3_titulo_arte * 2.0);
+            if (b3.length) blocks.push({ title: '3. Méritos académicos', rows: b3 });
+
+            const b4 = [];
+            push(b4, `4.1 Dirección (${s.s4_1_director_years} a, ${s.s4_1_director_months} m)`, calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750));
+            push(b4, `4.2 Vicedirección / jefatura / secretaría (${s.s4_2_vicedir_years} a, ${s.s4_2_vicedir_months} m)`, calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500));
+            push(b4, `4.3 Coordinación y tutoría (${s.s4_3_coord_years} a, ${s.s4_3_coord_months} m)`, calcTime(s.s4_3_coord_years, s.s4_3_coord_months, 1.5, 0.1250));
+            if (b4.length) blocks.push({ title: '4. Cargos directivos', rows: b4 });
+
+            const b5 = [];
+            push(b5, `5.1 Formación superada (${s.s5_1_horas} h)`, Calculators.calc51(s));
+            push(b5, `5.2 Impartición de formación (${s.s5_2_horas} h)`, Calculators.calc52(s));
+            push(b5, `5.3 Nuevas especialidades (${s.s5_3_especialidades})`, s.s5_3_especialidades * 1.0);
+            if (s.s5_4_competencia_digital !== 'none') {
+                const map = { 'A1': 0.5, 'A2': 1.0, 'B1': 1.5, 'B2': 2.0, 'C1': 2.5, 'C2': 3.0 };
+                push(b5, `5.4 ${s.s5_4_competencia_digital} de Competencia Digital Docente`, map[s.s5_4_competencia_digital] || 0);
+            }
+            Object.values(grouped).forEach(g => {
+                if (g.origen === 'ACLES') push(b5, `5.5 ACLES ${g.nombre} — ${g.certificado} (${g.nivel})`, g.pts);
+            });
+            if (b5.length) blocks.push({ title: '5. Formación y perfeccionamiento', rows: b5 });
+
+            const b6 = [];
+            push(b6, `6.1.1 Libros autor único (${s.s6_1_libros_autor})`, s.s6_1_libros_autor * 1.0);
+            push(b6, `6.1.1 Libros coautor (${s.s6_1_libros_coautor})`, s.s6_1_libros_coautor * 0.5);
+            push(b6, `6.1.1 Libros 3 autores (${s.s6_1_libros_3autores})`, s.s6_1_libros_3autores * 0.4);
+            push(b6, `6.1.1 Libros 4 autores (${s.s6_1_libros_4autores})`, s.s6_1_libros_4autores * 0.3);
+            push(b6, `6.1.1 Libros 5 autores (${s.s6_1_libros_5autores})`, s.s6_1_libros_5autores * 0.2);
+            push(b6, `6.1.1 Libros más de 5 autores (${s.s6_1_libros_mas5autores})`, s.s6_1_libros_mas5autores * 0.1);
+            push(b6, `6.1.2 Obras literarias autor (${s.s6_1_obras_literarias_autor})`, s.s6_1_obras_literarias_autor * 1.0);
+            push(b6, `6.1.2 Obras literarias coautor (${s.s6_1_obras_literarias_coautor})`, s.s6_1_obras_literarias_coautor * 0.5);
+            push(b6, `6.1.2 Obras literarias 3+ autores (${s.s6_1_obras_literarias_3autores})`, s.s6_1_obras_literarias_3autores * 0.4);
+            push(b6, `6.1.2 Obras literarias ilustrador/a (${s.s6_1_obras_literarias_ilustrador})`, s.s6_1_obras_literarias_ilustrador * 0.2);
+            push(b6, `6.1.3 Revistas autor (${s.s6_1_revistas_autor})`, s.s6_1_revistas_autor * 0.2);
+            push(b6, `6.1.3 Revistas coautor (${s.s6_1_revistas_coautor})`, s.s6_1_revistas_coautor * 0.1);
+            push(b6, `6.1.3 Revistas 3+ autores (${s.s6_1_revistas_3mas})`, s.s6_1_revistas_3mas * 0.05);
+            const premios_pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
+                                (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
+                                (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1);
+            push(b6, '6.2 Premios', premios_pts);
+            push(b6, `6.2 Coordinación Plan de Igualdad (${s.s6_2_coord_plan_igualdad_years} cursos)`, s.s6_2_coord_plan_igualdad_years * 1.0);
+            push(b6, `6.2 Coordinación otros proyectos (${s.s6_2_coord_proyectos_years} cursos)`, s.s6_2_coord_proyectos_years * 0.5);
+            push(b6, `6.2 Participación en proyectos (${s.s6_2_part_proyectos_years} cursos)`, s.s6_2_part_proyectos_years * 0.2);
+            push(b6, `6.3 Premios internacionales (${formatDecimal(s.s6_3_premios_intl)})`, s.s6_3_premios_intl * 1.5);
+            push(b6, `6.3 Premios nacionales (${formatDecimal(s.s6_3_premios_nat)})`, s.s6_3_premios_nat * 1.0);
+            push(b6, `6.3 Premios autonómicos (${formatDecimal(s.s6_3_premios_auto)})`, s.s6_3_premios_auto * 0.5);
+            push(b6, `6.3 Espectáculos gran formato (${formatDecimal(s.s6_3_espectaculos_gran)})`, s.s6_3_espectaculos_gran * 1.0);
+            push(b6, `6.3 Cámara / pequeños grupos (${formatDecimal(s.s6_3_espectaculos_peq)})`, s.s6_3_espectaculos_peq * 0.5);
+            push(b6, `6.3 Otras composiciones (${formatDecimal(s.s6_3_otras_composiciones)})`, s.s6_3_otras_composiciones * 0.25);
+            push(b6, `6.3 Actuaciones destacadas (${formatDecimal(s.s6_3_actuaciones_destacadas)})`, s.s6_3_actuaciones_destacadas * 0.5);
+            push(b6, `6.3 Actuaciones secundarias (${formatDecimal(s.s6_3_actuaciones_secundarias)})`, s.s6_3_actuaciones_secundarias * 0.2);
+            push(b6, `6.3 Exposiciones (${formatDecimal(s.s6_3_exposiciones)})`, s.s6_3_exposiciones * 0.5);
+            push(b6, `6.3 Conservador-restaurador director (${formatDecimal(s.s6_3_conservador_dir)})`, s.s6_3_conservador_dir * 0.5);
+            push(b6, `6.3 Conservador-restaurador participante (${formatDecimal(s.s6_3_conservador_part)})`, s.s6_3_conservador_part * 0.2);
+            push(b6, `6.3 Deportista alto nivel (${s.s6_3_deportista_nivel})`, s.s6_3_deportista_nivel * 1.0);
+            push(b6, `6.3 Deportista alto rendimiento (${s.s6_3_deportista_rendimiento})`, s.s6_3_deportista_rendimiento * 0.5);
+            push(b6, `6.4 Puestos en la administración (${s.s6_4_puestos_admin_years} a, ${s.s6_4_puestos_admin_months} m)`, calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125));
+            push(b6, `6.5 Tribunales (${s.s6_5_tribunales} convocatorias)`, s.s6_5_tribunales * 0.5);
+            push(b6, `6.6 Tutorización máster/grado (${s.s6_6_tutor_master_grado} cursos)`, s.s6_6_tutor_master_grado * 0.1);
+            push(b6, `6.6 Tutorización fase aspirantes (${s.s6_6_tutor_aspirantes} cursos)`, s.s6_6_tutor_aspirantes * 0.2);
+            if (b6.length) blocks.push({ title: '6. Otros méritos', rows: b6 });
+
+            if (!blocks.length) {
+                return `
+                    <div class="mt-6 bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center border border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Aún no hay méritos introducidos. Rellena las pestañas anteriores para ver aquí el desglose.</p>
+                    </div>`;
+            }
+
+            return `
+                <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="bg-secondary p-4">
+                        <h3 class="text-lg font-bold text-white">Desglose de méritos</h3>
+                        <p class="text-xs text-gray-300">Valores brutos antes de aplicar los topes máximos por apartado</p>
+                    </div>
+                    <div class="p-4 sm:p-6 space-y-4 print-breakdown-grid">
+                        ${blocks.map(b => `
+                            <div class="print-breakdown-section">
+                                <h4 class="text-sm font-bold text-primary uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-1 mb-2">${b.title}</h4>
+                                <ul class="space-y-1">
+                                    ${b.rows.map(r => `
+                                        <li class="flex justify-between items-baseline gap-2 text-sm text-gray-700 dark:text-gray-300 print-breakdown-row">
+                                            <span>${r.label}</span>
+                                            <span class="font-mono font-semibold text-primary whitespace-nowrap print-summary-points">${formatPoints(r.pts)} ptos.</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>`;
         }
 
         function renderSummary() {
-            const s1 = Calculators.section1(state).toFixed(4);
-            const s2 = Calculators.section2(state).toFixed(4);
-            const s3 = Calculators.section3(state).toFixed(4);
-            const s4 = Calculators.section4(state).toFixed(4);
-            const s5 = Calculators.section5(state).toFixed(4);
-            const s6 = Calculators.section6(state).toFixed(4);
-            const total = Calculators.total(state).toFixed(4);
-
+            const s1 = formatPoints(Calculators.section1(state));
+            const s2 = formatPoints(Calculators.section2(state));
+            const s3 = formatPoints(Calculators.section3(state));
+            const s4 = formatPoints(Calculators.section4(state));
+            const s5 = formatPoints(Calculators.section5(state));
+            const s6 = formatPoints(Calculators.section6(state));
+            const total = formatPoints(Calculators.total(state));
             const Row = (label, value, max) => `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="py-3 px-2 text-gray-800 font-medium">${label}</td>
-                    <td class="py-3 text-right font-mono text-gray-700">${value}</td>
-                    <td class="py-3 text-right text-xs text-gray-400 font-mono">${max}</td>
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    <td class="py-3 px-2 text-gray-800 dark:text-gray-200 font-medium">${label}</td>
+                    <td class="py-3 text-right font-mono text-gray-700 dark:text-gray-300 print-summary-points">${value}</td>
+                    <td class="py-3 text-right text-xs text-gray-400 dark:text-gray-500 font-mono print-summary-max">${max}</td>
                 </tr>`;
-
             return `
                 <div class="max-w-3xl mx-auto">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-                        <div class="bg-primary p-6 text-white flex justify-between items-center">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 print-summary-card">
+                        <div class="bg-primary p-6 text-white flex justify-between items-center print-summary-header">
                             <div>
-                                <h2 class="text-2xl font-bold">Resumen de Baremación</h2>
-                                <p class="text-green-100">Concurso de Traslados 2025</p>
+                                <h2 class="text-2xl font-bold print-summary-title">Resumen de baremación</h2>
+                                <p class="text-green-100 print-summary-muted">Concurso de Traslados 2026 · Andalucía</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm opacity-80">Puntuación Total</p>
-                                <p class="text-4xl font-bold">${total}</p>
+                                <p class="text-sm opacity-80 print-summary-total-label">Puntuación total</p>
+                                <p class="text-4xl font-bold print-summary-points">${total}</p>
                             </div>
                         </div>
-
                         <div class="p-6">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-gray-200 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                                    <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider print-summary-table-heading">
                                         <th class="py-3">Apartado</th>
-                                        <th class="py-3 text-right">Puntos</th>
-                                        <th class="py-3 text-right text-xs text-gray-400">Máximo</th>
+                                        <th class="py-3 text-right print-summary-table-heading">Ptos.</th>
+                                        <th class="py-3 text-right text-xs print-summary-max">Máximo</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     ${Row('1. Antigüedad', s1, 'Sin límite')}
-                                    ${Row('2. Cuerpos de Catedráticos', s2, '5.0000')}
-                                    ${Row('3. Méritos Académicos', s3, '10.0000')}
-                                    ${Row('4. Cargos Directivos', s4, '30.0000')}
-                                    ${Row('5. Formación y perfeccionamiento', s5, '15.0000')}
-                                    ${Row('6. Otros méritos', s6, '15.0000')}
+                                    ${Row('2. Cuerpos de Catedráticos', s2, '5,0000')}
+                                    ${Row('3. Méritos académicos', s3, '10,0000')}
+                                    ${Row('4. Cargos directivos', s4, '30,0000')}
+                                    ${Row('5. Formación y perfeccionamiento', s5, '15,0000')}
+                                    ${Row('6. Otros méritos', s6, '15,0000')}
                                 </tbody>
                                 <tfoot>
-                                    <tr class="bg-gray-50">
-                                        <td class="py-4 px-2 font-bold text-gray-800">TOTAL ESTIMADO</td>
-                                        <td class="py-4 text-right font-bold text-primary text-xl">${total}</td>
+                                    <tr class="bg-gray-50 dark:bg-gray-700">
+                                        <td class="py-4 px-2 font-bold text-gray-800 dark:text-gray-100">TOTAL ESTIMADO</td>
+                                        <td class="py-4 text-right font-bold text-primary text-xl print-summary-points">${total}</td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
                             </table>
-
-                            <div class="mt-8 flex justify-center no-print">
-                                <button onclick="window.print()" class="bg-secondary hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m10 0h.01M7 10V5h10v5"/></svg>
-                                    Imprimir / Guardar PDF
-                                </button>
-                            </div>
-                            <div class="mt-8 text-xs text-gray-400 text-center print-only">
-                                Calculado el ${new Date().toLocaleDateString()} mediante Calculadora Concurso de Traslado 2025.
+                            <div class="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
+                                <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <div>
+                                    Resultado orientativo según el <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-blue-900 dark:hover:text-blue-100">anexo II del BOJA n.º 210, de 29/10/2026</a>.
+                                </div>
                             </div>
                         </div>
                     </div>
+                    ${renderBreakdown()}
+                    <div class="mt-6 flex justify-center gap-3 no-print flex-wrap">
+                        <button onclick="printReport()" class="bg-secondary hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                            Imprimir / Guardar PDF
+                        </button>
+                        <button onclick="resetAll()" aria-label="Borrar puntuación" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2 border border-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-200 dark:border-red-800">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20h16"/>
+                                <g transform="rotate(-42 12 10)">
+                                    <rect x="8" y="3" width="8" height="14" rx="1.5" stroke-width="1.8"/>
+                                    <path stroke-linecap="round" stroke-width="1.5" d="M8.5 12h7"/>
+                                </g>
+                            </svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Borrar puntuación
+                        </button>
+                    </div>
+                    <div class="mt-8 text-xs text-gray-400 dark:text-gray-500 text-center print-only print-meta">
+                        <p id="print-timestamp"></p>
+                        Calculadora creada originalmente por MaestroRafa. Modificada por fcallejah.<br>
+                        BOJA n.º 210, de 29 de octubre de 2026 — https://www.juntadeandalucia.es/boja/2026/210/16
+                    </div>
                 </div>`;
         }
-
-        // --- CORE FUNCTIONS ---
 
         function closeLanding() {
             document.getElementById('landing-page').classList.add('hidden');
             document.getElementById('app-container').classList.remove('opacity-0');
         }
-
-        function switchTab(id) {
-            activeTabId = id;
-            renderNavigation();
-            renderMainContent();
-            updateCalculations();
+        function switchTab(id) { activeTabId = id; renderNavigation(); renderMainContent(); updateCalculations(); }
+        function scrollTabs(direction) {
+            const wrapper = document.getElementById('tabs-scroll-wrapper');
+            if (wrapper) wrapper.scrollBy({ left: direction * Math.max(wrapper.clientWidth * 0.65, 140), behavior: 'smooth' });
         }
-
         function handleInput(element) {
             const name = element.name;
-            const value = element.type === 'number' ? parseFloat(element.value) || 0 : element.value;
+            const numeric = element.type === 'number' || element.inputMode === 'decimal';
+            if (element.inputMode === 'decimal') element.value = element.value.replace('.', ',');
+            const parsed = numeric ? Number(element.value.replace(',', '.')) : NaN;
+            let value = numeric ? (Number.isFinite(parsed) ? parsed : 0) : element.value;
+            if (numeric && value < 0) { value = 0; element.value = 0; }
+            if (name.endsWith('_months') && element.type === 'number' && value > 11) { value = 11; element.value = 11; }
             state[name] = value;
-            updateCalculations();
+            saveState(); updateCalculations();
         }
-
-        function handleCheck(element) {
-            state[element.name] = element.checked;
-            updateCalculations();
-        }
-
-        // Only updates the text content of scores, doesn't re-render inputs to maintain focus
+        function handleCheck(element) { state[element.name] = element.checked; saveState(); updateCalculations(); }
         function updateCalculations() {
-            // Header Total
-            document.getElementById('header-total-score').textContent = Calculators.total(state).toFixed(4);
-
-            // Update specific section scores if they exist in the DOM
+            const h = document.getElementById('header-total-score');
+            if (h) h.textContent = formatPoints(Calculators.total(state));
+            const p = document.getElementById('print-total');
+            if (p) p.textContent = formatPoints(Calculators.total(state));
             if (activeTabId === 1) {
                 updateText('score-s1', Calculators.section1(state));
                 updateText('score-s11', Calculators.calc11(state));
@@ -847,6 +1524,7 @@
                 updateText('score-s52', Calculators.calc52(state));
                 updateText('score-s53', Calculators.calc53(state));
                 updateText('score-s54', Calculators.calc54(state));
+                updateText('score-s55', Calculators.calc55(state));
             } else if (activeTabId === 6) {
                 updateText('score-s6', Calculators.section6(state));
                 updateText('score-s61', Calculators.calc61(state));
@@ -857,62 +1535,59 @@
                 updateText('score-s66', Calculators.calc66(state));
             }
         }
-
-        function updateText(id, val) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = val.toFixed(4) + ' pts';
-        }
-
+        function updateText(id, val) { const el = document.getElementById(id); if (el) el.textContent = formatPoints(val) + ' ptos.'; }
         function renderNavigation() {
             const navHTML = Tabs.map(tab => `
-                <button onclick="switchTab(${tab.id})" 
-                    class="py-3 px-4 text-sm font-medium whitespace-nowrap transition-colors duration-200 border-b-2 focus:outline-none ${activeTabId === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
-                >
+                <button id="tab-${tab.id}" onclick="switchTab(${tab.id})" aria-current="${activeTabId === tab.id ? 'page' : 'false'}"
+                    class="py-3 px-4 text-sm font-medium whitespace-nowrap transition-colors duration-200 border-b-2 focus:outline-none ${activeTabId === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'}">
                     ${tab.label}
                 </button>
             `).join('');
             document.getElementById('tabs-container').innerHTML = navHTML;
+            const wrapper = document.getElementById('tabs-scroll-wrapper');
+            const activeTab = document.getElementById(`tab-${activeTabId}`);
+            if (wrapper && activeTab) {
+                wrapper.scrollLeft = activeTab.offsetLeft - (wrapper.clientWidth - activeTab.offsetWidth) / 2;
+            }
         }
-
+        function renderSectionNavigation() {
+            if (activeTabId < 1 || activeTabId > 6) return '';
+            const nextId = activeTabId + 1;
+            const label = activeTabId === 6 ? 'Ver resumen' : 'Siguiente apartado';
+            return `
+                <div class="max-w-2xl mx-auto mt-8 flex justify-end gap-3 no-print">
+                    ${activeTabId > 1 ? `
+                    <button type="button" onclick="switchTab(${activeTabId - 1})"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-semibold px-4 py-3 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        Apartado previo
+                    </button>` : ''}
+                    <button type="button" onclick="switchTab(${nextId})"
+                            class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-[#00623b] text-white font-semibold px-4 py-3 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        ${label}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>`;
+        }
         function renderMainContent() {
-            const container = document.getElementById('main-content');
+            const c = document.getElementById('main-content');
             switch(activeTabId) {
-                case 1: container.innerHTML = renderSection1(); break;
-                case 2: container.innerHTML = renderSection2(); break;
-                case 3: container.innerHTML = renderSection3(); break;
-                case 4: container.innerHTML = renderSection4(); break;
-                case 5: container.innerHTML = renderSection5(); break;
-                case 6: container.innerHTML = renderSection6(); break;
-                case 7: container.innerHTML = renderSummary(); break;
+                case 1: c.innerHTML = renderSection1(); break;
+                case 2: c.innerHTML = renderSection2(); break;
+                case 3: c.innerHTML = renderSection3(); break;
+                case 4: c.innerHTML = renderSection4(); break;
+                case 5: c.innerHTML = renderSection5(); break;
+                case 6: c.innerHTML = renderSection6(); break;
+                case 7: c.innerHTML = renderSummary(); break;
             }
+            c.insertAdjacentHTML('beforeend', renderSectionNavigation());
         }
 
-        // Visit Counter Logic
-        (function initCounter() {
-            const namespace = 'maestrorafa-traslados-2025-v2';
-            const key = 'visits';
-            const el = document.getElementById('visit-count');
-            
-            if(el) {
-                fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`)
-                    .then(res => res.json())
-                    .then(data => { 
-                        el.innerText = data.count; 
-                    })
-                    .catch(err => { 
-                        console.error('Counter error', err);
-                        el.innerText = '---'; 
-                    });
-            }
-        })();
-
-        // Initialize
+        applyTheme();
+        loadState();
         renderNavigation();
         renderMainContent();
-        actualizarAntiguedadRapida();
         updateCalculations();
-
     </script>
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
