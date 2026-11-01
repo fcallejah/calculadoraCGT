@@ -23,7 +23,7 @@ Calculadora para el **Concurso General de Traslados 2026** en **Andalucía** (Cu
 
 *   **📅 Fecha de corte real (26/11/2026):** el cálculo de antigüedad y experiencia ya no se detiene el 31/10, sino en el fin del plazo de solicitudes, para que compute correctamente el segundo mes (septiembre/octubre) tal como exige la Junta.
 *   **⚖️ Corrección del tope en 6.2:** solucionado el bug que permitía superar los 2,5 ptos. máximos en premios y proyectos. Ahora el sumatorio respeta el límite legal.
-*   **📊 Desglose completo del 4.3 (Coordinación y tutoría):** se han creado cajas individuales para jefatura de departamento, coordinación de ciclo/EOE/CEP y tutoría, cada una con sus propios campos de años y meses, en lugar de una única caja genérica.
+*   **📊 Desglose completo del 4.3 (Coordinación y tutoría):** se han creado cajas individuales para jefatura de Departamento, coordinación de ciclo/EOE/CEP y tutoría, cada una con sus propios campos de años y meses, en lugar de una única caja genérica.
 *   **🇪🇸 Lista de idiomas EOI ampliada:** ahora incluye 22 idiomas oficiales, incorporando lenguas cooficiales como el valenciano, catalán, euskera y gallego, tal como permite la disposición complementaria segunda del BOJA.
 
 
@@ -63,4 +63,4 @@ Herramienta **NO OFICIAL** de simulación. Los autores no se responsabilizan de 
 ## 🙏 Créditos
 
 *   Basada en el trabajo original de **MaestroRafa** — [https://github.com/rbuegon523/calculadoraCGT](https://github.com/rbuegon523/calculadoraCGT) (2025).
-*   Adaptación al baremo 2026 y mejoras de usabilidad: **fcallejah** — [https://github.com/fcallejah/calculadoraCGT/tree/fcallejah-boja-2026-updates](https://github.com/fcallejah/calculadoraCGT/tree/fcallejah-boja-2026-updates)
+*   Adaptación al baremo 2026 y mejoras de usabilidad: **fcallejah** — [https://github.com/fcallejah/calculadoraCGT/]
