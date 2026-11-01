@@ -1,6 +1,6 @@
 {
-  "name": "Calculadora CGT Andalucía 2026",
-  "short_name": "CGT 2026",
+  "name": "Calculadora Concurso Traslados 2026 Andalucía",
+  "short_name": "Calculadora Concurso Traslados 2026 Andalucía",
   "description": "Calculadora para el Concurso General de Traslados 2026 en Andalucía",
   "start_url": "./",
   "scope": "./",
