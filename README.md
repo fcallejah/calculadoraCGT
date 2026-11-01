@@ -63,4 +63,4 @@ Herramienta **NO OFICIAL** de simulación. Los autores no se responsabilizan de 
 ## 🙏 Créditos
 
 *   Basada en el trabajo original de **MaestroRafa** — [https://github.com/rbuegon523/calculadoraCGT](https://github.com/rbuegon523/calculadoraCGT) (2025).
-*   Adaptación al baremo 2026 y mejoras de usabilidad: **fcallejah** — [https://github.com/fcallejah/calculadoraCGT/]
+*   Adaptación al baremo 2026 y mejoras de usabilidad: **fcallejah** — [https://github.com/fcallejah/calculadoraCGT/](https://github.com/fcallejah/calculadoraCGT/)
