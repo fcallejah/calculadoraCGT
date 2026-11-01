@@ -267,8 +267,14 @@
                 <!-- PASO DEFINITIVO -->
                 <div data-wizard-step="definitive" class="hidden">
                     <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Destino definitivo</h3>
-                    <label for="wizard-definitive-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo ocupas tu último destino definitivo?</label>
-                    <input id="wizard-definitive-start" type="date" max="2026-11-26" onchange="validarFechasCuestionario()" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <label for="wizard-definitive-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo ocupas tu último destino definitivo?</label>
+                    <div class="mt-1 flex gap-2">
+                        <input id="wizard-definitive-start-text" data-date-for="wizard-definitive-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                        <span class="relative inline-flex shrink-0">
+                            <button type="button" onclick="openWizardDatePicker('wizard-definitive-start')" aria-label="Abrir calendario de destino definitivo" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                            <input id="wizard-definitive-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); autocompletarFechasDesdeDestino()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                        </span>
+                    </div>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Indica la toma de posesión de tu último destino definitivo.</p>
                 </div>
 
@@ -279,11 +285,23 @@
                         <input id="wizard-is-stabilized" type="checkbox" onchange="toggleEstabilizacion()" class="mt-0.5 shrink-0 rounded border-gray-300 text-primary focus:ring-primary">
                         <span>He adquirido la condición de funcionario/a por estabilización o no realicé periodo de prácticas</span>
                     </label>
-                    <label for="wizard-practice-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Cuándo empezaste las prácticas? (Fecha de inicio)</label>
-                    <input id="wizard-practice-start" type="date" max="2026-11-26" onchange="autocompletarFechaCarrera()" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <label for="wizard-practice-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Cuándo empezaste las prácticas? (Fecha de inicio)</label>
+                    <div class="mt-1 flex gap-2">
+                        <input id="wizard-practice-start-text" data-date-for="wizard-practice-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                        <span class="relative inline-flex shrink-0">
+                            <button type="button" onclick="openWizardDatePicker('wizard-practice-start')" aria-label="Abrir calendario de inicio de prácticas" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                            <input id="wizard-practice-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); autocompletarFechaCarrera()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                        </span>
+                    </div>
                     
-                    <label for="wizard-career-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mt-4">¿Cuándo fuiste nombrado/a funcionario/a de carrera?</label>
-                    <input id="wizard-career-start" type="date" max="2026-11-26" onchange="onCareerStartChange()" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <label for="wizard-career-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mt-4">¿Cuándo fuiste nombrado/a funcionario/a de carrera?</label>
+                    <div class="mt-1 flex gap-2">
+                        <input id="wizard-career-start-text" data-date-for="wizard-career-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                        <span class="relative inline-flex shrink-0">
+                            <button type="button" onclick="openWizardDatePicker('wizard-career-start')" aria-label="Abrir calendario de nombramiento de carrera" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                            <input id="wizard-career-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); onCareerStartChange()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                        </span>
+                    </div>
                     
                     <p id="wizard-practice-warning" class="hidden mt-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
                         ⚠️ Han pasado más de 2 años. Las prácticas suelen durar 1 año (o 2 en casos excepcionales). Revisa si las fechas son correctas.
@@ -294,13 +312,19 @@
 
                 <div data-wizard-step="practice" class="hidden">
                     <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Prácticas</h3>
-                    <label for="wizard-practice-only-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo eres funcionario/a en prácticas?</label>
-                    <input id="wizard-practice-only-start" type="date" max="2026-11-26" onchange="validarFechasCuestionario()" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <label for="wizard-practice-only-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo eres funcionario/a en prácticas?</label>
+                    <div class="mt-1 flex gap-2">
+                        <input id="wizard-practice-only-start-text" data-date-for="wizard-practice-only-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                        <span class="relative inline-flex shrink-0">
+                            <button type="button" onclick="openWizardDatePicker('wizard-practice-only-start')" aria-label="Abrir calendario de inicio en prácticas" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                            <input id="wizard-practice-only-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); validarFechasCuestionario()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                        </span>
+                    </div>
                 </div>
 
                 <div data-wizard-step="all" class="hidden">
                     <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Antigüedad en el cuerpo</h3>
-                    <label for="wizard-body-start" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde qué fecha acumulas servicios docentes en este mismo cuerpo?</label>
+                    <label for="wizard-body-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde qué fecha acumulas servicios docentes en este mismo cuerpo?</label>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Incluye interinidad, prácticas y carrera. Si fuiste interino/a, pon tu primera fecha de alta.</p>
                     
                     <label class="flex items-center gap-2 mt-3 cursor-pointer">
@@ -308,7 +332,13 @@
                         <span class="text-sm font-medium text-primary dark:text-green-400">No fui interino/a (usar mi fecha de inicio de prácticas)</span>
                     </label>
 
-                    <input id="wizard-body-start" type="date" max="2026-11-26" onchange="validarFechasCuestionario()" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <div class="mt-2 flex gap-2">
+                        <input id="wizard-body-start-text" data-date-for="wizard-body-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                        <span class="relative inline-flex shrink-0">
+                            <button type="button" onclick="openWizardDatePicker('wizard-body-start')" aria-label="Abrir calendario de inicio de servicios" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                            <input id="wizard-body-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); validarFechasCuestionario()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                        </span>
+                    </div>
                 </div>
 
                 <div data-wizard-step="all" class="hidden">
@@ -608,15 +638,13 @@
             const defaultDate = getDefaultSeptember1st(); // Calcula el 1 de septiembre más reciente
             
             document.getElementById('wizard-status').value = wizard.status || '';
-            document.getElementById('wizard-definitive-start').value = wizard.definitiveStartDate || defaultDate;
-            document.getElementById('wizard-practice-start').value = wizard.practiceStartDate || defaultDate;
-            document.getElementById('wizard-career-start').value = wizard.careerStartDate || defaultDate;
+            setWizardDateValue('wizard-definitive-start', wizard.definitiveStartDate || defaultDate);
+            setWizardDateValue('wizard-practice-start', wizard.practiceStartDate || defaultDate);
+            setWizardDateValue('wizard-career-start', wizard.careerStartDate || defaultDate);
             document.getElementById('wizard-is-stabilized').checked = Boolean(wizard.isStabilized);
-            document.getElementById('wizard-practice-only-start').value = wizard.practiceOnlyStartDate || defaultDate;
-            document.getElementById('wizard-body-start').value = wizard.bodyStartDate || defaultDate;
+            setWizardDateValue('wizard-practice-only-start', wizard.practiceOnlyStartDate || defaultDate);
+            setWizardDateValue('wizard-body-start', wizard.bodyStartDate || defaultDate);
             document.getElementById('wizard-body-gap-months').value = wizard.bodyGapMonths || 0;
-            actualizarLimitesFechasCuestionario();
-            actualizarLimitesFechaCarrera();
             toggleEstabilizacion();
             
             document.getElementById('wizard-hardship-years').value = state.s1_1_3_years;
@@ -628,8 +656,14 @@
             
             document.getElementById('wizard-no-interino').checked = false;
             const bodyInput = document.getElementById('wizard-body-start');
-            bodyInput.readOnly = false;
+            const bodyTextInput = document.getElementById('wizard-body-start-text');
+            const bodyCalendarButton = bodyInput.parentElement.querySelector('button');
+            bodyInput.disabled = false;
+            bodyTextInput.disabled = false;
+            bodyCalendarButton.disabled = false;
+            bodyCalendarButton.classList.remove('cursor-not-allowed', 'opacity-50');
             bodyInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            bodyTextInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
             
             document.getElementById('seniority-wizard-error').classList.add('hidden');
             const dialog = document.getElementById('seniority-wizard');
@@ -646,34 +680,80 @@
             const month = Number(match[2]);
             const day = Number(match[3]);
             const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-            return `${year}-${String(month).padStart(2, '0')}-${String(Math.min(day, lastDayOfMonth)).padStart(2, '0')}`;
+            return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(Math.min(day, lastDayOfMonth)).padStart(2, '0')}`;
         }
         function getTodayDateString() {
             const today = new Date();
             return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         }
-        function actualizarLimitesFechasCuestionario() {
-            const today = getTodayDateString();
-            document.querySelectorAll('#seniority-wizard input[type="date"]').forEach(input => {
-                const baseMax = input.dataset.baseMax || input.getAttribute('max') || '2026-11-26';
-                input.dataset.baseMax = baseMax;
-                input.setAttribute('max', baseMax < today ? baseMax : today);
-            });
+        function parseWizardDateText(value) {
+            const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+            if (!match) return '';
+            const day = Number(match[1]);
+            const month = Number(match[2]);
+            const year = Number(match[3]);
+            if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) return '';
+            const date = new Date(0);
+            date.setUTCHours(0, 0, 0, 0);
+            date.setUTCFullYear(year, month - 1, day);
+            if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return '';
+            return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         }
-        function actualizarLimitesFechaCarrera() {
-            const practiceInput = document.getElementById('wizard-practice-start');
-            const careerInput = document.getElementById('wizard-career-start');
-            const practiceDate = practiceInput.value;
-            const latestAllowedDate = practiceDate ? addYearsToDateString(practiceDate, 2) : '';
-            const baseMax = careerInput.dataset.baseMax || careerInput.getAttribute('max') || '2026-11-26';
-            const presentMax = baseMax < getTodayDateString() ? baseMax : getTodayDateString();
-            const applicableMax = latestAllowedDate && latestAllowedDate < presentMax ? latestAllowedDate : presentMax;
-            careerInput.setAttribute('max', applicableMax);
-            if (practiceDate) {
-                careerInput.setAttribute('min', practiceDate);
-            } else {
-                careerInput.removeAttribute('min');
+        function formatWizardDateText(value) {
+            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+            return match ? `${match[3]}/${match[2]}/${match[1]}` : '';
+        }
+        function setWizardDateValue(id, value) {
+            const dateInput = document.getElementById(id);
+            dateInput.value = value || '';
+            const textInput = document.querySelector(`[data-date-for="${id}"]`);
+            if (textInput) {
+                textInput.value = formatWizardDateText(dateInput.value);
+                textInput.classList.remove('border-red-500');
+                textInput.removeAttribute('aria-invalid');
             }
+        }
+        function openWizardDatePicker(id) {
+            const dateInput = document.getElementById(id);
+            if (typeof dateInput.showPicker === 'function') {
+                dateInput.showPicker();
+            } else {
+                dateInput.focus();
+                dateInput.click();
+            }
+        }
+        function syncWizardDatePicker(dateInput) {
+            const textInput = document.querySelector(`[data-date-for="${dateInput.id}"]`);
+            if (!textInput) return;
+            textInput.value = formatWizardDateText(dateInput.value);
+            textInput.classList.remove('border-red-500');
+            textInput.removeAttribute('aria-invalid');
+        }
+        function syncWizardDateText(textInput) {
+            const dateInput = document.getElementById(textInput.dataset.dateFor);
+            const digits = textInput.value.replace(/\D/g, '').slice(0, 8);
+            textInput.value = digits.length > 4
+                ? `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+                : digits.length > 2
+                    ? `${digits.slice(0, 2)}/${digits.slice(2)}`
+                    : digits;
+            const text = textInput.value.trim();
+            const isoDate = parseWizardDateText(text);
+            const isInvalid = Boolean(text && !isoDate);
+            textInput.classList.toggle('border-red-500', isInvalid);
+            if (isInvalid) {
+                textInput.setAttribute('aria-invalid', 'true');
+                return;
+            }
+            textInput.removeAttribute('aria-invalid');
+            if (dateInput.value !== isoDate) {
+                dateInput.value = isoDate;
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        function hasInvalidWizardDateText(step) {
+            return [...step.querySelectorAll('[data-date-for]')]
+                .some(input => input.value.trim() && !parseWizardDateText(input.value));
         }
         function getPracticeCareerDateError(practiceDate, careerDate) {
             if (!practiceDate || !careerDate) return '';
@@ -689,37 +769,46 @@
         function autocompletarFechaCarrera() {
             const practiceDate = document.getElementById('wizard-practice-start').value;
             const careerInput = document.getElementById('wizard-career-start');
-            actualizarLimitesFechasCuestionario();
-            actualizarLimitesFechaCarrera();
             if (practiceDate) {
                 const oneYearLater = addYearsToDateString(practiceDate, 1);
-                careerInput.value = oneYearLater > careerInput.max ? careerInput.max : oneYearLater;
-            } else {
-                careerInput.value = '';
+                setWizardDateValue('wizard-career-start', oneYearLater > careerInput.max ? careerInput.max : oneYearLater);
             }
+            validarDuracionPracticas();
+            validarFechasCuestionario();
+        }
+        function autocompletarFechasDesdeDestino() {
+            const definitiveDate = document.getElementById('wizard-definitive-start').value;
+            if (!definitiveDate) return;
+            const isStabilized = document.getElementById('wizard-is-stabilized').checked;
+            setWizardDateValue('wizard-career-start', definitiveDate);
+            setWizardDateValue('wizard-practice-start', isStabilized ? definitiveDate : addYearsToDateString(definitiveDate, -1));
             validarDuracionPracticas();
             validarFechasCuestionario();
         }
         function toggleEstabilizacion() {
             const isStabilized = document.getElementById('wizard-is-stabilized').checked;
             const practiceInput = document.getElementById('wizard-practice-start');
+            const practiceTextInput = document.getElementById('wizard-practice-start-text');
+            const practiceCalendarButton = practiceInput.parentElement.querySelector('button');
             const careerInput = document.getElementById('wizard-career-start');
-            practiceInput.readOnly = isStabilized;
-            practiceInput.classList.toggle('bg-gray-100', isStabilized);
-            practiceInput.classList.toggle('dark:bg-gray-800', isStabilized);
-            practiceInput.classList.toggle('opacity-50', isStabilized);
+            practiceInput.disabled = isStabilized;
+            practiceTextInput.disabled = isStabilized;
+            practiceCalendarButton.disabled = isStabilized;
+            practiceCalendarButton.classList.toggle('cursor-not-allowed', isStabilized);
+            practiceCalendarButton.classList.toggle('opacity-50', isStabilized);
+            practiceTextInput.classList.toggle('bg-gray-100', isStabilized);
+            practiceTextInput.classList.toggle('dark:bg-gray-800', isStabilized);
+            practiceTextInput.classList.toggle('opacity-50', isStabilized);
             if (isStabilized && careerInput.value) {
-                practiceInput.value = careerInput.value;
+                setWizardDateValue('wizard-practice-start', careerInput.value);
             }
-            actualizarLimitesFechaCarrera();
             validarDuracionPracticas();
             validarFechasCuestionario();
         }
         function onCareerStartChange() {
             if (document.getElementById('wizard-is-stabilized').checked) {
-                document.getElementById('wizard-practice-start').value = document.getElementById('wizard-career-start').value;
+                setWizardDateValue('wizard-practice-start', document.getElementById('wizard-career-start').value);
             }
-            actualizarLimitesFechaCarrera();
             validarDuracionPracticas();
             validarFechasCuestionario();
         }
@@ -727,6 +816,8 @@
             const practiceDate = document.getElementById('wizard-practice-start').value;
             const practiceInput = document.getElementById('wizard-practice-start');
             const careerInput = document.getElementById('wizard-career-start');
+            const practiceTextInput = document.getElementById('wizard-practice-start-text');
+            const careerTextInput = document.getElementById('wizard-career-start-text');
             const warning = document.getElementById('wizard-practice-warning');
             const today = getTodayDateString();
             let errorMessage = '';
@@ -737,20 +828,28 @@
             } else {
                 errorMessage = getPracticeCareerDateError(practiceDate, careerInput.value);
             }
-            practiceInput.classList.toggle('border-red-500', practiceDate > today);
-            careerInput.classList.toggle('border-red-500', Boolean(errorMessage) && practiceDate <= today);
+            practiceTextInput.classList.toggle('border-red-500', practiceDate > today);
+            careerTextInput.classList.toggle('border-red-500', Boolean(errorMessage) && practiceDate <= today);
             warning.textContent = errorMessage ? `⚠️ ${errorMessage}` : '';
             warning.classList.toggle('hidden', !errorMessage);
             return errorMessage;
         }
         function getWizardDateError(step) {
+            if (hasInvalidWizardDateText(step)) {
+                return 'Introduce una fecha válida con el formato día/mes/año (dd/mm/aaaa).';
+            }
             const today = getTodayDateString();
             const dateInputs = step.querySelectorAll('input[type="date"]');
             for (const input of dateInputs) {
                 const isFutureDate = Boolean(input.value && input.value > today);
-                input.classList.toggle('border-red-500', isFutureDate);
+                const textInput = document.querySelector(`[data-date-for="${input.id}"]`);
+                if (textInput) {
+                    textInput.classList.toggle('border-red-500', isFutureDate);
+                    if (isFutureDate) textInput.setAttribute('aria-invalid', 'true');
+                    else textInput.removeAttribute('aria-invalid');
+                }
                 if (isFutureDate) {
-                    return `La fecha «${input.labels?.[0]?.textContent.trim() || 'seleccionada'}» no puede ser posterior a hoy.`;
+                    return `La fecha «${textInput?.labels?.[0]?.textContent.trim() || 'seleccionada'}» no puede ser posterior a hoy.`;
                 }
             }
             if (step.querySelector('#wizard-career-start')) {
@@ -762,14 +861,13 @@
             return '';
         }
         function validarFechasCuestionario() {
-            actualizarLimitesFechasCuestionario();
-            actualizarLimitesFechaCarrera();
             validarDuracionPracticas();
             const activeStep = [...getSeniorityWizardSteps()].find(step => !step.classList.contains('hidden'));
             const error = document.getElementById('seniority-wizard-error');
             const dateError = activeStep ? getWizardDateError(activeStep) : '';
             const isCareerStep = activeStep?.querySelector('#wizard-career-start');
-            const message = isCareerStep ? '' : dateError;
+            const hasInvalidDateText = activeStep && hasInvalidWizardDateText(activeStep);
+            const message = isCareerStep && !hasInvalidDateText ? '' : dateError;
             error.textContent = message;
             error.classList.toggle('hidden', !message);
             return message;
@@ -777,6 +875,8 @@
         function toggleNoInterino() {
             const isChecked = document.getElementById('wizard-no-interino').checked;
             const bodyInput = document.getElementById('wizard-body-start');
+            const bodyTextInput = document.getElementById('wizard-body-start-text');
+            const bodyCalendarButton = bodyInput.parentElement.querySelector('button');
             
             if (isChecked) {
                 // Buscamos la fecha de prácticas que haya rellenado antes
@@ -785,16 +885,24 @@
                 const dateToUse = pracStart || pracOnlyStart;
                 
                 if (dateToUse) {
-                    bodyInput.value = dateToUse;
+                    setWizardDateValue('wizard-body-start', dateToUse);
                 }
                 // Bloqueamos el campo y lo pintamos en gris para que se vea que es automático
-                bodyInput.readOnly = true;
+                bodyInput.disabled = true;
+                bodyTextInput.disabled = true;
+                bodyCalendarButton.disabled = true;
+                bodyCalendarButton.classList.add('cursor-not-allowed', 'opacity-50');
                 bodyInput.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                bodyTextInput.classList.add('bg-gray-100', 'dark:bg-gray-800');
             } else {
                 // Si desmarca, lo dejamos libre otra vez
-                bodyInput.readOnly = false;
+                bodyInput.disabled = false;
+                bodyTextInput.disabled = false;
+                bodyCalendarButton.disabled = false;
+                bodyCalendarButton.classList.remove('cursor-not-allowed', 'opacity-50');
                 bodyInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
-                bodyInput.value = '';
+                bodyTextInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+                setWizardDateValue('wizard-body-start', '');
             }
         }
         function closeSeniorityWizard() {
@@ -834,7 +942,7 @@
                 const errorMessage = validateSeniorityWizardStep(steps[stepIndex]);
                 const error = document.getElementById('seniority-wizard-error');
                 if (errorMessage) {
-                    if (steps[stepIndex].querySelector('#wizard-career-start')) {
+                    if (steps[stepIndex].querySelector('#wizard-career-start') && !hasInvalidWizardDateText(steps[stepIndex])) {
                         validarDuracionPracticas();
                         error.classList.add('hidden');
                         return;
