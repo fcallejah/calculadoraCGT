@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f3f4f6"/>
+  <rect x="48" y="48" width="1104" height="534" rx="32" fill="#fff"/>
+  <rect x="100" y="218" width="194" height="194" rx="34" fill="#007849"/>
+  <g transform="translate(132 250) scale(2.03)">
+    <rect x="17" y="10" width="30" height="44" rx="4" fill="#fff"/>
+    <rect x="22" y="15" width="20" height="10" rx="2" fill="#cce8da"/>
+    <g fill="#007849">
+      <circle cx="24" cy="32" r="3"/>
+      <circle cx="32" cy="32" r="3"/>
+      <circle cx="40" cy="32" r="3"/>
+      <circle cx="24" cy="41" r="3"/>
+      <circle cx="32" cy="41" r="3"/>
+      <rect x="37" y="38" width="6" height="12" rx="2"/>
+      <circle cx="24" cy="50" r="3"/>
+      <circle cx="32" cy="50" r="3"/>
+    </g>
+  </g>
+  <text x="350" y="286" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Calculadora Concurso</text>
+  <text x="350" y="358" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Traslados 2026 Andalucía</text>
+  <rect x="350" y="397" width="92" height="8" rx="4" fill="#007849"/>
+</svg>
