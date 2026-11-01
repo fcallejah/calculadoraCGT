@@ -1,0 +1,24 @@
+{
+  "name": "Calculadora CGT Andalucía 2026",
+  "short_name": "CGT 2026",
+  "description": "Calculadora para el Concurso General de Traslados 2026 en Andalucía",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#007849",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
