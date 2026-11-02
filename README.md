@@ -29,13 +29,15 @@ Se ha pasado de tener simples cajas de texto a un **asistente interactivo (Wizar
 
 ### ✨ 4. Interfaz, Usabilidad y Accesibilidad
 *   **🌙 Modo oscuro nativo:** con persistencia en `localStorage` y detección automática del tema del sistema. Se ha ajustado el contraste de todos los elementos para garantizar su legibilidad.
+*   **👨‍💻 Diseño:** fondo dinámico de tonos verdosos con un movimiento ondulado. Se han añadido detalles estéticos en todos los iconos, botones y menús.
 *   **📈 Barras de progreso:** cada apartado incluye una barra visual que se llena según los puntos obtenidos. Al llegar al tope, aparece una píldora verde de *"Máximo alcanzado"*.
 *   **🔢 Formato numérico profesional:** todas las cifras usan fuente monoespaciada y ceros tachados (`Ø`) para evitar confusiones con la letra "O". El resumen se ha rediseñado para albergar totales de 3 dígitos y 4 decimales.
 *   **🔀 Selectores interactivos EOI/ACLES:** botones que atenúan la caja del idioma que no corresponde y muestran un aviso dinámico, evitando que se introduzcan méritos en el lugar equivocado.
-*   **💾 Guardado automático y borrado seguro:** el progreso se guarda solo y se ha añadido un modal de confirmación antes de borrar todos los datos.
+*   **💾 Guardado automático:** el progreso se guarda automáticamente, aunque se refresque o se cierre la página.
+*   **🗑️ Borrado seguro:**  y se ha añadido un modal de confirmación antes de borrar todos los datos.
 *   **💡 _Feedback_ integrado:** botón de sugerencias que enlaza a un Google Forms, y botón directo de *"Inscribirse en el concurso"*.
 *   **📱 PWA (Aplicación web instalable):** se ha añadido un `manifest.json` y un Service Worker para que la calculadora se pueda instalar en Android/iOS como si fuera una app nativa.
-*   **🖨️ Informe de impresión rediseñado:** cabecera con total, desglose a dos columnas y marca temporal obtenida de un servidor horario web (con fallback al reloj del dispositivo).
+*   **🖨️ Informe de impresión rediseñado:** cabecera con total, desglose a dos columnas y marca temporal obtenida de un servidor horario web (con _fallback_ al reloj del dispositivo).
 *   **♿ Accesibilidad:** uso de `aria-label`, `aria-current`, `aria-live`, `role="dialog"` y focus rings visibles.
 
 ---
