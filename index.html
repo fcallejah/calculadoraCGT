@@ -135,7 +135,6 @@
             top: -90%;
             width: 200%;
             height: 280%;
-            will-change: transform;
             animation: landing-wave-rise 13s ease-in-out infinite alternate;
         }
         .summary-wave:nth-child(1) { opacity: 0.3; animation-duration: 13s; }
@@ -204,7 +203,6 @@
             width: 200%;
             height: 66vh;
             bottom: -10vh;
-            will-change: transform;
             animation: landing-wave-rise 11s ease-in-out infinite alternate;
         }
         .landing-wave:nth-child(1) {
@@ -278,7 +276,6 @@
             top: -28%;
             width: 200%;
             height: 210%;
-            will-change: transform;
             animation: landing-wave-rise 13s ease-in-out infinite alternate;
         }
         .credits-wave:nth-child(1) { opacity: 0.34; animation-duration: 13s; }
@@ -287,8 +284,8 @@
         .credits-wave:nth-child(4) { opacity: 0.42; animation-duration: 12s; animation-delay: -5s; }
         .dark .credits-wave { opacity: 0.34; }
         @keyframes landing-wave-rise {
-            from { transform: translate3d(-6%, 4vh, 0); }
-            to { transform: translate3d(6%, -4vh, 0); }
+            from { transform: translate(-6%, 4vh); }
+            to { transform: translate(6%, -4vh); }
         }
         @media (max-width: 640px) {
             .landing-wave {
