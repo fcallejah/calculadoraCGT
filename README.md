@@ -12,33 +12,33 @@ Esta versión 2026 es una actualización de [MaestroRafa](https://github.com/rbu
 *   **🎭 Sección 6.3 reescrita:** se ha desglosado completamente el apartado de méritos artísticos y deportivos (premios, espectáculos, composiciones, actuaciones, exposiciones, conservador-restaurador y deportistas).
 *   **📚 Obras literarias (6.1):** nueva tabla específica para autor, coautor, 3+ autores e ilustrador/a.
 *   **💜 Plan de Igualdad (6.2):** añadido como mérito específico (1,0 pto./curso).
-*   **🎓 Múltiples títulos (3.1 y 3.2):** los títulos de Doctor, DEA y Máster pasan de ser casillas únicas a contadores, permitiendo alegar varios títulos a la vez.
+*   **🎓 Múltiples títulos (3.1 y 3.2):** los títulos de doctor, DEA y máster pasan de ser casillas únicas a contadores, permitiendo alegar varios títulos a la vez.
 
 ### 🧮 2. Correcciones críticas de cálculo
 *   **📅 Fecha de corte exacta (26/11/2026):** el cálculo de antigüedad (1.1 y 1.2) ya no se detiene el 31 de octubre. Ahora computa hasta la fecha de fin de plazo de solicitudes, reflejando correctamente los dos meses (septiembre y octubre) del año en curso, 2026.
 *   **⚖️ Bug del 6.2 solucionado:** se ha corregido el error que permitía superar el tope máximo de **2,5 ptos.** en premios y proyectos. Se ha aplicado un `Math.min` estricto en todos los apartados para garantizar que nunca se sobrepasen los límites legales.
-*   **📊 Desglose del 4.3 (coordinación):** se ha dividido la caja genérica en **tres apartados independientes** (Jefatura de Departamento, Coordinación de Ciclo/EOE/CEP y Tutoría LOE), cada uno con su propia caja de años/meses.
+*   **📊 Desglose del 4.3 (coordinación):** se ha dividido la caja genérica en **tres apartados independientes** (jefatura de departamento, coordinación de ciclo/EOE/CEP y tutoría LOE), cada uno con su propia caja de años/meses.
 *   **👩‍🏫 Tutorización (6.6) diferenciada:** máster/grado (0,1 pto./curso) frente a fase de aspirantes (0,2 ptos./curso), con un aviso para los cursos anteriores a 2023/24.
 
 ### 🧙‍♂️ 3. El nuevo cuestionario de Antigüedad
 Se ha pasado de tener simples cajas de texto a un **asistente interactivo (Wizard)** de varios pasos:
 *   **📅 Fechas por defecto:** los calendarios arrancan automáticamente en el 1 de septiembre más reciente.
 *   **🛡️ Validación estricta:** el sistema bloquea fechas de carrera anteriores a las de prácticas o que superen un margen lógico de 2 años. Además, se ha implementado un campo de texto `dd/mm/aaaa` sincronizado con el calendario nativo.
-*   **🔄 Casilla de estabilización:** nueva casilla para marcar "No realicé prácticas / Accedí por estabilización", que iguala automáticamente las fechas.
+*   **🔄 Casilla de estabilización:** nueva casilla para marcar «No realicé prácticas / Accedí por estabilización», que iguala automáticamente las fechas.
 *   **⚠️ Avisos inteligentes:** se muestra un aviso si eres funcionario en prácticas (puntuación real 0), si la compensatoria no es del último destino, o si las tutorías son anteriores a 2007 o las tutorizaciones de funcionarios/as en prácticas a 2023/24.
 
 ### ✨ 4. Interfaz, Usabilidad y Accesibilidad
 *   **🌙 Modo oscuro nativo:** con persistencia en `localStorage` y detección automática del tema del sistema. Se ha ajustado el contraste de todos los elementos para garantizar su legibilidad.
 *   **👨‍💻 Diseño:** fondo dinámico de tonos verdosos con un movimiento ondulado. Se han añadido detalles estéticos en todos los iconos, botones y menús.
-*   **📈 Barras de progreso:** cada apartado incluye una barra visual que se llena según los puntos obtenidos. Al llegar al tope, aparece una píldora verde de *"Máximo alcanzado"*.
+*   **📈 Barras de progreso:** cada apartado incluye una barra visual que se llena según los puntos obtenidos. Al llegar al tope, aparece una píldora verde de «Máximo alcanzado».
 *   **🔢 Formato numérico profesional:** todas las cifras usan fuente monoespaciada y ceros tachados (`Ø`) para evitar confusiones con la letra "O". El resumen se ha rediseñado para albergar totales de 3 dígitos y 4 decimales.
 *   **🔀 Selectores interactivos EOI/ACLES:** botones que atenúan la caja del idioma que no corresponde y muestran un aviso dinámico, evitando que se introduzcan méritos en el lugar equivocado.
 *   **💾 Guardado automático:** el progreso se guarda automáticamente, aunque se refresque o se cierre la página.
-*   **🗑️ Borrado seguro:**  y se ha añadido un modal de confirmación antes de borrar todos los datos.
-*   **💡 _Feedback_ integrado:** botón de sugerencias que enlaza a un Google Forms, y botón directo de *"Inscribirse en el concurso"*.
-*   **📱 PWA (Aplicación web instalable):** se ha añadido un `manifest.json` y un Service Worker para que la calculadora se pueda instalar en Android/iOS como si fuera una app nativa.
+*   **🗑️ Borrado seguro:** se ha añadido un modal de confirmación antes de borrar todos los datos.
+*   **💡 _Feedback_ integrado:** botón de sugerencias que enlaza a un Google Forms, y botón directo de «Inscribirse en el concurso». 
+*   **📱 PWA (Aplicación web instalable):** se ha añadido un `manifest.json` y un _Service Worker_ para que la calculadora se pueda instalar en Android/iOS como si fuera una _app_ nativa.
 *   **🖨️ Informe de impresión rediseñado:** cabecera con total, desglose a dos columnas y marca temporal obtenida de un servidor horario web (con _fallback_ al reloj del dispositivo).
-*   **♿ Accesibilidad:** uso de `aria-label`, `aria-current`, `aria-live`, `role="dialog"` y focus rings visibles.
+*   **♿ Accesibilidad:** uso de `aria-label`, `aria-current`, `aria-live`, `role="dialog"` y _focus rings_ visibles.
 
 ---
 
