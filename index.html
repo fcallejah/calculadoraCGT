@@ -13,7 +13,7 @@
     <meta property="og:title" content="Calculadora Concurso Traslados 2026 Andalucía">
     <meta property="og:description" content="Calculadora Concurso Traslados 2026 Andalucía">
     <meta property="og:image" content="https://fcallejah.github.io/calculadoraCGT/icon-512.png">
-    <meta property="og:image:alt" content="Icono verde de la Calculadora Concurso Traslados 2026 Andalucía">
+    <meta property="og:image:alt" content="Calculadora verde con el texto Traslados 2026">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Calculadora Concurso Traslados 2026 Andalucía">
     <meta name="twitter:description" content="Calculadora Concurso Traslados 2026 Andalucía">
@@ -21,7 +21,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23007849'/%3E%3Crect x='17' y='10' width='30' height='44' rx='4' fill='white'/%3E%3Crect x='22' y='15' width='20' height='10' rx='2' fill='%23cce8da'/%3E%3Cg fill='%23007849'%3E%3Ccircle cx='24' cy='32' r='3'/%3E%3Ccircle cx='32' cy='32' r='3'/%3E%3Ccircle cx='40' cy='32' r='3'/%3E%3Ccircle cx='24' cy='41' r='3'/%3E%3Ccircle cx='32' cy='41' r='3'/%3E%3Crect x='37' y='38' width='6' height='12' rx='2'/%3E%3Ccircle cx='24' cy='50' r='3'/%3E%3Ccircle cx='32' cy='50' r='3'/%3E%3C/g%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -30,15 +31,52 @@
         }
     </script>
     <style>
+        html { scrollbar-gutter: stable; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             html, body { background: white !important; color: black !important; font-size: 9pt !important; }
             #main-content { max-width: none !important; width: 100%; padding: 0 !important; }
             #main-content > div { max-width: none !important; }
-            .print-breakdown-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem 1rem; }
-            .print-breakdown-section { break-inside: avoid; page-break-inside: avoid; }
+            .print-breakdown-grid { display: block !important; columns: 2; column-gap: 1rem; }
+            .print-breakdown-section {
+                display: inline-block;
+                width: 100%;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 0.75rem;
+            }
+            .print-breakdown-section-title { break-after: avoid; page-break-after: avoid; }
+            .print-breakdown-row {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid;
+            }
+            .print-breakdown-label {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid;
+            }
             .print-breakdown-row { font-size: 8pt !important; line-height: 1.2 !important; }
+            .print-breakdown-label { display: flex; align-items: baseline; gap: 0.35rem; min-width: 0; }
+            .print-breakdown-number { flex: 0 0 4.2em; text-align: right; white-space: nowrap; }
+            .print-breakdown-description { min-width: 0; flex: 1 1 auto; unicode-bidi: isolate; }
+            .print-breakdown-card::after {
+                content: "- - - - - - - - -";
+                position: fixed;
+                z-index: 10;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0.15rem 0.5rem;
+                background: white;
+                color: #6b7280;
+                font-size: 9pt;
+                letter-spacing: 0.15em;
+                white-space: nowrap;
+            }
             #main-content table { font-size: 9pt; }
             #main-content th, #main-content td { padding-top: 0.2rem !important; padding-bottom: 0.2rem !important; }
             #main-content .shadow-lg { box-shadow: none !important; }
@@ -46,6 +84,7 @@
             #main-content .print-breakdown-grid li span:first-child { overflow-wrap: anywhere; }
             .print-only { color: #333 !important; }
             .print-summary-header { background: #f3f4f6 !important; color: #1f2937 !important; border-bottom: 1px solid #d1d5db; }
+            .summary-wave-layer { display: none !important; }
             .print-summary-title { color: #1f2937 !important; }
             .print-summary-muted, .print-summary-total-label, .print-summary-table-heading,
             .print-summary-points, .print-summary-max { color: #374151 !important; opacity: 1 !important; }
@@ -53,11 +92,71 @@
             .print-breakdown-section-title { color: #1f2937 !important; opacity: 1 !important; }
             .print-breakdown-header { background: #f3f4f6 !important; border-bottom: 1px solid #d1d5db; }
             .print-meta { color: #374151 !important; }
-            #main-content .print-summary-card { border: 1px solid #9abfa7 !important; border-radius: 0.5rem !important; overflow: hidden; }
+            .credits-wave-layer { display: none !important; }
+            .credits-wave-box { width: auto !important; min-height: 0 !important; margin-left: 0 !important; border: 0 !important; border-radius: 0 !important; background: white !important; }
+            .credits-wave-credit { background: transparent !important; box-shadow: none !important; }
+            #main-content .print-summary-card { border: 1px solid #9abfa7 !important; border-radius: 0.5rem !important; overflow: visible !important; }
+            #main-content .print-breakdown-card { overflow: visible !important; }
             #main-content .print-summary-card .rounded-lg { border-radius: 0.4rem !important; }
             @page { margin: 1.2cm; }
         }
         .print-only { display: none; }
+        .print-breakdown-label {
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            flex: 1 1 0%;
+            min-width: 0;
+        }
+        .print-breakdown-number {
+            flex: 0 0 4.2em;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .print-breakdown-description {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        .print-summary-header {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        .summary-wave-layer {
+            position: absolute;
+            z-index: 0;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .summary-wave {
+            position: absolute;
+            left: -50%;
+            top: -90%;
+            width: 200%;
+            height: 280%;
+            will-change: transform;
+            animation: landing-wave-rise 13s ease-in-out infinite alternate;
+        }
+        .summary-wave:nth-child(1) { opacity: 0.3; animation-duration: 13s; }
+        .summary-wave:nth-child(2) { opacity: 0.34; animation-duration: 10s; animation-delay: -4s; }
+        .summary-wave:nth-child(3) { opacity: 0.38; animation-duration: 15s; animation-delay: -7s; }
+        .summary-wave:nth-child(4) { opacity: 0.32; animation-duration: 12s; animation-delay: -5s; }
+        .dark .summary-wave { opacity: 0.28; }
+        .print-summary-header > * {
+            position: relative;
+            z-index: 1;
+        }
+        .print-summary-header > .summary-wave-layer {
+            position: absolute;
+            z-index: 0;
+        }
+        .total-score-value {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.32);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .summary-wave { animation: none; }
+        }
         .font-mono, .tabular-nums, .print-summary-points, .print-summary-max {
             font-family: "Source Code Pro", Consolas, "Courier New", monospace;
             font-variant-numeric: tabular-nums;
@@ -88,6 +187,118 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .tab-scroll-control { display: none; }
+        .landing-wave-background {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f0fdf4, #d1fae5);
+        }
+        .landing-waves {
+            position: absolute;
+            z-index: 0;
+            inset: 0;
+            pointer-events: none;
+        }
+        .landing-wave {
+            position: absolute;
+            left: -50%;
+            width: 200%;
+            height: 66vh;
+            bottom: -10vh;
+            will-change: transform;
+            animation: landing-wave-rise 11s ease-in-out infinite alternate;
+        }
+        .landing-wave:nth-child(1) {
+            opacity: 0.34;
+            animation-duration: 13s;
+        }
+        .landing-wave:nth-child(2) {
+            opacity: 0.41;
+            animation-duration: 10s;
+            animation-delay: -4s;
+        }
+        .landing-wave:nth-child(3) {
+            opacity: 0.48;
+            animation-duration: 15s;
+            animation-delay: -7s;
+        }
+        .landing-wave:nth-child(4) {
+            opacity: 0.42;
+            animation-duration: 12s;
+            animation-delay: -5s;
+        }
+        .dark .landing-wave-background {
+            background: linear-gradient(135deg, #064e3b, #022c22);
+        }
+        .dark .landing-wave {
+            opacity: 0.34;
+        }
+        .landing-card {
+            position: relative;
+            z-index: 1;
+        }
+        .credits-wave-box {
+            position: relative;
+            isolation: isolate;
+            width: calc(100% + 2rem);
+            min-height: 220px;
+            margin-left: -1rem;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f0fdf4, #d1fae5);
+        }
+        #main-content.credits-footer-active {
+            padding-bottom: 0;
+        }
+        .credits-wave-box::after {
+            content: "";
+            position: absolute;
+            z-index: 0;
+            inset: 0 0 auto;
+            height: 2.75rem;
+            pointer-events: none;
+            background: linear-gradient(to bottom, #f9fafb, transparent);
+        }
+        .dark .credits-wave-box {
+            background: linear-gradient(135deg, #064e3b, #022c22);
+        }
+        .dark .credits-wave-box::after {
+            background: linear-gradient(to bottom, #111827, transparent);
+        }
+        .credits-wave-layer {
+            position: absolute;
+            z-index: -1;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .credits-wave {
+            position: absolute;
+            left: -50%;
+            top: -28%;
+            width: 200%;
+            height: 210%;
+            will-change: transform;
+            animation: landing-wave-rise 13s ease-in-out infinite alternate;
+        }
+        .credits-wave:nth-child(1) { opacity: 0.34; animation-duration: 13s; }
+        .credits-wave:nth-child(2) { opacity: 0.41; animation-duration: 10s; animation-delay: -4s; }
+        .credits-wave:nth-child(3) { opacity: 0.48; animation-duration: 15s; animation-delay: -7s; }
+        .credits-wave:nth-child(4) { opacity: 0.42; animation-duration: 12s; animation-delay: -5s; }
+        .dark .credits-wave { opacity: 0.34; }
+        @keyframes landing-wave-rise {
+            from { transform: translate3d(-6%, 4vh, 0); }
+            to { transform: translate3d(6%, -4vh, 0); }
+        }
+        @media (max-width: 640px) {
+            .landing-wave {
+                height: 58vh;
+                bottom: -7vh;
+            }
+            .credits-wave-box { min-height: 200px; }
+            .credits-wave-credit { margin-inline: 0.75rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .landing-wave, .credits-wave { animation: none; }
+        }
         @media (max-width: 640px) {
             .tab-scroll-control { display: flex; }
         }
@@ -95,8 +306,26 @@
 </head>
 <body class="bg-gray-50 text-slate-800 font-sans dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
 
-    <div id="landing-page" class="fixed inset-0 z-50 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+    <div id="landing-page" class="landing-wave-background fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="landing-waves" aria-hidden="true">
+            <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                <defs><linearGradient id="landing-wave-light" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#4ade80"/></linearGradient></defs>
+                <path fill="url(#landing-wave-light)" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
+            </svg>
+            <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                <defs><linearGradient id="landing-wave-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+                <path fill="url(#landing-wave-mid)" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
+            </svg>
+            <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                <defs><linearGradient id="landing-wave-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs>
+                <path fill="url(#landing-wave-deep)" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
+            </svg>
+            <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                <defs><linearGradient id="landing-wave-bottom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
+                <path fill="url(#landing-wave-bottom)" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
+            </svg>
+        </div>
+        <div class="landing-card bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
             <button onclick="toggleDarkMode()" title="Cambiar modo diurno/nocturno"
                     class="absolute top-3 right-3 rounded-xl border-2 border-gray-800 bg-gray-800 p-2 text-white shadow-sm transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 dark:focus:ring-offset-gray-800">
                 <svg class="hidden h-3.5 w-3.5 text-gray-900 dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -109,9 +338,6 @@
                 </div>
             </div>
             <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">Calculadora Concurso de Traslados 2026</h1>
-            <p class="text-xs text-primary font-semibold mb-1 leading-snug">
-                Creada originalmente por MaestroRafa.<br>Modificada por fcallejah.
-            </p>
             <p class="text-gray-500 dark:text-gray-400 mb-2">Cuerpo de Maestros y Secundaria</p>
             <p class="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full px-3 py-1 mb-6">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
@@ -143,9 +369,14 @@
                 Entendido, acceder a la calculadora
             </button>
 
-            <div class="flex justify-center">
+            <div class="mt-1 flex flex-col items-center text-center">
+                <p class="text-xs text-gray-600 dark:text-gray-200">
+                    Creada por MaestroRafa<br>
+                    Modificada por fcallejah con mucho cariño desde Cuevas Bajas (Málaga)<br>
+                    <span class="mt-1 inline-block whitespace-nowrap" role="img" aria-label="zanahoria morada, corazón morado, aceituna y paisaje">🥕 💜 🫒 🏞️</span>
+                </p>
                 <a href="https://github.com/fcallejah/calculadoraCGT" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-full px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 transition"
+                   class="mt-3 inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-full px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 transition"
                    title="Ver el repositorio del proyecto en GitHub (se abre en nueva pestaña)">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     <span>github.com/fcallejah/calculadoraCGT</span>
@@ -178,14 +409,22 @@
                     <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer"
                        class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary dark:text-emerald-400 bg-primary/5 dark:bg-primary/20 hover:bg-primary/10 rounded-md border border-primary/25 dark:border-primary/40 transition"
                        title="Ver resolución oficial en BOJA (se abre en nueva pestaña)">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/>
+                            <path stroke-linecap="round" stroke-width="1.2" d="M14 3.8V8h4"/>
+                            <text x="12" y="15.2" text-anchor="middle" fill="currentColor" stroke="none" font-size="4.3" font-weight="700">BOJA</text>
+                        </svg>
                         <span>BOJA oficial</span>
                         <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
                     <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer"
                        class="md:hidden inline-flex items-center justify-center p-2 text-primary dark:text-emerald-400 bg-primary/5 dark:bg-primary/20 hover:bg-primary/10 rounded-md border border-primary/25 dark:border-primary/40 transition"
                        title="Ver resolución oficial en BOJA (nueva pestaña)">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/>
+                            <path stroke-linecap="round" stroke-width="1.2" d="M14 3.8V8h4"/>
+                            <text x="12" y="15.2" text-anchor="middle" fill="currentColor" stroke="none" font-size="4.3" font-weight="700">BOJA</text>
+                        </svg>
                     </a>
 
                     <button onclick="toggleDarkMode()" title="Cambiar modo diurno/nocturno" class="flex h-[30px] w-[30px] items-center justify-center rounded-md border border-gray-800 bg-gray-800 p-0 text-white shadow-sm transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100 dark:focus:ring-offset-gray-900">
@@ -197,8 +436,8 @@
                         <button onclick="printReport()" title="Imprimir / Guardar PDF" class="rounded-md border border-gray-300 bg-white p-1.5 text-secondary shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-900">
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                         </button>
-                        <button onclick="resetAll()" title="Borrar puntuación" aria-label="Borrar puntuación" class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white p-1.5 text-secondary shadow-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-red-800 dark:hover:bg-red-900/30 dark:hover:text-red-200 dark:focus:ring-offset-gray-900">
-                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <button onclick="resetAll()" title="Borrar puntuación" aria-label="Borrar puntuación" class="group inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white p-1.5 text-secondary shadow-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-red-800 dark:hover:bg-red-900/30 dark:hover:text-red-200 dark:focus:ring-offset-gray-900">
+                            <svg class="h-3.5 w-3.5 shrink-0 text-red-700/70 transition-colors group-hover:text-red-700 dark:text-red-200/70 dark:group-hover:text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20h16"/>
                                 <g transform="rotate(-42 12 10)">
                                     <rect x="8" y="3" width="8" height="14" rx="1.5" stroke-width="1.8"/>
@@ -208,6 +447,14 @@
                             <span class="hidden sm:inline text-xs font-semibold whitespace-nowrap">Borrar puntuación</span>
                             <svg class="hidden h-3.5 w-3.5 sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                         </button>
+                        <a href="https://forms.gle/p5SjjQAw2Wgd6js86" target="_blank" rel="noopener noreferrer"
+                           class="p-2 text-secondary dark:text-gray-300 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+                           title="Dudas, sugerencias o reportar un error" aria-label="Dudas, sugerencias o reportar un error">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" stroke-width="1.8"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.6 9a2.45 2.45 0 014.75.8c0 1.65-2.35 2.25-2.35 3.7m.02 3h.01"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -281,7 +528,7 @@
                 <!-- PASO DEFINITIVO -->
                 <div data-wizard-step="definitive" class="hidden">
                     <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Destino definitivo</h3>
-                    <label for="wizard-definitive-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo ocupas tu último destino definitivo?</label>
+                    <label for="wizard-definitive-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde cuándo ocupas tu <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>?</label>
                     <div class="mt-1 flex gap-2">
                         <input id="wizard-definitive-start-text" data-date-for="wizard-definitive-start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="syncWizardDateText(this)" onblur="validarFechasCuestionario()" class="min-w-0 flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
                         <span class="relative inline-flex shrink-0">
@@ -289,7 +536,7 @@
                             <input id="wizard-definitive-start" type="date" max="2026-11-26" aria-hidden="true" tabindex="-1" onchange="syncWizardDatePicker(this); autocompletarFechasDesdeDestino()" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
                         </span>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Indica la toma de posesión de tu último destino definitivo.</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Indica la toma de posesión de tu <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>.</p>
                 </div>
 
                 <!-- PASO HISTORIAL (Para definitivos y provisionales) -->
@@ -362,11 +609,14 @@
                 </div>
 
                 <div data-wizard-step="all" class="hidden">
-                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad</h3>
-                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica el tiempo completo que corresponda. Si no tienes, deja ambos campos a cero.</p>
+                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad (solo desde tu <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)</h3>
+                    <p id="wizard-hardship-definitive-hint" class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica solo el tiempo que corresponda a tu <span class="underline decoration-2 underline-offset-2">destino definitivo más reciente</span>. Si no tienes, deja ambos campos a cero.</p>
+                    <div id="wizard-hardship-definitive-note" class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
+                        <span>El baremo del BOJA solo cuenta la compensatoria <span class="underline decoration-2 underline-offset-2">desde tu cambio más reciente de destino definitivo</span>. Los periodos anteriores no cuentan.</span>
+                    </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años de especial dificultad" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                        <input id="wizard-hardship-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses de especial dificultad" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años de compensatoria y especial dificultad" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <input id="wizard-hardship-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses de compensatoria y especial dificultad" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     </div>
                 </div>
 
@@ -537,6 +787,7 @@
             s4_2_vicedir_years: 0, s4_2_vicedir_months: 0,
             s4_3_jefatura_years: 0, s4_3_jefatura_months: 0,
             s4_3_coordinacion_years: 0, s4_3_coordinacion_months: 0,
+            s4_3_tutoria_antes_2007: '',
             s4_3_tutoria_years: 0, s4_3_tutoria_months: 0,
             s5_1_horas: 0,
             s5_2_horas: 0,
@@ -930,6 +1181,9 @@
             const dialog = document.getElementById('seniority-wizard');
             const steps = getSeniorityWizardSteps();
             const stepIndex = Math.min(Number(dialog.dataset.stepIndex) || 0, steps.length - 1);
+            const showDefinitiveHardshipHint = document.getElementById('wizard-status').value === 'definitive';
+            document.getElementById('wizard-hardship-definitive-hint').classList.toggle('hidden', !showDefinitiveHardshipHint);
+            document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', !showDefinitiveHardshipHint);
             dialog.dataset.stepIndex = String(stepIndex);
             steps.forEach((step, index) => step.classList.toggle('hidden', index !== stepIndex));
             document.getElementById('wizard-progress').textContent = `Paso ${stepIndex + 1} de ${steps.length}`;
@@ -1113,7 +1367,20 @@
             window.print();
         }
 
+        const MAX_TUTORING_MONTHS = (19 * 12) + 2;
         const calcTime = (years, months, ptsPerYear, ptsPerMonth) => (years * ptsPerYear) + (months * ptsPerMonth);
+        const getDurationMonths = (s, prefix) => (Number(s[`${prefix}_years`]) || 0) * 12 + (Number(s[`${prefix}_months`]) || 0);
+        const section11ExceedsBodyService = (s) => {
+            const bodyServiceMonths = getDurationMonths(s, 's1_2_1');
+            return ['s1_1_1', 's1_1_2', 's1_1_3'].some(prefix => getDurationMonths(s, prefix) > bodyServiceMonths);
+        };
+        const formatQuantity = (value, singular, plural) => `${formatDecimal(value)} ${value === 1 ? singular : plural}`;
+        const formatMeritQuantity = (value, singular, plural) => `${value === 1 ? singular : plural} (${formatDecimal(value)})`;
+        const formatDuration = (years, months) => `${formatQuantity(years, 'año', 'años')} y ${formatQuantity(months, 'mes', 'meses')}`;
+        const calcTutor43 = (s) => {
+            const months = Math.min((s.s4_3_tutoria_years * 12) + s.s4_3_tutoria_months, MAX_TUTORING_MONTHS);
+            return calcTime(Math.floor(months / 12), months % 12, 1.5, 0.1250);
+        };
         const PTS_IDIOMA = { B1: 1, B2: 2, C1: 3, C2: 4 };
         const formatPoints = (value) => Number(value).toFixed(4).replace('.', ',');
         const formatDecimal = (value) => String(value).replace('.', ',');
@@ -1182,7 +1449,7 @@
             calc43: (s) => Math.min(
                 calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250) +
                 calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250) +
-                calcTime(s.s4_3_tutoria_years, s.s4_3_tutoria_months, 1.5, 0.1250),
+                calcTutor43(s),
                 10.0
             ),
             section4: (s) => Math.min(Calculators.calc41(s) + Calculators.calc42(s) + Calculators.calc43(s), 30.0),
@@ -1322,13 +1589,23 @@
             </div>`;
         };
 
-        const YMInput = (label, yName, mName, disabled=false) => `
+        const section4ExceedsOtherBodyService = (s, yearsName, monthsName) => {
+            const enteredMonths = (Number(s[yearsName]) || 0) * 12 + (Number(s[monthsName]) || 0);
+            const otherBodyMonths = (Number(s.s1_2_2_years) || 0) * 12 + (Number(s.s1_2_2_months) || 0);
+            return enteredMonths > otherBodyMonths;
+        };
+        const OtherBodyServiceWarning = (id, yearsName, monthsName) => `
+            <p id="${id}" class="${section4ExceedsOtherBodyService(state, yearsName, monthsName) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+                Revisa las cifras: este periodo no puede superar el total de servicios en otros cuerpos (1.2.2).
+            </p>`;
+        const YMInput = (label, yName, mName, disabled=false, warning='') => `
             <div class="${disabled ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-white dark:bg-gray-800'} p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mb-4">
                 <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">${label}</label>
                 <div class="flex gap-4">
                     ${NumInput('Años', yName, 1, 99, 'flex-1 flex-col', disabled)}
                     ${NumInput('Meses', mName, 1, 11, 'flex-1 flex-col', disabled)}
                 </div>
+                ${warning}
             </div>`;
 
         const Checkbox = (label, name) => `
@@ -1358,10 +1635,10 @@
                     </select>
                     ${origin === 'EOI'
                         ? `<select aria-label="Nivel del certificado EOI" onchange="updateIdioma(${l._idx}, 'nivel', this.value)" class="sm:col-span-4 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
-                            <option value="B1" ${l.nivel==='B1'?'selected':''}>B1 (1 pto.)</option>
-                            <option value="B2" ${l.nivel==='B2'?'selected':''}>B2 (2 ptos.)</option>
-                            <option value="C1" ${l.nivel==='C1'?'selected':''}>C1 (3 ptos.)</option>
-                            <option value="C2" ${l.nivel==='C2'?'selected':''}>C2 (4 ptos.)</option>
+                            <option value="B1" ${l.nivel==='B1'?'selected':''}>3.3 d) B1 (1 pto.)</option>
+                            <option value="B2" ${l.nivel==='B2'?'selected':''}>3.3 c) B2 (2 ptos.)</option>
+                            <option value="C1" ${l.nivel==='C1'?'selected':''}>3.3 b) C1 (3 ptos.)</option>
+                            <option value="C2" ${l.nivel==='C2'?'selected':''}>3.3 a) C2 (4 ptos.)</option>
                         </select>`
                         : `<select aria-label="Nivel del certificado ACLES" onchange="updateIdioma(${l._idx}, 'nivelFiltro', this.value)" class="sm:col-span-2 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
                             <option value="">Nivel...</option>
@@ -1385,8 +1662,8 @@
                         Añadir idioma ${isEOI ? 'EOI' : 'ACLES'}
                     </button>
                     ${isEOI
-                        ? '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Solo se valora el certificado de nivel más alto por idioma; el nivel mínimo baremable es B1 (A1 y A2 no puntúan). Los DLSE se incluyen en 3.3; los certificados de conocimiento del español no se bareman.</p>'
-                        : '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Selecciona idioma, nivel y certificado reconocido por ACLES. Solo se ofrecen niveles baremables (B1–C2) disponibles para el idioma elegido; A1 y A2 no puntúan. El nivel y los puntos se asignan automáticamente. ACLES exige examen presencial y evaluación de las cuatro destrezas. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-primary">tabla oficial de certificados reconocidos por ACLES (rev. 28/07/2025)</a>.</p>'}
+                        ? '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Solo se valora el certificado de nivel más alto por idioma; el nivel mínimo baremable es B1 (A1 y A2 no puntúan). Los certificados de conocimiento del español no se bareman.</p>'
+                        : '<p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Selecciona idioma, nivel y certificado reconocido por ACLES. Solo se ofrecen niveles baremables (B1–C2) disponibles para el idioma elegido; A1 y A2 no puntúan. El nivel y los puntos se asignan automáticamente. ACLES exige examen presencial y evaluación de las cuatro destrezas. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-primary">tabla oficial de certificados reconocidos por ACLES (rev. 28/07/2025)<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.</p>'}
                 </div>`;
         }
         function addIdiomaForOrigin(origin) {
@@ -1460,7 +1737,7 @@
                     ${state.seniorityWizard.status === 'practice' ? `
                     <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
                         <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>Aviso: Si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
+                        <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
                     </div>` : ''}
                     <div class="mb-5 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4">
                         <p class="text-sm text-gray-700 dark:text-gray-200">Responde unas preguntas para calcular automáticamente el tiempo hasta el <strong>26 de noviembre de 2026</strong>. Después, podrás revisar o corregir cada campo manualmente.</p>
@@ -1471,32 +1748,33 @@
                     </div>
 
                     ${SubTitle('1.1 Antigüedad en el centro', 'score-s11')}
-                    <div class="bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-500 mb-4 text-sm text-amber-800 dark:text-amber-200 rounded-r">
-                        <button onclick="toggleWarningBox()" class="w-full flex justify-between items-center p-4 text-left hover:bg-amber-100 dark:hover:bg-amber-900/50 transition">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 mb-4 text-sm text-blue-800 dark:text-blue-200 rounded-r">
+                        <button onclick="toggleWarningBox()" class="w-full flex justify-between items-center p-4 text-left hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">
                             <span class="font-bold flex items-center gap-1.5">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v5m0-8h.01"/></svg>
                                 Cómo rellenar el apartado 1.1
                             </span>
-                            <svg id="warning-chevron" class="w-4 h-4 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg id="warning-chevron" class="w-4 h-4 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <div id="warning-content" class="px-4 pb-4 hidden">
-                            <p class="mb-2"><strong>Solo cuenta el tiempo transcurrido desde tu ÚLTIMO destino definitivo (el más reciente).</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste.</p>
+                            <p class="mb-2"><strong>Solo cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste.</p>
                             <ul class="list-disc list-inside space-y-1 ml-1 mb-2">
                                 <li><strong>Tienes destino definitivo ahora</strong> → rellena solo <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino.</li>
                                 <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → deja 1.1.1 en blanco y rellena solo <strong>1.1.2</strong>.</li>
                                 <li><strong>Eres funcionario/a en prácticas</strong> → deja <strong>todo el 1.1 en blanco</strong>; tu antigüedad va íntegra al <strong>1.2</strong>.</li>
                                 <li><strong>1.1.3</strong> (especial dificultad) se suma siempre al 1.1.1 o al 1.1.2, según corresponda.</li>
                             </ul>
-                            <p class="text-xs italic mt-2 pt-2 border-t border-amber-200 dark:border-amber-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
+                            <p class="text-xs italic mt-2 pt-2 border-t border-blue-200 dark:border-blue-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
                         </div>
                     </div>
-                    ${YMInput('1.1.1 Permanencia ininterrumpida (destino definitivo)', 's1_1_1_years', 's1_1_1_months', ['provisional', 'practice'].includes(state.seniorityWizard.status))}
+                    ${YMInput('1.1.1 Permanencia ininterrumpida (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_1_years', 's1_1_1_months', ['provisional', 'practice'].includes(state.seniorityWizard.status))}
                     ${YMInput('1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', ['definitive', 'practice'].includes(state.seniorityWizard.status))}
-                    ${YMInput('1.1.3 Compensatoria y especial dificultad (se suma a lo anterior)', 's1_1_3_years', 's1_1_3_months')}
+                    ${YMInput('1.1.3 Compensatoria y especial dificultad (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_3_years', 's1_1_3_months')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
                     ${InfoBox('En <strong>1.2.1</strong> se computan todos los servicios en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas, Religión...).')}
                     ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
+                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: el tiempo indicado en 1.1.1, 1.1.2 o 1.1.3 no puede superar el total de servicios en el mismo cuerpo de 1.2.1.</p>
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
                     ${YMInput('1.2.3 Otros cuerpos (subgrupo inferior)', 's1_2_3_years', 's1_2_3_months')}
                 </div>`;
@@ -1517,7 +1795,8 @@
                     ${SectionTitle('3. Méritos académicos (máx. 10)', 'score-s3', 10, Calculators.section3(state))}
                     ${InfoBox('<strong>Importante:</strong> no se puede valorar el título alegado para el ingreso en el cuerpo. En 3.1.1-3.1.3 se valoran todos los títulos aportados.')}
                     ${SubTitle('3.1 Doctorado, postgrados y premios extraordinarios', 'score-s31', 'El máster de secundaria (antiguo CAP) no puntúa si fue requisito de acceso. No se barema el máster que sea requisito de acceso al doctorado alegado.')}
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                    <div class="space-y-3">
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
                         ${NumInput('3.1.1 Títulos de Doctor (6 ptos. cada uno)', 's3_1_1_doctor')}
                         ${NumInput('3.1.2 Másteres universitarios oficiales, distintos al de acceso y con ≥60 créditos (3 ptos. cada uno)', 's3_1_2_masters')}
                         ${NumInput('3.1.3 Certificados de suficiencia investigadora / DEA (2 ptos. cada uno)', 's3_1_3_dea')}
@@ -1529,7 +1808,7 @@
                         ${NumInput('3.2.2 Diplomaturas / primer ciclo (3 ptos. cada uno — la 1.ª no puntúa)', 's3_2_2_primer_ciclo')}
                         ${NumInput('3.2.3 Licenciaturas / segundo ciclo (3 ptos. cada uno)', 's3_2_3_segundo_ciclo')}
                     </div>
-                    ${SubTitle('3.3 Idiomas (EOI) y enseñanzas artísticas', 'score-s33', 'Solo se valora el nivel más alto por idioma. Los DLSE (Diplomas de Lengua de Signos) puntúan aquí como un nivel de idioma.')}
+                    ${SubTitle('3.3 Idiomas (EOI) y enseñanzas artísticas', 'score-s33', 'Solo se valora el nivel más alto por idioma.')}
                     ${renderLanguageModeButtons('3.3', state.lang33Mode, [
                         { value: 'eoi', label: 'Tengo título por la Escuela Oficial de Idiomas (EOI)' },
                         { value: 'other', label: 'Tengo otro título oficial (Cambridge, Trinity...)' }
@@ -1543,18 +1822,21 @@
                         ${renderLanguageManagerForOrigin('EOI')}
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4">
-                        <label for="s3_3_dlse" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Diploma de Lengua de Signos Española (DLSE)</label>
+                        <label for="s3_3_dlse" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3.3 e) Diploma de Lengua de Signos Española (DLSE)</label>
                         <select id="s3_3_dlse" name="s3_3_dlse" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="none" ${state.s3_3_dlse === 'none' ? 'selected' : ''}>Seleccionar nivel...</option>
-                            <option value="B1" ${state.s3_3_dlse === 'B1' ? 'selected' : ''}>B1 en lengua de signos por la DLSE (1,0000 ptos.)</option>
-                            <option value="B2" ${state.s3_3_dlse === 'B2' ? 'selected' : ''}>B2 en lengua de signos por la DLSE (2,0000 ptos.)</option>
-                            <option value="C1" ${state.s3_3_dlse === 'C1' ? 'selected' : ''}>C1 en lengua de signos por la DLSE (3,0000 ptos.)</option>
-                            <option value="C2" ${state.s3_3_dlse === 'C2' ? 'selected' : ''}>C2 en lengua de signos por la DLSE (4,0000 ptos.)</option>
+                            <option value="B1" ${state.s3_3_dlse === 'B1' ? 'selected' : ''}>B1 en Lengua de Signos Española (LSE) (1,0000 ptos.)</option>
+                            <option value="B2" ${state.s3_3_dlse === 'B2' ? 'selected' : ''}>B2 en Lengua de Signos Española (LSE) (2,0000 ptos.)</option>
+                            <option value="C1" ${state.s3_3_dlse === 'C1' ? 'selected' : ''}>C1 en Lengua de Signos Española (LSE) (3,0000 ptos.)</option>
+                            <option value="C2" ${state.s3_3_dlse === 'C2' ? 'selected' : ''}>C2 en Lengua de Signos Española (LSE) (4,0000 ptos.)</option>
                         </select>
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                            El nivel mínimo baremable es B1 (A1 y A2 no puntúan). <a href="https://cnlse.es/es/dlse" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-primary">Más información en el CNLSE<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>
+                        </p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4 space-y-3">
-                        ${NumInput('Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
-                        ${NumInput('Título de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior, Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
+                        ${NumInput('3.3 g) Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
+                        ${NumInput('3.3 f) Títulos de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior o Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
                     </div>
                 </div>`;
         }
@@ -1565,15 +1847,33 @@
                     ${SectionTitle('4. Cargos directivos (máx. 30)', 'score-s4', 30, Calculators.section4(state))}
                     ${InfoBox('No se pueden acumular ptos. por el desempeño simultáneo de varios cargos. Se valora el más ventajoso.')}
                     ${SubTitle('4.1 Dirección', 'score-s41', 'Director/a de centros públicos, CEP, Agrupaciones de Lengua y Culturas, primer responsable de CEP.')}
-                    ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months')}
+                    ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months', false, OtherBodyServiceWarning('s4-1-other-body-warning', 's4_1_director_years', 's4_1_director_months'))}
                     ${SubTitle('4.2 Vicedirección, jefatura, secretaría...', 'score-s42')}
-                    ${YMInput('Vicedirección, subdirección, secretaría, jefatura de estudios...', 's4_2_vicedir_years', 's4_2_vicedir_months')}
+                    ${YMInput('Vicedirección, subdirección, secretaría, jefatura de estudios...', 's4_2_vicedir_years', 's4_2_vicedir_months', false, OtherBodyServiceWarning('s4-2-other-body-warning', 's4_2_vicedir_years', 's4_2_vicedir_months'))}
                     ${SubTitle('4.3 Coordinación y otras funciones (máx. 10)', 'score-s43', 'Coordinación de ciclo, asesoría CEP, jefatura de departamento, coordinación didáctica, EOE, tutoría desde LOE 2006 (a partir del 1/9/2007).', 10, Calculators.calc43(state))}
-                    ${InfoBox('<strong>Importante:</strong> Si desempeñaste varios cargos o funciones a la vez, ten en cuenta que la Junta cuenta solo el subapartado que más te beneficie. Los periodos que no coinciden en 4.3 (jefatura, coordinación de ciclo, tutoría) sí se pueden sumar.')}
+                    ${InfoBox('<strong>Importante:</strong> si desempeñaste varios cargos o funciones a la vez, ten en cuenta que la Junta cuenta solo el subapartado que más te beneficie. Los periodos que no coinciden en 4.3 (jefatura, coordinación de ciclo, tutoría) sí se pueden sumar.')}
                     <div class="space-y-4">
-                        ${YMInput('Jefatura de Departamento', 's4_3_jefatura_years', 's4_3_jefatura_months')}
-                        ${YMInput('Coordinación de Ciclo / EOE / CEP', 's4_3_coordinacion_years', 's4_3_coordinacion_months')}
-                        ${YMInput('Tutoría (desde LOE 2006, a partir del 1/9/2007)', 's4_3_tutoria_years', 's4_3_tutoria_months')}
+                        ${YMInput('Jefatura de departamento', 's4_3_jefatura_years', 's4_3_jefatura_months', false, OtherBodyServiceWarning('s4-3-jefatura-other-body-warning', 's4_3_jefatura_years', 's4_3_jefatura_months'))}
+                        ${YMInput('Coordinación de ciclo / EOE / CEP', 's4_3_coordinacion_years', 's4_3_coordinacion_months', false, OtherBodyServiceWarning('s4-3-coordinacion-other-body-warning', 's4_3_coordinacion_years', 's4_3_coordinacion_months'))}
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300">¿Realizaste funciones de tutoría antes del 1/09/2007?</p>
+                            <div class="grid grid-cols-2 gap-2" role="group" aria-label="Funciones de tutoría anteriores al 1 de septiembre de 2007">
+                                ${['si', 'no'].map(value => {
+                                    const active = state.s4_3_tutoria_antes_2007 === value;
+                                    const classes = active
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300';
+                                    return `<button type="button" aria-pressed="${active}" onclick="setTutorBefore2007Answer('${value}')" class="rounded-lg px-3 py-2 text-sm font-semibold transition ${classes}">${value === 'si' ? 'Sí' : 'No'}</button>`;
+                                }).join('')}
+                            </div>
+                            <div class="${state.s4_3_tutoria_antes_2007 === 'si' ? '' : 'hidden'} flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span><strong>¡Atención!</strong> La función tutorial solo se valora a partir del 1 de septiembre de 2007. Las tutorías anteriores a esa fecha no puntúan, según el <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline">baremo de la Resolución de 23 de octubre de 2026</a>.</span>
+                            </div>
+                            </div>
+                            ${YMInput('Tutoría (desde el 1/09/2007)', 's4_3_tutoria_years', 's4_3_tutoria_months', state.s4_3_tutoria_antes_2007 === '', OtherBodyServiceWarning('s4-3-tutoria-other-body-warning', 's4_3_tutoria_years', 's4_3_tutoria_months'))}
+                            <p id="s4-3-tutoria-warning" class="${(state.s4_3_tutoria_years * 12 + state.s4_3_tutoria_months) > MAX_TUTORING_MONTHS ? '' : 'hidden'} text-sm font-medium text-red-600 dark:text-red-400" role="alert">Solo han transcurrido 19 años y 2 meses de cursos académicos desde septiembre de 2007/08 hasta octubre de 2026/27, ambos inclusive. Revisa la cifra.</p>
+                        </div>
                     </div>
                 </div>`;
         }
@@ -1601,12 +1901,12 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nivel acreditado</label>
                         <select name="s5_4_competencia_digital" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="none" ${state.s5_4_competencia_digital === 'none' ? 'selected' : ''}>Seleccionar nivel de CDD...</option>
-                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>A1 de CDD (0,5 ptos.)</option>
-                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>A2 de CDD (1,0 ptos.)</option>
-                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>B1 de CDD (1,5 ptos.)</option>
-                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>B2 de CDD (2,0 ptos.)</option>
-                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>C1 de CDD (2,5 ptos.)</option>
-                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>C2 de CDD (3,0 ptos.)</option>
+                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>5.4 a) A1 de CDD (0,5 ptos.)</option>
+                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>5.4 b) A2 de CDD (1,0 ptos.)</option>
+                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>5.4 c) B1 de CDD (1,5 ptos.)</option>
+                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>5.4 d) B2 de CDD (2,0 ptos.)</option>
+                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>5.4 e) C1 de CDD (2,5 ptos.)</option>
+                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>5.4 f) C2 de CDD (3,0 ptos.)</option>
                         </select>
                     </div>
                     ${SubTitle('5.5 Idiomas acreditados por ACLES', 'score-s55', 'Cambridge, Trinity, Alliance Française... Excluye EOI (va en 3.3).')}
@@ -1615,7 +1915,7 @@
                         { value: 'other', label: 'Tengo otro título oficial (Cambridge, Trinity...)' }
                     ])}
                     <div class="mb-4 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                        <strong>¡Atención!</strong> Ningún título de Aptis (Aptis ESOL General, Aptis Advanced, etc.) es reconocido como baremable para el concurso de traslados porque no aparece en ACLES. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)</a>.
+                        <strong>¡Atención!</strong> Ningún título de Aptis (Aptis ESOL General, Aptis Advanced, etc.) es reconocido como baremable para el concurso de traslados porque no aparece en ACLES. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.
                     </div>
                     ${state.lang55Mode === 'eoi' ? `
                     <div class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
@@ -1639,7 +1939,7 @@
                     ${SectionTitle('6. Otros méritos (máx. 15)', 'score-s6', 15, Calculators.section6(state))}
                     ${SubTitle('6.1 Publicaciones (máx. 8)', 'score-s61', 'Libros con ISBN, revistas con ISSN, obras literarias. La autoría de obras literarias sigue la misma tabla que los libros, más ilustraciones a 0,2.', 8, Calculators.calc61(state))}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1">Libros didácticos / científicos</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1">6.1 a) Libros didácticos / científicos</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_libros_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_libros_coautor', 0.5)}
@@ -1648,14 +1948,14 @@
                             ${GridInput('5 autores', 's6_1_libros_5autores', 0.2)}
                             ${GridInput('Más de 5', 's6_1_libros_mas5autores', 0.1)}
                         </div>
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">Obras literarias</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 c) Obras literarias</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_obras_literarias_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_obras_literarias_coautor', 0.5)}
                             ${GridInput('3+ autores', 's6_1_obras_literarias_3autores', 0.4)}
                             ${GridInput('Ilustrador/a', 's6_1_obras_literarias_ilustrador', 0.2)}
                         </div>
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">Revistas</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 b) Revistas</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_revistas_autor', 0.2)}
                             ${GridInput('Coautor', 's6_1_revistas_coautor', 0.1)}
@@ -1667,7 +1967,7 @@
                     ${InfoBox('Premios (DC Quinta.2): internacional 1,5/0,75/0,5 · nacional 1,0/0,5/0,25 · autonómico 0,5/0,25/0,1. Coordinación de proyectos: 0,5/curso (excepto Plan de Igualdad: 1,0/curso).')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">Premios</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">6.2 a) Premios</h4>
                             <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-center bg-gray-50 dark:bg-gray-700 rounded-t py-2">
                                 <div class="text-left pl-2">Ámbito</div>
                                 <div>1.º premio</div>
@@ -1694,7 +1994,7 @@
                             </div>
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">Proyectos y planes</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">6.2 b) Proyectos y planes</h4>
                             ${NumInput('Cursos coordinando Plan de Igualdad (1,0 pto./año)', 's6_2_coord_plan_igualdad_years')}
                             ${NumInput('Cursos coordinando otros proyectos/planes (0,5 ptos./año)', 's6_2_coord_proyectos_years')}
                             ${NumInput('Cursos participando en proyectos/planes (0,2 ptos./año)', 's6_2_part_proyectos_years')}
@@ -1752,8 +2052,11 @@
                     </div>
                     ${SubTitle('6.6 Tutorización', 'score-s66', 'La puntuación se otorga por cada curso académico en el que se tutoriza al menos un alumno, con independencia del número de alumnos tutorizados simultáneamente en ese curso.')}
                     ${InfoBox('El mérito se computa <strong>por curso académico</strong>, no por alumno. Da igual tutorizar 1 o 10 alumnos en el mismo curso: cuenta una sola vez por ese curso.')}
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                    <div class="space-y-3">
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         ${NumInput('Cursos tutorizando prácticas de máster o grado (0,1 ptos. cada año, independientemente del n.º de alumnos tutorizados simultáneamente)', 's6_6_tutor_master_grado')}
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
                         <div>
                             <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">¿Tutorizaste a funcionariado aspirante en cursos anteriores a 2023/24?</p>
                             <div class="grid grid-cols-2 gap-2" role="group" aria-label="Tutorización de aspirantes antes del curso 2023/24">
@@ -1771,6 +2074,7 @@
                         </div>
                         ${NumInput('Cursos tutorizando fase de prácticas de funcionarios/as en prácticas (0,2 ptos. cada curso desde 2023/24, independientemente del n.º de personas tutorizadas simultáneamente)', 's6_6_tutor_aspirantes', 1, 999, 'flex-col', state.s6_6_tutor_aspirantes_anteriores === '')}
                         <p id="s6-6-tutor-aspirantes-warning" class="${state.s6_6_tutor_aspirantes > 3 ? '' : 'hidden'} text-sm font-medium text-red-600 dark:text-red-400" role="alert">Solo han transcurrido 3 cursos académicos desde 2023/24 (23/24, 24/25 y 25/26). Revisa la cifra.</p>
+                        </div>
                     </div>
                 </div>`;
         }
@@ -1782,52 +2086,58 @@
             const addBlock = (title, rows, max, total) => blocks.push({ title, rows, max, total });
 
             const b1 = [];
-            push(b1, `1.1.1 Permanencia ininterrumpida en destino definitivo (${s.s1_1_1_years} a, ${s.s1_1_1_months} m)`, calc111(s));
-            push(b1, `1.1.2 Provisionalidad (${s.s1_1_2_years} a, ${s.s1_1_2_months} m)`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
-            push(b1, `1.1.3 Especial dificultad (${s.s1_1_3_years} a, ${s.s1_1_3_months} m)`, calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333));
-            push(b1, `1.2.1 Servicio activo en el cuerpo (${s.s1_2_1_years} a, ${s.s1_2_1_months} m)`, calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666));
-            push(b1, `1.2.2 Otros cuerpos — mismo o superior subgrupo (${s.s1_2_2_years} a, ${s.s1_2_2_months} m)`, calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250));
-            push(b1, `1.2.3 Otros cuerpos — subgrupo inferior (${s.s1_2_3_years} a, ${s.s1_2_3_months} m)`, calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625));
+            push(b1, `1.1.1 Permanencia ininterrumpida en destino definitivo (${formatDuration(s.s1_1_1_years, s.s1_1_1_months)})`, calc111(s));
+            push(b1, `1.1.2 Provisionalidad (${formatDuration(s.s1_1_2_years, s.s1_1_2_months)})`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
+            push(b1, `1.1.3 Especial dificultad (${formatDuration(s.s1_1_3_years, s.s1_1_3_months)})`, calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333));
+            push(b1, `1.2.1 Servicio activo en el cuerpo (${formatDuration(s.s1_2_1_years, s.s1_2_1_months)})`, calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666));
+            push(b1, `1.2.2 Otros cuerpos — mismo o superior subgrupo (${formatDuration(s.s1_2_2_years, s.s1_2_2_months)})`, calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250));
+            push(b1, `1.2.3 Otros cuerpos — subgrupo inferior (${formatDuration(s.s1_2_3_years, s.s1_2_3_months)})`, calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625));
             addBlock('1. Antigüedad', b1, null, Calculators.section1(s));
 
             const b2 = [];
             if (s.s2_catedratico) {
-                push(b2, 'Pertenencia al Cuerpo de Catedráticos', 5.0);
+                push(b2, '2. Pertenencia al Cuerpo de Catedráticos', 5.0);
             }
             addBlock('2. Cuerpos de Catedráticos', b2, 5.0, Calculators.section2(s));
 
             const b3 = [];
-            push(b3, `3.1.1 Títulos de Doctor (${formatDecimal(s.s3_1_1_doctor)})`, s.s3_1_1_doctor * 6.0);
-            push(b3, `3.1.2 Másteres universitarios oficiales (${formatDecimal(s.s3_1_2_masters)})`, s.s3_1_2_masters * 3.0);
-            push(b3, `3.1.3 Suficiencia investigadora / DEA (${formatDecimal(s.s3_1_3_dea)})`, s.s3_1_3_dea * 2.0);
+            push(b3, `3.1.1 ${formatMeritQuantity(s.s3_1_1_doctor, 'Título de Doctor/a', 'Títulos de Doctor/a')}`, s.s3_1_1_doctor * 6.0);
+            push(b3, `3.1.2 ${formatMeritQuantity(s.s3_1_2_masters, 'Máster universitario oficial', 'Másteres universitarios oficiales')}`, s.s3_1_2_masters * 3.0);
+            push(b3, `3.1.3 ${formatMeritQuantity(s.s3_1_3_dea, 'Certificado de suficiencia investigadora / DEA', 'Certificados de suficiencia investigadora / DEA')}`, s.s3_1_3_dea * 2.0);
             if (s.s3_1_4_premio_doctor) push(b3, '3.1.4 Premio extraordinario de doctorado o grado', 1.0);
-            push(b3, `3.2.1 Grados universitarios adicionales (${formatDecimal(s.s3_2_1_grados)})`, s.s3_2_1_grados * 5.0);
-            push(b3, `3.2.2 Diplomaturas / primer ciclo (${formatDecimal(s.s3_2_2_primer_ciclo)})`, s.s3_2_2_primer_ciclo * 3.0);
-            push(b3, `3.2.3 Licenciaturas / segundo ciclo (${formatDecimal(s.s3_2_3_segundo_ciclo)})`, s.s3_2_3_segundo_ciclo * 3.0);
+            push(b3, `3.2.1 ${formatMeritQuantity(s.s3_2_1_grados, 'Grado universitario adicional', 'Grados universitarios adicionales')}`, s.s3_2_1_grados * 5.0);
+            push(b3, `3.2.2 ${formatMeritQuantity(s.s3_2_2_primer_ciclo, 'Diplomatura / título de primer ciclo', 'Diplomaturas / títulos de primer ciclo')}`, s.s3_2_2_primer_ciclo * 3.0);
+            push(b3, `3.2.3 ${formatMeritQuantity(s.s3_2_3_segundo_ciclo, 'Licenciatura / título de segundo ciclo', 'Licenciaturas / títulos de segundo ciclo')}`, s.s3_2_3_segundo_ciclo * 3.0);
             const { grouped } = getIdiomasBreakdown(s);
             Object.values(grouped).forEach(g => {
-                if (g.origen === 'EOI') push(b3, `3.3 ${g.nombre} por la EOI — nivel ${g.nivel}`, g.pts);
+                if (g.origen === 'EOI') {
+                    const languageMerit = { C2: 'a', C1: 'b', B2: 'c', B1: 'd' }[g.nivel];
+                    push(b3, `3.3 ${languageMerit}) ${g.nombre} por la EOI — nivel ${g.nivel}`, g.pts);
+                }
             });
-            push(b3, `3.3 Diploma de Lengua de Signos Española — nivel ${s.s3_3_dlse}`, PTS_IDIOMA[s.s3_3_dlse] || 0);
-            push(b3, `Títulos profesionales de Música o Danza (${s.s3_3_titulo_musica})`, s.s3_3_titulo_musica * 2.0);
-            push(b3, `Títulos Técnico Superior APD / Deportivo / FP (${s.s3_3_titulo_arte})`, s.s3_3_titulo_arte * 2.0);
+            push(b3, `3.3 e) Diploma de Lengua de Signos Española — nivel ${s.s3_3_dlse}`, PTS_IDIOMA[s.s3_3_dlse] || 0);
+            push(b3, `3.3 f) ${formatMeritQuantity(s.s3_3_titulo_arte, 'Título de Técnico Superior APD / Deportivo / FP', 'Títulos de Técnico Superior APD / Deportivo / FP')}`, s.s3_3_titulo_arte * 2.0);
+            push(b3, `3.3 g) ${formatMeritQuantity(s.s3_3_titulo_musica, 'Título profesional de Música o Danza', 'Títulos profesionales de Música o Danza')}`, s.s3_3_titulo_musica * 2.0);
             addBlock('3. Méritos académicos', b3, 10.0, Calculators.section3(s));
 
             const b4 = [];
-            push(b4, `4.1 Dirección (${s.s4_1_director_years} a, ${s.s4_1_director_months} m)`, calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750));
-            push(b4, `4.2 Vicedirección / jefatura / secretaría (${s.s4_2_vicedir_years} a, ${s.s4_2_vicedir_months} m)`, calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500));
-            push(b4, `4.3 Jefatura de Departamento (${s.s4_3_jefatura_years} a, ${s.s4_3_jefatura_months} m)`, calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250));
-            push(b4, `4.3 Coordinación de Ciclo / EOE / CEP (${s.s4_3_coordinacion_years} a, ${s.s4_3_coordinacion_months} m)`, calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250));
-            push(b4, `4.3 Tutoría desde LOE 2006 (${s.s4_3_tutoria_years} a, ${s.s4_3_tutoria_months} m)`, calcTime(s.s4_3_tutoria_years, s.s4_3_tutoria_months, 1.5, 0.1250));
+            push(b4, `4.1 Dirección (${formatDuration(s.s4_1_director_years, s.s4_1_director_months)})`, calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750));
+            push(b4, `4.2 Vicedirección / jefatura / secretaría (${formatDuration(s.s4_2_vicedir_years, s.s4_2_vicedir_months)})`, calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500));
+            push(b4, `4.3 Jefatura de departamento (${formatDuration(s.s4_3_jefatura_years, s.s4_3_jefatura_months)})`, calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250));
+            push(b4, `4.3 Coordinación de ciclo / EOE / CEP (${formatDuration(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months)})`, calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250));
+            const maxTutor43Years = Math.floor(MAX_TUTORING_MONTHS / 12);
+            const maxTutor43Months = MAX_TUTORING_MONTHS % 12;
+            push(b4, `4.3 Tutoría desde LOE 2006 (${formatDuration(s.s4_3_tutoria_years, s.s4_3_tutoria_months)}; máximo computable: ${formatDuration(maxTutor43Years, maxTutor43Months)})`, calcTutor43(s));
             addBlock('4. Cargos directivos', b4, 30.0, Calculators.section4(s));
 
             const b5 = [];
-            push(b5, `5.1 Formación superada (${s.s5_1_horas} h)`, Calculators.calc51(s));
-            push(b5, `5.2 Impartición de formación (${s.s5_2_horas} h)`, Calculators.calc52(s));
-            push(b5, `5.3 Nuevas especialidades (${s.s5_3_especialidades})`, s.s5_3_especialidades * 1.0);
+            push(b5, `5.1 Formación superada (${formatQuantity(s.s5_1_horas, 'hora', 'horas')})`, Calculators.calc51(s));
+            push(b5, `5.2 Impartición de formación (${formatQuantity(s.s5_2_horas, 'hora', 'horas')})`, Calculators.calc52(s));
+            push(b5, `5.3 ${formatMeritQuantity(s.s5_3_especialidades, 'Nueva especialidad', 'Nuevas especialidades')}`, s.s5_3_especialidades * 1.0);
             if (s.s5_4_competencia_digital !== 'none') {
                 const map = { 'A1': 0.5, 'A2': 1.0, 'B1': 1.5, 'B2': 2.0, 'C1': 2.5, 'C2': 3.0 };
-                push(b5, `5.4 ${s.s5_4_competencia_digital} de Competencia Digital Docente`, map[s.s5_4_competencia_digital] || 0);
+                const letter = { A1: 'a', A2: 'b', B1: 'c', B2: 'd', C1: 'e', C2: 'f' }[s.s5_4_competencia_digital];
+                push(b5, `5.4 ${letter}) ${s.s5_4_competencia_digital} de Competencia Digital Docente`, map[s.s5_4_competencia_digital] || 0);
             }
             Object.values(grouped).forEach(g => {
                 if (g.origen === 'ACLES') push(b5, `5.5 ACLES ${g.nombre} — ${g.certificado} (${g.nivel})`, g.pts);
@@ -1835,50 +2145,51 @@
             addBlock('5. Formación y perfeccionamiento', b5, 15.0, Calculators.section5(s));
 
             const b6 = [];
-            push(b6, `6.1.1 Libros autor único (${s.s6_1_libros_autor})`, s.s6_1_libros_autor * 1.0);
-            push(b6, `6.1.1 Libros coautor (${s.s6_1_libros_coautor})`, s.s6_1_libros_coautor * 0.5);
-            push(b6, `6.1.1 Libros 3 autores (${s.s6_1_libros_3autores})`, s.s6_1_libros_3autores * 0.4);
-            push(b6, `6.1.1 Libros 4 autores (${s.s6_1_libros_4autores})`, s.s6_1_libros_4autores * 0.3);
-            push(b6, `6.1.1 Libros 5 autores (${s.s6_1_libros_5autores})`, s.s6_1_libros_5autores * 0.2);
-            push(b6, `6.1.1 Libros más de 5 autores (${s.s6_1_libros_mas5autores})`, s.s6_1_libros_mas5autores * 0.1);
-            push(b6, `6.1.2 Obras literarias autor (${s.s6_1_obras_literarias_autor})`, s.s6_1_obras_literarias_autor * 1.0);
-            push(b6, `6.1.2 Obras literarias coautor (${s.s6_1_obras_literarias_coautor})`, s.s6_1_obras_literarias_coautor * 0.5);
-            push(b6, `6.1.2 Obras literarias 3+ autores (${s.s6_1_obras_literarias_3autores})`, s.s6_1_obras_literarias_3autores * 0.4);
-            push(b6, `6.1.2 Obras literarias ilustrador/a (${s.s6_1_obras_literarias_ilustrador})`, s.s6_1_obras_literarias_ilustrador * 0.2);
-            push(b6, `6.1.3 Revistas autor (${s.s6_1_revistas_autor})`, s.s6_1_revistas_autor * 0.2);
-            push(b6, `6.1.3 Revistas coautor (${s.s6_1_revistas_coautor})`, s.s6_1_revistas_coautor * 0.1);
-            push(b6, `6.1.3 Revistas 3+ autores (${s.s6_1_revistas_3mas})`, s.s6_1_revistas_3mas * 0.05);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_autor, 'Libro de autor único', 'Libros de autor único')}`, s.s6_1_libros_autor * 1.0);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_coautor, 'Libro en coautoría', 'Libros en coautoría')}`, s.s6_1_libros_coautor * 0.5);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_3autores, 'Libro de 3 autores', 'Libros de 3 autores')}`, s.s6_1_libros_3autores * 0.4);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_4autores, 'Libro de 4 autores', 'Libros de 4 autores')}`, s.s6_1_libros_4autores * 0.3);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_5autores, 'Libro de 5 autores', 'Libros de 5 autores')}`, s.s6_1_libros_5autores * 0.2);
+            push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_mas5autores, 'Libro de más de 5 autores', 'Libros de más de 5 autores')}`, s.s6_1_libros_mas5autores * 0.1);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_autor, 'Obra literaria de autor único', 'Obras literarias de autor único')}`, s.s6_1_obras_literarias_autor * 1.0);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_coautor, 'Obra literaria en coautoría', 'Obras literarias en coautoría')}`, s.s6_1_obras_literarias_coautor * 0.5);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_3autores, 'Obra literaria de 3 o más autores', 'Obras literarias de 3 o más autores')}`, s.s6_1_obras_literarias_3autores * 0.4);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_ilustrador, 'Obra literaria ilustrada', 'Obras literarias ilustradas')}`, s.s6_1_obras_literarias_ilustrador * 0.2);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_autor, 'Artículo de revista de autor único', 'Artículos de revista de autor único')}`, s.s6_1_revistas_autor * 0.2);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_coautor, 'Artículo de revista en coautoría', 'Artículos de revista en coautoría')}`, s.s6_1_revistas_coautor * 0.1);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_3mas, 'Artículo de revista de 3 o más autores', 'Artículos de revista de 3 o más autores')}`, s.s6_1_revistas_3mas * 0.05);
             push(b6, '6.1 Total aplicado (Tope: 8,0000 ptos.)', Calculators.calc61(s));
             const premios_pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
                                 (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
                                 (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1);
-            push(b6, '6.2 Premios', premios_pts);
-            push(b6, `6.2 Coordinación Plan de Igualdad (${s.s6_2_coord_plan_igualdad_years} cursos)`, s.s6_2_coord_plan_igualdad_years * 1.0);
-            push(b6, `6.2 Coordinación otros proyectos (${s.s6_2_coord_proyectos_years} cursos)`, s.s6_2_coord_proyectos_years * 0.5);
-            push(b6, `6.2 Participación en proyectos (${s.s6_2_part_proyectos_years} cursos)`, s.s6_2_part_proyectos_years * 0.2);
+            const premios_count = s.s6_2_intl_1 + s.s6_2_intl_2 + s.s6_2_intl_3 + s.s6_2_nat_1 + s.s6_2_nat_2 + s.s6_2_nat_3 + s.s6_2_auto_1 + s.s6_2_auto_2 + s.s6_2_auto_3;
+            push(b6, `6.2 a) ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
+            push(b6, `6.2 b) Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
+            push(b6, `6.2 b) Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
+            push(b6, `6.2 b) Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
             push(b6, '6.2 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc62(s));
-            push(b6, `6.3 Premios internacionales (${formatDecimal(s.s6_3_premios_intl)})`, s.s6_3_premios_intl * 1.5);
-            push(b6, `6.3 Premios nacionales (${formatDecimal(s.s6_3_premios_nat)})`, s.s6_3_premios_nat * 1.0);
-            push(b6, `6.3 Premios autonómicos (${formatDecimal(s.s6_3_premios_auto)})`, s.s6_3_premios_auto * 0.5);
-            push(b6, `6.3 Espectáculos gran formato (${formatDecimal(s.s6_3_espectaculos_gran)})`, s.s6_3_espectaculos_gran * 1.0);
-            push(b6, `6.3 Cámara / pequeños grupos (${formatDecimal(s.s6_3_espectaculos_peq)})`, s.s6_3_espectaculos_peq * 0.5);
-            push(b6, `6.3 Otras composiciones (${formatDecimal(s.s6_3_otras_composiciones)})`, s.s6_3_otras_composiciones * 0.25);
-            push(b6, `6.3 Actuaciones destacadas (${formatDecimal(s.s6_3_actuaciones_destacadas)})`, s.s6_3_actuaciones_destacadas * 0.5);
-            push(b6, `6.3 Actuaciones secundarias (${formatDecimal(s.s6_3_actuaciones_secundarias)})`, s.s6_3_actuaciones_secundarias * 0.2);
-            push(b6, `6.3 Exposiciones (${formatDecimal(s.s6_3_exposiciones)})`, s.s6_3_exposiciones * 0.5);
-            push(b6, `6.3 Conservador-restaurador director (${formatDecimal(s.s6_3_conservador_dir)})`, s.s6_3_conservador_dir * 0.5);
-            push(b6, `6.3 Conservador-restaurador participante (${formatDecimal(s.s6_3_conservador_part)})`, s.s6_3_conservador_part * 0.2);
-            push(b6, `6.3 Deportista alto nivel (${s.s6_3_deportista_nivel})`, s.s6_3_deportista_nivel * 1.0);
-            push(b6, `6.3 Deportista alto rendimiento (${s.s6_3_deportista_rendimiento})`, s.s6_3_deportista_rendimiento * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_intl, 'Premio internacional', 'Premios internacionales')}`, s.s6_3_premios_intl * 1.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_nat, 'Premio nacional', 'Premios nacionales')}`, s.s6_3_premios_nat * 1.0);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_auto, 'Premio autonómico', 'Premios autonómicos')}`, s.s6_3_premios_auto * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_espectaculos_gran, 'Espectáculo de gran formato', 'Espectáculos de gran formato')}`, s.s6_3_espectaculos_gran * 1.0);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_espectaculos_peq, 'Espectáculo de cámara o pequeño grupo', 'Espectáculos de cámara o pequeños grupos')}`, s.s6_3_espectaculos_peq * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_otras_composiciones, 'Otra composición', 'Otras composiciones')}`, s.s6_3_otras_composiciones * 0.25);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_actuaciones_destacadas, 'Actuación destacada', 'Actuaciones destacadas')}`, s.s6_3_actuaciones_destacadas * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_actuaciones_secundarias, 'Actuación secundaria', 'Actuaciones secundarias')}`, s.s6_3_actuaciones_secundarias * 0.2);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_exposiciones, 'Exposición', 'Exposiciones')}`, s.s6_3_exposiciones * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_conservador_dir, 'Participación como conservador-restaurador director', 'Participaciones como conservador-restaurador director')}`, s.s6_3_conservador_dir * 0.5);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_conservador_part, 'Participación como conservador-restaurador', 'Participaciones como conservador-restaurador')}`, s.s6_3_conservador_part * 0.2);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_deportista_nivel, 'Mérito como deportista de alto nivel', 'Méritos como deportista de alto nivel')}`, s.s6_3_deportista_nivel * 1.0);
+            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_deportista_rendimiento, 'Mérito como deportista de alto rendimiento', 'Méritos como deportista de alto rendimiento')}`, s.s6_3_deportista_rendimiento * 0.5);
             push(b6, '6.3 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc63(s));
-            push(b6, `6.4 Puestos en la administración (${s.s6_4_puestos_admin_years} a, ${s.s6_4_puestos_admin_months} m)`, calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125));
-            push(b6, `6.5 Tribunales (${s.s6_5_tribunales} convocatorias)`, s.s6_5_tribunales * 0.5);
-            push(b6, `6.6 Tutorización máster/grado (${s.s6_6_tutor_master_grado} cursos)`, s.s6_6_tutor_master_grado * 0.1);
-            push(b6, `6.6 Tutorización fase aspirantes (${s.s6_6_tutor_aspirantes} cursos; máximo computable: 3)`, Math.min(s.s6_6_tutor_aspirantes, 3) * 0.2);
+            push(b6, `6.4 Puestos en la administración (${formatDuration(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months)})`, calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125));
+            push(b6, `6.5 Tribunales (${formatQuantity(s.s6_5_tribunales, 'convocatoria', 'convocatorias')})`, s.s6_5_tribunales * 0.5);
+            push(b6, `6.6 Tutorización máster/grado (${formatQuantity(s.s6_6_tutor_master_grado, 'curso', 'cursos')})`, s.s6_6_tutor_master_grado * 0.1);
+            push(b6, `6.6 Tutorización fase aspirantes (${formatQuantity(s.s6_6_tutor_aspirantes, 'curso', 'cursos')}; máximo computable: 3 cursos)`, Math.min(s.s6_6_tutor_aspirantes, 3) * 0.2);
             addBlock('6. Otros méritos', b6, 15.0, Calculators.section6(s));
 
             return `
-                <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 print-breakdown-card">
                     <div class="bg-secondary p-4 print-breakdown-header">
                         <h3 class="text-lg font-bold text-white print-breakdown-title">Desglose de méritos</h3>
                         <p class="text-xs text-gray-300 print-breakdown-subtitle">Desglose de méritos (con topes aplicados)</p>
@@ -1890,7 +2201,12 @@
                                 <ul class="space-y-1">
                                     ${b.rows.map(r => `
                                         <li class="flex justify-between items-baseline gap-2 text-sm text-gray-700 dark:text-gray-200 print-breakdown-row">
-                                            <span>${r.label}</span>
+                                            <span class="print-breakdown-label">${(() => {
+                                                const match = r.label.match(/^(\d+(?:\.\d+)*(?:\s+[a-z]\))?)(?:\s+)(.*)$/i);
+                                                return match
+                                                    ? `<span class="print-breakdown-number">${match[1]}</span><span class="print-breakdown-description">${match[2]}</span>`
+                                                    : `<span class="print-breakdown-number" aria-hidden="true"></span><span class="print-breakdown-description">${r.label}</span>`;
+                                            })()}</span>
                                             <span class="font-mono font-semibold text-primary dark:text-emerald-400 whitespace-nowrap print-summary-points summary-mono-score">${formatPoints(r.pts)} ptos.</span>
                                         </li>
                                     `).join('')}
@@ -1923,6 +2239,12 @@
                 <div class="max-w-3xl mx-auto">
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 print-summary-card">
                         <div class="bg-primary p-6 text-white flex justify-between items-center gap-3 print-summary-header">
+                            <div class="summary-wave-layer no-print" aria-hidden="true">
+                                <svg class="summary-wave" viewBox="0 0 1440 600" preserveAspectRatio="none"><path fill="#86efac" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/></svg>
+                                <svg class="summary-wave" viewBox="0 0 1440 600" preserveAspectRatio="none"><path fill="#6ee7b7" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/></svg>
+                                <svg class="summary-wave" viewBox="0 0 1440 600" preserveAspectRatio="none"><path fill="#4ade80" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/></svg>
+                                <svg class="summary-wave" viewBox="0 0 1440 600" preserveAspectRatio="none"><path fill="#22c55e" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/></svg>
+                            </div>
                             <div class="min-w-0">
                                 <h2 class="text-2xl font-bold print-summary-title">Resumen de baremación</h2>
                                 <p class="text-green-100 print-summary-muted">Traslados 2026 · Andalucía</p>
@@ -1937,7 +2259,7 @@
                             ${state.seniorityWizard.status === 'practice' ? `
                             <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
                                 <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                <span>Aviso: Si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
+                                <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
                             </div>` : ''}
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -1983,9 +2305,8 @@
                         </button>
                     </div>
                     <div class="mt-8 text-xs text-gray-400 dark:text-gray-500 text-center print-only print-meta">
-                        <p id="print-timestamp"></p>
-                        Calculadora creada originalmente por MaestroRafa. Modificada por fcallejah.<br>
-                        BOJA n.º 210, de 29 de octubre de 2026 — https://www.juntadeandalucia.es/boja/2026/210/16
+                        <p id="print-timestamp" class="mb-2"></p>
+                        <p class="mt-2">BOJA n.º 210, de 29 de octubre de 2026 — <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="underline hover:text-primary">https://www.juntadeandalucia.es/boja/2026/210/16</a></p>
                     </div>
                 </div>`;
         }
@@ -1993,6 +2314,7 @@
         function closeLanding() {
             document.getElementById('landing-page').classList.add('hidden');
             document.getElementById('app-container').classList.remove('opacity-0');
+            window.scrollTo({ top: 0, behavior: 'instant' });
         }
         function switchTab(id) {
             window.scrollTo({ top: 0, behavior: 'instant' });
@@ -2005,6 +2327,19 @@
             const wrapper = document.getElementById('tabs-scroll-wrapper');
             if (wrapper) wrapper.scrollBy({ left: direction * Math.max(wrapper.clientWidth * 0.65, 140), behavior: 'smooth' });
         }
+        function updateSection4OtherBodyServiceWarnings() {
+            const fields = [
+                ['s4-1-other-body-warning', 's4_1_director_years', 's4_1_director_months'],
+                ['s4-2-other-body-warning', 's4_2_vicedir_years', 's4_2_vicedir_months'],
+                ['s4-3-jefatura-other-body-warning', 's4_3_jefatura_years', 's4_3_jefatura_months'],
+                ['s4-3-coordinacion-other-body-warning', 's4_3_coordinacion_years', 's4_3_coordinacion_months'],
+                ['s4-3-tutoria-other-body-warning', 's4_3_tutoria_years', 's4_3_tutoria_months']
+            ];
+            fields.forEach(([id, yearsName, monthsName]) => {
+                const warning = document.getElementById(id);
+                if (warning) warning.classList.toggle('hidden', !section4ExceedsOtherBodyService(state, yearsName, monthsName));
+            });
+        }
         function handleInput(element) {
             const name = element.name;
             const numeric = element.type === 'number' || element.inputMode === 'decimal';
@@ -2014,15 +2349,33 @@
             if (numeric && value < 0) { value = 0; element.value = 0; }
             if (name.endsWith('_months') && element.type === 'number' && value > 11) { value = 11; element.value = 11; }
             state[name] = value;
+            if (name === 's1_2_2_years' || name === 's1_2_2_months' || name.startsWith('s4_')) {
+                updateSection4OtherBodyServiceWarnings();
+            }
+            if (['s1_1_1_years', 's1_1_1_months', 's1_1_2_years', 's1_1_2_months', 's1_1_3_years', 's1_1_3_months', 's1_2_1_years', 's1_2_1_months'].includes(name)) {
+                const warning = document.getElementById('s1-1-body-service-warning');
+                if (warning) warning.classList.toggle('hidden', !section11ExceedsBodyService(state));
+            }
             if (name === 's6_6_tutor_aspirantes') {
                 const warning = document.getElementById('s6-6-tutor-aspirantes-warning');
                 if (warning) warning.classList.toggle('hidden', value <= 3);
+            }
+            if (name === 's4_3_tutoria_years' || name === 's4_3_tutoria_months') {
+                const warning = document.getElementById('s4-3-tutoria-warning');
+                if (warning) warning.classList.toggle('hidden', (state.s4_3_tutoria_years * 12 + state.s4_3_tutoria_months) <= MAX_TUTORING_MONTHS);
             }
             saveState(); updateCalculations();
         }
         function setTutorPreviousAnswer(value) {
             if (value !== 'si' && value !== 'no') return;
             state.s6_6_tutor_aspirantes_anteriores = state.s6_6_tutor_aspirantes_anteriores === value ? '' : value;
+            saveState();
+            renderMainContent();
+            updateCalculations();
+        }
+        function setTutorBefore2007Answer(value) {
+            if (value !== 'si' && value !== 'no') return;
+            state.s4_3_tutoria_antes_2007 = state.s4_3_tutoria_antes_2007 === value ? '' : value;
             saveState();
             renderMainContent();
             updateCalculations();
@@ -2126,8 +2479,48 @@
                     </button>
                 </div>`;
         }
+        function renderCreditsFooter() {
+            return `
+                <footer class="credits-wave-box mt-6 flex items-center justify-center px-4 py-5 text-center">
+                    <div class="credits-wave-layer no-print" aria-hidden="true">
+                        <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                            <defs><linearGradient id="credits-wave-light" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#4ade80"/></linearGradient></defs>
+                            <path fill="url(#credits-wave-light)" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
+                        </svg>
+                        <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                            <defs><linearGradient id="credits-wave-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+                            <path fill="url(#credits-wave-mid)" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
+                        </svg>
+                        <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                            <defs><linearGradient id="credits-wave-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs>
+                            <path fill="url(#credits-wave-deep)" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
+                        </svg>
+                        <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="none">
+                            <defs><linearGradient id="credits-wave-bottom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
+                            <path fill="url(#credits-wave-bottom)" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
+                        </svg>
+                    </div>
+                    <div class="landing-card credits-wave-credit w-full max-w-lg rounded-2xl bg-white dark:bg-gray-800 shadow-xl p-6 sm:p-8 text-center border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-600 dark:text-gray-200">
+                            Creada por MaestroRafa<br>
+                            Modificada por fcallejah con mucho cariño desde Cuevas Bajas (Málaga)<br>
+                            <span class="mt-1 inline-block whitespace-nowrap" role="img" aria-label="zanahoria morada, corazón morado, aceituna y paisaje">🥕 💜 🫒 🏞️</span>
+                        </p>
+                        <div class="mt-3 flex justify-center">
+                        <a href="https://github.com/fcallejah/calculadoraCGT" target="_blank" rel="noopener noreferrer"
+                           class="no-print inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-full px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 transition"
+                           title="Ver el repositorio del proyecto en GitHub (se abre en nueva pestaña)">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                            <span>github.com/fcallejah/calculadoraCGT</span>
+                        </a>
+                        </div>
+                    </div>
+                </footer>`;
+        }
         function renderMainContent() {
             const c = document.getElementById('main-content');
+            c.classList.toggle('pb-20', activeTabId !== 1 && activeTabId !== 7);
+            c.classList.toggle('credits-footer-active', activeTabId === 1 || activeTabId === 7);
             switch(activeTabId) {
                 case 1: c.innerHTML = renderSection1(); break;
                 case 2: c.innerHTML = renderSection2(); break;
@@ -2138,6 +2531,9 @@
                 case 7: c.innerHTML = renderSummary(); break;
             }
             c.insertAdjacentHTML('beforeend', renderSectionNavigation());
+            if (activeTabId === 1 || activeTabId === 7) {
+                c.insertAdjacentHTML('beforeend', renderCreditsFooter());
+            }
         }
 
         applyTheme();
