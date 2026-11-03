@@ -199,8 +199,8 @@
         }
         .landing-wave {
             position: absolute;
-            left: -50%;
-            width: 200%;
+            left: -15%;
+            width: 130%;
             height: 66vh;
             bottom: -10vh;
             animation: landing-wave-rise 11s ease-in-out infinite alternate;
@@ -272,9 +272,9 @@
         }
         .credits-wave {
             position: absolute;
-            left: -50%;
+            left: -15%;
             top: -28%;
-            width: 200%;
+            width: 130%;
             height: 210%;
             animation: landing-wave-rise 13s ease-in-out infinite alternate;
         }
@@ -303,25 +303,21 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-slate-800 font-sans dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
+<body class="bg-gray-50 text-slate-800 font-sans dark:bg-gray-900 dark:text-gray-100">
 
     <div id="landing-page" class="landing-wave-background fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="landing-waves" aria-hidden="true">
             <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                <defs><linearGradient id="landing-wave-light" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#4ade80"/></linearGradient></defs>
-                <path fill="url(#landing-wave-light)" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
+                <path fill="#86efac" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
             </svg>
             <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                <defs><linearGradient id="landing-wave-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
-                <path fill="url(#landing-wave-mid)" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
+                <path fill="#6ee7b7" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
             </svg>
             <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                <defs><linearGradient id="landing-wave-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs>
-                <path fill="url(#landing-wave-deep)" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
+                <path fill="#4ade80" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
             </svg>
             <svg class="landing-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                <defs><linearGradient id="landing-wave-bottom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
-                <path fill="url(#landing-wave-bottom)" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
+                <path fill="#22c55e" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
             </svg>
         </div>
         <div class="landing-card bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
@@ -1590,12 +1586,13 @@
 
         const section4ExceedsOtherBodyService = (s, yearsName, monthsName) => {
             const enteredMonths = (Number(s[yearsName]) || 0) * 12 + (Number(s[monthsName]) || 0);
-            const otherBodyMonths = (Number(s.s1_2_2_years) || 0) * 12 + (Number(s.s1_2_2_months) || 0);
+            const ref = yearsName.startsWith('s4_3_tutoria') ? 's1_2_1' : 's1_2_2';
+            const otherBodyMonths = (Number(s[ref + '_years']) || 0) * 12 + (Number(s[ref + '_months']) || 0);
             return enteredMonths > otherBodyMonths;
         };
         const OtherBodyServiceWarning = (id, yearsName, monthsName) => `
             <p id="${id}" class="${section4ExceedsOtherBodyService(state, yearsName, monthsName) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
-                Revisa las cifras: este periodo no puede superar el total de servicios en otros cuerpos (1.2.2).
+                Revisa las cifras: este periodo no puede superar el total de servicios en ${yearsName.startsWith('s4_3_tutoria') ? 'el mismo cuerpo (1.2.1)' : 'otros cuerpos (1.2.2)'}.
             </p>`;
         const YMInput = (label, yName, mName, disabled=false, warning='') => `
             <div class="${disabled ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-white dark:bg-gray-800'} p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mb-4">
@@ -1608,12 +1605,12 @@
             </div>`;
 
         const Checkbox = (label, name) => `
-            <div class="flex items-center mt-4 mb-2 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <label class="flex items-center mt-4 mb-2 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer">
                 <input type="checkbox" name="${name}" ${state[name] ? 'checked' : ''}
                     class="w-5 h-5 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
                     onchange="handleCheck(this)">
-                <label class="ml-2 text-sm text-gray-800 dark:text-gray-200">${label}</label>
-            </div>`;
+                <span class="ml-2 text-sm text-gray-800 dark:text-gray-200">${label}</span>
+            </label>`;
 
         function renderLanguageManagerForOrigin(origin) {
             const allowedLanguages = origin === 'EOI' ? IDIOMAS_EOI : IDIOMAS_ACLES;
@@ -2348,7 +2345,7 @@
             if (numeric && value < 0) { value = 0; element.value = 0; }
             if (name.endsWith('_months') && element.type === 'number' && value > 11) { value = 11; element.value = 11; }
             state[name] = value;
-            if (name === 's1_2_2_years' || name === 's1_2_2_months' || name.startsWith('s4_')) {
+            if (name.startsWith('s1_2_1_') || name === 's1_2_2_years' || name === 's1_2_2_months' || name.startsWith('s4_')) {
                 updateSection4OtherBodyServiceWarnings();
             }
             if (['s1_1_1_years', 's1_1_1_months', 's1_1_2_years', 's1_1_2_months', 's1_1_3_years', 's1_1_3_months', 's1_2_1_years', 's1_2_1_months'].includes(name)) {
@@ -2483,20 +2480,16 @@
                 <footer class="credits-wave-box mt-6 flex items-center justify-center px-4 py-5 text-center">
                     <div class="credits-wave-layer no-print" aria-hidden="true">
                         <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                            <defs><linearGradient id="credits-wave-light" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#4ade80"/></linearGradient></defs>
-                            <path fill="url(#credits-wave-light)" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
+                            <path fill="#86efac" d="M0 250 C180 180 300 310 480 250 S780 190 960 250 S1260 320 1440 240 L1440 600 L0 600 Z"/>
                         </svg>
                         <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                            <defs><linearGradient id="credits-wave-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
-                            <path fill="url(#credits-wave-mid)" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
+                            <path fill="#6ee7b7" d="M0 320 C160 390 330 250 500 320 S820 400 990 310 S1280 250 1440 330 L1440 600 L0 600 Z"/>
                         </svg>
                         <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                            <defs><linearGradient id="credits-wave-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs>
-                            <path fill="url(#credits-wave-deep)" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
+                            <path fill="#4ade80" d="M0 400 C180 330 330 470 520 400 S830 330 1010 410 S1280 470 1440 390 L1440 600 L0 600 Z"/>
                         </svg>
                         <svg class="credits-wave" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
-                            <defs><linearGradient id="credits-wave-bottom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
-                            <path fill="url(#credits-wave-bottom)" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
+                            <path fill="#22c55e" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 600 L0 600 Z"/>
                         </svg>
                     </div>
                     <div class="landing-card credits-wave-credit w-full max-w-lg rounded-2xl bg-white dark:bg-gray-800 shadow-xl p-6 sm:p-8 text-center border border-gray-100 dark:border-gray-700">
