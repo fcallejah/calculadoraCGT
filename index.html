@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="landing-open">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,6 +98,8 @@
             #main-content .print-summary-card { border: 1px solid #9abfa7 !important; border-radius: 0.5rem !important; overflow: visible !important; }
             #main-content .print-breakdown-card { overflow: visible !important; }
             #main-content .print-summary-card .rounded-lg { border-radius: 0.4rem !important; }
+            .simulation-notice, .merit-limit-notice { background: #fff7ed !important; color: #7c2d12 !important; border-color: #f97316 !important; }
+            .claims-notice { background: #eff6ff !important; color: #1e40af !important; border-color: #3b82f6 !important; }
             @page { margin: 1.2cm; }
         }
         .print-only { display: none; }
@@ -116,6 +118,20 @@
         .print-breakdown-description {
             min-width: 0;
             flex: 1 1 auto;
+        }
+        input, select, textarea { min-width: 0; max-width: 100%; }
+        select { width: 100%; overflow: hidden; }
+        .print-summary-table { table-layout: fixed; }
+        .print-summary-table th:first-child { width: 52%; }
+        .print-summary-table td, .print-summary-table th { overflow-wrap: anywhere; }
+        .print-breakdown-description { overflow-wrap: anywhere; }
+        .simulation-notice { break-inside: avoid; }
+        @media screen and (max-width: 640px) {
+            input, select, textarea { font-size: 16px !important; }
+            .print-summary-header { flex-wrap: wrap; }
+            .print-summary-table { font-size: 0.75rem; }
+            .print-summary-table td, .print-summary-table th { padding-inline: 0.25rem; }
+            .print-summary-card > .p-6 { padding: 1rem; }
         }
         .print-summary-header {
             position: relative;
@@ -182,7 +198,7 @@
             content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
             border-width: 5px; border-style: solid; border-color: #1f2937 transparent transparent transparent;
         }
-        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .tooltip-container:hover .tooltip-text, .tooltip-container:focus-within .tooltip-text { visibility: visible; opacity: 1; pointer-events: auto; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .tab-scroll-control { display: none; }
@@ -233,6 +249,15 @@
         .landing-card {
             position: relative;
             z-index: 1;
+        }
+        html.landing-open, html.landing-open body {
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+        #landing-page > .landing-card {
+            max-height: calc(100% - 2rem);
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
         .credits-wave-box {
             position: relative;
@@ -295,11 +320,31 @@
             .credits-wave-box { min-height: 200px; }
             .credits-wave-credit { margin-inline: 0.75rem; }
         }
+        @media screen and (max-width: 640px) {
+            .tooltip-text {
+                position: fixed;
+                left: 1rem;
+                bottom: 1rem;
+                margin-left: 0;
+                width: calc(100% - 2rem);
+            }
+            .tooltip-text::after { display: none; }
+        }
         @media (prefers-reduced-motion: reduce) {
             .landing-wave, .credits-wave { animation: none; }
         }
         @media (max-width: 640px) {
             .tab-scroll-control { display: flex; }
+            #tabs-scroll-wrapper {
+                -webkit-mask-image: linear-gradient(to right, transparent 1.5rem, black 2.5rem, black calc(100% - 2.5rem), transparent calc(100% - 1.5rem));
+                mask-image: linear-gradient(to right, transparent 1.5rem, black 2.5rem, black calc(100% - 2.5rem), transparent calc(100% - 1.5rem));
+            }
+            #tabs-container {
+                position: relative;
+                width: max-content;
+                min-width: 100%;
+                padding-inline: 2.5rem;
+            }
         }
     </style>
 </head>
@@ -465,14 +510,14 @@
             </div>
             <div class="max-w-5xl mx-auto px-4 relative">
                 <button id="tabs-scroll-left" onclick="scrollTabs(-1)" aria-label="Desplazar pestañas a la izquierda"
-                        class="tab-scroll-control absolute left-4 top-0 bottom-0 z-10 items-center justify-center w-8 text-secondary/70 dark:text-gray-200/70 bg-white/75 dark:bg-gray-800/75 backdrop-blur-sm">
+                        class="tab-scroll-control absolute left-4 top-0 bottom-0 z-10 isolate items-center justify-center w-10 text-secondary dark:text-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
                 </button>
                 <div id="tabs-scroll-wrapper" class="overflow-x-auto scrollbar-hide">
                     <nav class="flex space-x-1 border-b border-gray-200 dark:border-gray-700" id="tabs-container" aria-label="Apartados de la calculadora"></nav>
                 </div>
                 <button id="tabs-scroll-right" onclick="scrollTabs(1)" aria-label="Desplazar pestañas a la derecha"
-                        class="tab-scroll-control absolute right-4 top-0 bottom-0 z-10 items-center justify-center w-8 text-secondary/70 dark:text-gray-200/70 bg-white/75 dark:bg-gray-800/75 backdrop-blur-sm">
+                        class="tab-scroll-control absolute right-4 top-0 bottom-0 z-10 isolate items-center justify-center w-10 text-secondary dark:text-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/></svg>
                 </button>
             </div>
@@ -604,10 +649,10 @@
                 </div>
 
                 <div data-wizard-step="all" class="hidden">
-                    <h3 class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad (solo desde tu <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)</h3>
-                    <p id="wizard-hardship-definitive-hint" class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica solo el tiempo que corresponda a tu <span class="underline decoration-2 underline-offset-2">destino definitivo más reciente</span>. Si no tienes, deja ambos campos a cero.</p>
+                    <h3 id="wizard-hardship-title" class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad</h3>
+                    <p id="wizard-hardship-definitive-hint" class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica solo los servicios en especial dificultad como funcionario/a de carrera durante el periodo que corresponda a tu situación. No incluyas funcionario/a en prácticas ni interinidad.</p>
                     <div id="wizard-hardship-definitive-note" class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
-                        <span>El baremo del BOJA solo cuenta la compensatoria <span class="underline decoration-2 underline-offset-2">desde tu cambio más reciente de destino definitivo</span>. Los periodos anteriores no cuentan.</span>
+                        <span>Si participas desde un destino definitivo, solo cuenta la especial dificultad <span class="underline decoration-2 underline-offset-2">desde tu último destino definitivo</span>. No sumes aquí periodos de destinos anteriores ni la provisionalidad anterior a tu primer destino definitivo.</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años de compensatoria y especial dificultad" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
@@ -1176,9 +1221,30 @@
             const dialog = document.getElementById('seniority-wizard');
             const steps = getSeniorityWizardSteps();
             const stepIndex = Math.min(Number(dialog.dataset.stepIndex) || 0, steps.length - 1);
-            const showDefinitiveHardshipHint = document.getElementById('wizard-status').value === 'definitive';
-            document.getElementById('wizard-hardship-definitive-hint').classList.toggle('hidden', !showDefinitiveHardshipHint);
-            document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', !showDefinitiveHardshipHint);
+            const status = document.getElementById('wizard-status').value;
+            const hardshipContext = status === 'practice'
+                ? 'No computable para funcionario/a en prácticas'
+                : status === 'provisional' ? 'Durante tu provisionalidad como funcionario/a de carrera' : 'Desde tu último destino definitivo';
+            const hardshipTitle = document.getElementById('wizard-hardship-title');
+            hardshipTitle.classList.toggle('font-semibold', status !== 'provisional');
+            hardshipTitle.classList.toggle('font-normal', status === 'provisional');
+            hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria y especial dificultad${status === 'provisional' ? ' ' : ` · ${hardshipContext}`}`;
+            if (status === 'provisional') {
+                const careerStart = document.getElementById('wizard-career-start').value;
+                const startDate = parseSeniorityDate(careerStart) ? formatWizardDateText(careerStart) : '';
+                const context = document.createElement('strong');
+                context.textContent = `solo durante tu actual provisionalidad${startDate ? ` desde ${startDate}` : ' (indica la fecha de nombramiento en el paso 2)'}`;
+                hardshipTitle.append(context);
+            }
+            document.getElementById('wizard-hardship-definitive-hint').textContent = status === 'practice'
+                ? 'Si eres funcionario/a en prácticas, todo el apartado 1.1 queda a cero. Tus servicios se recogen en 1.2.1.'
+                : `Indica solo los servicios en especial dificultad ${status === 'provisional' ? 'durante la provisionalidad' : 'desde tu último destino definitivo'}, como funcionario/a de carrera. No incluyas funcionario/a en prácticas ni interinidad.`;
+            document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', status !== 'definitive');
+            ['wizard-hardship-years', 'wizard-hardship-months'].forEach(id => {
+                const input = document.getElementById(id);
+                input.disabled = status === 'practice';
+                input.classList.toggle('opacity-50', input.disabled);
+            });
             dialog.dataset.stepIndex = String(stepIndex);
             steps.forEach((step, index) => step.classList.toggle('hidden', index !== stepIndex));
             document.getElementById('wizard-progress').textContent = `Paso ${stepIndex + 1} de ${steps.length}`;
@@ -1187,8 +1253,11 @@
             document.getElementById('wizard-apply').classList.toggle('hidden', stepIndex !== steps.length - 1);
             document.getElementById('seniority-wizard-error').classList.add('hidden');
             validarFechasCuestionario();
-            const focusable = steps[stepIndex].querySelector('select, input');
-            if (focusable) focusable.focus();
+            const heading = steps[stepIndex].querySelector('h3');
+            if (heading) {
+                heading.tabIndex = -1;
+                heading.focus({ preventScroll: true });
+            }
         }
         function validateSeniorityWizardStep(step) {
             const status = document.getElementById('wizard-status').value;
@@ -1273,7 +1342,7 @@
                 setYearMonthFields('s1_2_1', Math.max(0, (completeMonthsSince(bodyStart) || 0) - bodyGapMonths));
             }
             
-            setYearMonthFields('s1_1_3', Math.max(0, Number(document.getElementById('wizard-hardship-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-hardship-months').value) || 0)));
+            setYearMonthFields('s1_1_3', status === 'practice' ? 0 : Math.max(0, Number(document.getElementById('wizard-hardship-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-hardship-months').value) || 0)));
             setYearMonthFields('s1_2_2', Math.max(0, Number(document.getElementById('wizard-other-equal-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-equal-months').value) || 0)));
             setYearMonthFields('s1_2_3', Math.max(0, Number(document.getElementById('wizard-other-lower-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-lower-months').value) || 0)));
             
@@ -1365,15 +1434,73 @@
         const MAX_TUTORING_MONTHS = (19 * 12) + 2;
         const calcTime = (years, months, ptsPerYear, ptsPerMonth) => (years * ptsPerYear) + (months * ptsPerMonth);
         const getDurationMonths = (s, prefix) => (Number(s[`${prefix}_years`]) || 0) * 12 + (Number(s[`${prefix}_months`]) || 0);
+        const SERVICE_PERIODS = {
+            s1_1_1: '1.1.1 Permanencia en destino definitivo',
+            s1_1_2: '1.1.2 Provisionalidad',
+            s1_1_3: '1.1.3 Compensatoria y especial dificultad',
+            s4_1_director: '4.1 Dirección',
+            s4_2_vicedir: '4.2 Vicedirección / jefatura / secretaría',
+            s4_3_jefatura: '4.3 Jefatura de departamento',
+            s4_3_coordinacion: '4.3 Coordinación de ciclo / EOE / CEP',
+            s4_3_tutoria: '4.3 Tutoría'
+        };
+        const SERVICE_COUNTS = {
+            s6_2_coord_plan_igualdad_years: '6.2 Coordinación del Plan de Igualdad',
+            s6_2_coord_proyectos_years: '6.2 Coordinación de proyectos',
+            s6_2_part_proyectos_years: '6.2 Participación en proyectos',
+            s6_5_tribunales: '6.5 Convocatorias de tribunales',
+            s6_6_tutor_master_grado: '6.6 Cursos de tutorización de máster/grado',
+            s6_6_tutor_aspirantes: '6.6 Cursos de tutorización de funcionario/a en prácticas'
+        };
+        const getCareerServiceMonths = (s) => {
+            if (s.seniorityWizard?.status === 'practice') return 0;
+            const bodyMonths = getDurationMonths(s, 's1_2_1');
+            const careerMonths = completeMonthsSince(s.seniorityWizard?.careerStartDate);
+            return Math.min(bodyMonths, careerMonths === null ? bodyMonths : careerMonths);
+        };
+        const getServicePeriodLimit = (s, prefix) => {
+            const bodyMonths = getDurationMonths(s, 's1_2_1');
+            const status = s.seniorityWizard?.status;
+            if (prefix.startsWith('s1_1_')) {
+                const careerMonths = getCareerServiceMonths(s);
+                if (prefix === 's1_1_1') return status === 'provisional' ? 0 : careerMonths;
+                if (prefix === 's1_1_2') return status === 'definitive' ? 0 : careerMonths;
+                const centreMonths = status === 'definitive' ? getDurationMonths(s, 's1_1_1')
+                    : status === 'provisional' ? getDurationMonths(s, 's1_1_2')
+                    : Math.max(getDurationMonths(s, 's1_1_1'), getDurationMonths(s, 's1_1_2'));
+                return Math.min(careerMonths, centreMonths);
+            }
+            return prefix === 's4_3_tutoria' ? Math.min(bodyMonths, MAX_TUTORING_MONTHS) : bodyMonths;
+        };
+        const needsTutorHistoryQuestion = (s, cutoff, careerOnly = false) => {
+            if (careerOnly && s.seniorityWizard?.status === 'practice') return false;
+            const start = careerOnly ? s.seniorityWizard?.careerStartDate : s.seniorityWizard?.bodyStartDate;
+            return !parseSeniorityDate(start) || completeMonthsSince(start) === null || start < cutoff;
+        };
+        const getServiceCountLimit = (s, name) => Math.min(
+            Math.floor((name === 's6_6_tutor_aspirantes' ? getCareerServiceMonths(s) : getDurationMonths(s, 's1_2_1')) / 12),
+            name === 's6_6_tutor_aspirantes' ? 3 : Infinity
+        );
+        const getLimitedMeritState = (s) => {
+            const limited = { ...s };
+            Object.keys(SERVICE_PERIODS).forEach(prefix => {
+                const months = Math.min(getDurationMonths(s, prefix), getServicePeriodLimit(s, prefix));
+                limited[`${prefix}_years`] = Math.floor(months / 12);
+                limited[`${prefix}_months`] = months % 12;
+            });
+            Object.keys(SERVICE_COUNTS).forEach(name => {
+                limited[name] = Math.min(Math.floor(Number(s[name]) || 0), getServiceCountLimit(s, name));
+            });
+            return limited;
+        };
         const section11ExceedsBodyService = (s) => {
-            const bodyServiceMonths = getDurationMonths(s, 's1_2_1');
-            return ['s1_1_1', 's1_1_2', 's1_1_3'].some(prefix => getDurationMonths(s, prefix) > bodyServiceMonths);
+            return ['s1_1_1', 's1_1_2', 's1_1_3'].some(prefix => getDurationMonths(s, prefix) > getServicePeriodLimit(s, prefix));
         };
         const formatQuantity = (value, singular, plural) => `${formatDecimal(value)} ${value === 1 ? singular : plural}`;
         const formatMeritQuantity = (value, singular, plural) => `${value === 1 ? singular : plural} (${formatDecimal(value)})`;
         const formatDuration = (years, months) => `${formatQuantity(years, 'año', 'años')} y ${formatQuantity(months, 'mes', 'meses')}`;
         const calcTutor43 = (s) => {
-            const months = Math.min((s.s4_3_tutoria_years * 12) + s.s4_3_tutoria_months, MAX_TUTORING_MONTHS);
+            const months = Math.min(getDurationMonths(s, 's4_3_tutoria'), getServicePeriodLimit(s, 's4_3_tutoria'));
             return calcTime(Math.floor(months / 12), months % 12, 1.5, 0.1250);
         };
         const PTS_IDIOMA = { B1: 1, B2: 2, C1: 3, C2: 4 };
@@ -1381,6 +1508,7 @@
         const formatDecimal = (value) => String(value).replace('.', ',');
 
         const calc111 = (s) => {
+            s = getLimitedMeritState(s);
             let y = s.s1_1_1_years, m = s.s1_1_1_months;
             y += Math.floor(m / 12); m %= 12;
             let pts = 0;
@@ -1396,7 +1524,7 @@
                 const key = (l.idioma || '').trim().toLowerCase();
                 const normalizedName = normalizeLanguageName(key);
                 const normalizedKey = normalizedName === 'griego moderno' ? 'griego' : normalizedName;
-                if (!key || isSpanishLanguage(key)) return;
+                if (!key || isSpanishLanguage(key) || !PTS_IDIOMA[l.nivel]) return;
                 let level = l.nivel;
                 let certificate = '';
                 if (l.origen === 'ACLES') {
@@ -1417,9 +1545,12 @@
         }
 
         const Calculators = {
-            calc11: (s) => calc111(s) +
+            calc11: (s) => {
+                s = getLimitedMeritState(s);
+                return calc111(s) +
                            calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333) +
-                           calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333),
+                           calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333);
+            },
             calc12: (s) => calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666) +
                            calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250) +
                            calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625),
@@ -1439,14 +1570,23 @@
                 return eoi + (PTS_IDIOMA[s.s3_3_dlse] || 0) + (s.s3_3_titulo_arte * 2.0) + (s.s3_3_titulo_musica * 2.0);
             },
             section3: (s) => Math.min(Calculators.calc31(s) + Calculators.calc32(s) + Calculators.calc33(s), 10.0),
-            calc41: (s) => calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750),
-            calc42: (s) => calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500),
-            calc43: (s) => Math.min(
-                calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250) +
-                calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250) +
-                calcTutor43(s),
-                10.0
-            ),
+            calc41: (s) => {
+                s = getLimitedMeritState(s);
+                return calcTime(s.s4_1_director_years, s.s4_1_director_months, 4.5, 0.3750);
+            },
+            calc42: (s) => {
+                s = getLimitedMeritState(s);
+                return calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500);
+            },
+            calc43: (s) => {
+                s = getLimitedMeritState(s);
+                return Math.min(
+                    calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250) +
+                    calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250) +
+                    calcTutor43(s),
+                    10.0
+                );
+            },
             section4: (s) => Math.min(Calculators.calc41(s) + Calculators.calc42(s) + Calculators.calc43(s), 30.0),
             calc51: (s) => Math.min(Math.floor(s.s5_1_horas / 10) * 0.1, 9.0),
             calc52: (s) => Math.min(Math.floor(s.s5_2_horas / 3) * 0.1, 3.0),
@@ -1475,6 +1615,7 @@
                 return Math.min(pts, 8.0);
             },
             calc62: (s) => {
+                s = getLimitedMeritState(s);
                 let pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
                           (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
                           (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1) +
@@ -1494,8 +1635,11 @@
                 2.5
             ),
             calc64: (s) => calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125),
-            calc65: (s) => s.s6_5_tribunales * 0.5,
-            calc66: (s) => (s.s6_6_tutor_master_grado * 0.1) + (Math.min(s.s6_6_tutor_aspirantes, 3) * 0.2),
+            calc65: (s) => getLimitedMeritState(s).s6_5_tribunales * 0.5,
+            calc66: (s) => {
+                s = getLimitedMeritState(s);
+                return (s.s6_6_tutor_master_grado * 0.1) + (s.s6_6_tutor_aspirantes * 0.2);
+            },
             section6: (s) => Math.min(Calculators.calc61(s) + Calculators.calc62(s) + Calculators.calc63(s) + Calculators.calc64(s) + Calculators.calc65(s) + Calculators.calc66(s), 15.0),
             total: (s) => Calculators.section1(s) + Calculators.section2(s) + Calculators.section3(s) + Calculators.section4(s) + Calculators.section5(s) + Calculators.section6(s)
         };
@@ -1530,7 +1674,7 @@
 
         const SectionTitle = (title, ptsId, maxPoints = null, currentPoints = 0) => `
             <div class="mb-4">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-wrap gap-2 justify-between items-center">
                     <h2 class="text-xl font-bold text-primary dark:text-emerald-400 border-b-2 border-primary/20 pb-2">${title}</h2>
                     <span class="text-2xl font-bold text-primary dark:text-emerald-400 score-value" id="${ptsId}">0,0000 ptos.</span>
                 </div>
@@ -1553,9 +1697,9 @@
         }
 
         const SubTitle = (title, ptsId, tooltipText = '', maxPoints = null, currentPoints = 0) => `
-            <h3 class="text-lg font-semibold text-secondary dark:text-gray-200 mt-6 ${maxPoints !== null ? 'mb-0' : 'mb-3'} flex justify-between items-end border-b border-gray-100 dark:border-gray-700 pb-1">
-                <div class="flex items-center">${title}${tooltipText ? `<div class="tooltip-container">${Icons.help}<span class="tooltip-text">${tooltipText}</span></div>` : ''}</div>
-                ${ptsId ? `<span class="text-sm font-bold text-primary dark:text-emerald-400 bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded score-value" id="${ptsId}">0,0000 ptos.</span>` : ''}
+            <h3 class="text-lg font-semibold text-secondary dark:text-gray-200 mt-6 ${maxPoints !== null ? 'mb-0' : 'mb-3'} flex flex-wrap gap-2 justify-between items-end border-b border-gray-100 dark:border-gray-700 pb-1">
+                <div class="flex items-center min-w-0">${title}${tooltipText ? `<div class="tooltip-container">${Icons.help}<span class="tooltip-text">${tooltipText}</span></div>` : ''}</div>
+                ${ptsId ? `<span class="shrink-0 text-sm font-bold text-primary dark:text-emerald-400 bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded score-value" id="${ptsId}">0,0000 ptos.</span>` : ''}
             </h3>
             ${maxPoints !== null ? ProgressBar(title, ptsId, maxPoints, currentPoints) : ''}`;
 
@@ -1564,11 +1708,12 @@
         const NumInput = (label, name, step=1, max=999, className="flex-col", disabled=false) => {
             const decimalInput = step === 'any';
             return `
-            <div class="flex ${className}">
+            <div class="flex min-w-0 ${className}">
                 ${label ? `<label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${label}</label>` : ''}
                 <input type="${decimalInput ? 'text' : 'number'}" name="${name}" ${decimalInput ? 'inputmode="decimal" autocomplete="off"' : `min="0" max="${max}" step="${step}"`} value="${state[name] || 0}" ${disabled ? 'disabled' : ''}
                     class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800 dark:disabled:text-gray-400"
                     oninput="handleInput(this)">
+                ${SERVICE_COUNTS[name] ? `<p data-service-count="${name}" class="${Number(state[name]) > getServiceCountLimit(state, name) ? '' : 'hidden'} mt-2 text-sm text-gray-600 dark:text-gray-300" aria-live="polite">${getServiceCountNotice(state, name)}</p>` : ''}
             </div>`;
         };
 
@@ -1584,25 +1729,27 @@
             </div>`;
         };
 
-        const section4ExceedsOtherBodyService = (s, yearsName, monthsName) => {
-            const enteredMonths = (Number(s[yearsName]) || 0) * 12 + (Number(s[monthsName]) || 0);
-            const ref = yearsName.startsWith('s4_3_tutoria') ? 's1_2_1' : 's1_2_2';
-            const otherBodyMonths = (Number(s[ref + '_years']) || 0) * 12 + (Number(s[ref + '_months']) || 0);
-            return enteredMonths > otherBodyMonths;
+        const getServiceCountNotice = (s, name) => {
+            const limit = getServiceCountLimit(s, name);
+            const exceeded = Number(s[name]) > limit;
+            return `${exceeded ? 'Revisa la cifra: el exceso no se suma. ' : ''}Máximo computable: ${limit} ${name === 's6_5_tribunales' ? 'convocatorias' : 'cursos'}, con referencia a los años completos de 1.2.1${name === 's6_6_tutor_aspirantes' ? ', solo como funcionario/a de carrera, y al máximo de 3 cursos desde 2023/24' : ''}.`;
         };
-        const OtherBodyServiceWarning = (id, yearsName, monthsName) => `
-            <p id="${id}" class="${section4ExceedsOtherBodyService(state, yearsName, monthsName) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
-                Revisa las cifras: este periodo no puede superar el total de servicios en ${yearsName.startsWith('s4_3_tutoria') ? 'el mismo cuerpo (1.2.1)' : 'otros cuerpos (1.2.2)'}.
-            </p>`;
-        const YMInput = (label, yName, mName, disabled=false, warning='') => `
+        const getServicePeriodNotice = (s, prefix) => {
+            const months = getServicePeriodLimit(s, prefix);
+            return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. La referencia es ${prefix === 's4_3_tutoria' ? 'la que has escrito en el 1.2.1' : '1.2.1'}${prefix.startsWith('s1_1_') ? ', solo como funcionario/a de carrera y según tu situación; en 1.1.3, también el periodo de 1.1.1 o 1.1.2 que corresponda' : ''}${prefix === 's4_3_tutoria' ? ', sin superar el tiempo transcurrido desde septiembre de 2007' : ''}.`;
+        };
+        const YMInput = (label, yName, mName, disabled=false) => {
+            const prefix = yName.replace(/_years$/, '');
+            return `
             <div class="${disabled ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-white dark:bg-gray-800'} p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mb-4">
                 <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">${label}</label>
                 <div class="flex gap-4">
                     ${NumInput('Años', yName, 1, 99, 'flex-1 flex-col', disabled)}
                     ${NumInput('Meses', mName, 1, 11, 'flex-1 flex-col', disabled)}
                 </div>
-                ${warning}
+                ${SERVICE_PERIODS[prefix] ? `<p data-service-period="${prefix}" class="${getDurationMonths(state, prefix) > getServicePeriodLimit(state, prefix) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">${getServicePeriodNotice(state, prefix)}</p>` : ''}
             </div>`;
+        };
 
         const Checkbox = (label, name) => `
             <label class="flex items-center mt-4 mb-2 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer">
@@ -1631,10 +1778,11 @@
                     </select>
                     ${origin === 'EOI'
                         ? `<select aria-label="Nivel del certificado EOI" onchange="updateIdioma(${l._idx}, 'nivel', this.value)" class="sm:col-span-4 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
-                            <option value="B1" ${l.nivel==='B1'?'selected':''}>3.3 d) B1 (1 pto.)</option>
-                            <option value="B2" ${l.nivel==='B2'?'selected':''}>3.3 c) B2 (2 ptos.)</option>
-                            <option value="C1" ${l.nivel==='C1'?'selected':''}>3.3 b) C1 (3 ptos.)</option>
-                            <option value="C2" ${l.nivel==='C2'?'selected':''}>3.3 a) C2 (4 ptos.)</option>
+                            <option value="" ${!l.nivel ? 'selected' : ''}>Seleccionar nivel...</option>
+                            <option value="B1" ${l.nivel==='B1'?'selected':''}>B1 (1 pto.)</option>
+                            <option value="B2" ${l.nivel==='B2'?'selected':''}>B2 (2 ptos.)</option>
+                            <option value="C1" ${l.nivel==='C1'?'selected':''}>C1 (3 ptos.)</option>
+                            <option value="C2" ${l.nivel==='C2'?'selected':''}>C2 (4 ptos.)</option>
                         </select>`
                         : `<select aria-label="Nivel del certificado ACLES" onchange="updateIdioma(${l._idx}, 'nivelFiltro', this.value)" class="sm:col-span-2 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary outline-none">
                             <option value="">Nivel...</option>
@@ -1664,7 +1812,7 @@
         }
         function addIdiomaForOrigin(origin) {
             if (!Array.isArray(state.idiomas)) state.idiomas = [];
-            state.idiomas.push({ idioma: '', nivel: origin === 'EOI' ? 'B1' : '', nivelFiltro: '', certificado: '', origen: origin });
+            state.idiomas.push({ idioma: '', nivel: '', nivelFiltro: '', certificado: '', origen: origin });
             saveState(); renderMainContent(); updateCalculations();
         }
         function setLanguageMode(section, mode) {
@@ -1753,24 +1901,25 @@
                             <svg id="warning-chevron" class="w-4 h-4 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <div id="warning-content" class="px-4 pb-4 hidden">
-                            <p class="mb-2"><strong>Solo cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste.</p>
+                            <p class="mb-2"><strong>Si tienes destino definitivo, solo cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste. Si estás en provisionalidad, indica el periodo correspondiente como funcionario/a de carrera.</p>
                             <ul class="list-disc list-inside space-y-1 ml-1 mb-2">
                                 <li><strong>Tienes destino definitivo ahora</strong> → rellena solo <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino.</li>
                                 <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → deja 1.1.1 en blanco y rellena solo <strong>1.1.2</strong>.</li>
                                 <li><strong>Eres funcionario/a en prácticas</strong> → deja <strong>todo el 1.1 en blanco</strong>; tu antigüedad va íntegra al <strong>1.2</strong>.</li>
-                                <li><strong>1.1.3</strong> (especial dificultad) se suma siempre al 1.1.1 o al 1.1.2, según corresponda.</li>
+                                <li><strong>1.1.3</strong> (especial dificultad) se añade al 1.1.1 o al 1.1.2, según corresponda, solo por servicios como funcionario/a de carrera; no cuenta prácticas ni interinidad.</li>
                             </ul>
                             <p class="text-xs italic mt-2 pt-2 border-t border-blue-200 dark:border-blue-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
                         </div>
                     </div>
                     ${YMInput('1.1.1 Permanencia ininterrumpida (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_1_years', 's1_1_1_months', ['provisional', 'practice'].includes(state.seniorityWizard.status))}
                     ${YMInput('1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', ['definitive', 'practice'].includes(state.seniorityWizard.status))}
-                    ${YMInput('1.1.3 Compensatoria y especial dificultad (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_3_years', 's1_1_3_months')}
+                    ${YMInput(`1.1.3 Compensatoria y especial dificultad (${state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
+                    ${InfoBox('En 1.1.1, 1.1.2 y 1.1.3 solo cuentan servicios como <strong>funcionario/a de carrera</strong>: no incluyas prácticas ni interinidad.')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
                     ${InfoBox('En <strong>1.2.1</strong> se computan todos los servicios en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas, Religión...).')}
                     ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
-                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: el tiempo indicado en 1.1.1, 1.1.2 o 1.1.3 no puede superar el total de servicios en el mismo cuerpo de 1.2.1.</p>
+                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios como funcionario/a de carrera, sin superar 1.2.1. En 1.1.3 tampoco se puede superar el periodo correspondiente de 1.1.1 o 1.1.2. Los excesos no se suman.</p>
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
                     ${YMInput('1.2.3 Otros cuerpos (subgrupo inferior)', 's1_2_3_years', 's1_2_3_months')}
                 </div>`;
@@ -1818,7 +1967,7 @@
                         ${renderLanguageManagerForOrigin('EOI')}
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4">
-                        <label for="s3_3_dlse" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3.3 e) Diploma de Lengua de Signos Española (DLSE)</label>
+                        <label for="s3_3_dlse" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Diploma de Lengua de Signos Española (DLSE)</label>
                         <select id="s3_3_dlse" name="s3_3_dlse" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="none" ${state.s3_3_dlse === 'none' ? 'selected' : ''}>Seleccionar nivel...</option>
                             <option value="B1" ${state.s3_3_dlse === 'B1' ? 'selected' : ''}>B1 en Lengua de Signos Española (LSE) (1,0000 ptos.)</option>
@@ -1831,27 +1980,28 @@
                         </p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4 space-y-3">
-                        ${NumInput('3.3 g) Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
-                        ${NumInput('3.3 f) Títulos de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior o Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
+                        ${NumInput('Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
+                        ${NumInput('Títulos de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior o Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
                     </div>
                 </div>`;
         }
 
         function renderSection4() {
+            const askTutorHistory = needsTutorHistoryQuestion(state, '2007-09-01');
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('4. Cargos directivos (máx. 30)', 'score-s4', 30, Calculators.section4(state))}
                     ${InfoBox('No se pueden acumular ptos. por el desempeño simultáneo de varios cargos. Se valora el más ventajoso.')}
                     ${SubTitle('4.1 Dirección', 'score-s41', 'Director/a de centros públicos, CEP, Agrupaciones de Lengua y Culturas, primer responsable de CEP.')}
-                    ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months', false, OtherBodyServiceWarning('s4-1-other-body-warning', 's4_1_director_years', 's4_1_director_months'))}
+                    ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months')}
                     ${SubTitle('4.2 Vicedirección, jefatura, secretaría...', 'score-s42')}
-                    ${YMInput('Vicedirección, subdirección, secretaría, jefatura de estudios...', 's4_2_vicedir_years', 's4_2_vicedir_months', false, OtherBodyServiceWarning('s4-2-other-body-warning', 's4_2_vicedir_years', 's4_2_vicedir_months'))}
+                    ${YMInput('Vicedirección, subdirección, secretaría, jefatura de estudios...', 's4_2_vicedir_years', 's4_2_vicedir_months')}
                     ${SubTitle('4.3 Coordinación y otras funciones (máx. 10)', 'score-s43', 'Coordinación de ciclo, asesoría CEP, jefatura de departamento, coordinación didáctica, EOE, tutoría desde LOE 2006 (a partir del 1/9/2007).', 10, Calculators.calc43(state))}
                     ${InfoBox('<strong>Importante:</strong> si desempeñaste varios cargos o funciones a la vez, ten en cuenta que la Junta cuenta solo el subapartado que más te beneficie. Los periodos que no coinciden en 4.3 (jefatura, coordinación de ciclo, tutoría) sí se pueden sumar.')}
                     <div class="space-y-4">
-                        ${YMInput('Jefatura de departamento', 's4_3_jefatura_years', 's4_3_jefatura_months', false, OtherBodyServiceWarning('s4-3-jefatura-other-body-warning', 's4_3_jefatura_years', 's4_3_jefatura_months'))}
-                        ${YMInput('Coordinación de ciclo / EOE / CEP', 's4_3_coordinacion_years', 's4_3_coordinacion_months', false, OtherBodyServiceWarning('s4-3-coordinacion-other-body-warning', 's4_3_coordinacion_years', 's4_3_coordinacion_months'))}
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                        ${YMInput('Jefatura de departamento', 's4_3_jefatura_years', 's4_3_jefatura_months')}
+                        ${YMInput('Coordinación de ciclo / EOE / CEP', 's4_3_coordinacion_years', 's4_3_coordinacion_months')}
+                        ${askTutorHistory ? `<div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
                             <p class="block text-sm font-medium text-gray-700 dark:text-gray-300">¿Realizaste funciones de tutoría antes del 1/09/2007?</p>
                             <div class="grid grid-cols-2 gap-2" role="group" aria-label="Funciones de tutoría anteriores al 1 de septiembre de 2007">
                                 ${['si', 'no'].map(value => {
@@ -1867,7 +2017,12 @@
                                 <span><strong>¡Atención!</strong> La función tutorial solo se valora a partir del 1 de septiembre de 2007. Las tutorías anteriores a esa fecha no puntúan, según el <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline">baremo de la Resolución de 23 de octubre de 2026</a>.</span>
                             </div>
                             </div>
-                            ${YMInput('Tutoría (desde el 1/09/2007)', 's4_3_tutoria_years', 's4_3_tutoria_months', state.s4_3_tutoria_antes_2007 === '', OtherBodyServiceWarning('s4-3-tutoria-other-body-warning', 's4_3_tutoria_years', 's4_3_tutoria_months'))}
+                            ` : ''}
+                            ${YMInput(`Tutoría (desde el 1/09/2007)
+                                <span class="tooltip-container">
+                                    <button type="button" aria-label="Por qué la tutoría se valora desde el 1 de septiembre de 2007" aria-describedby="tutoring-start-info" class="inline-flex items-center justify-center relative top-0.5 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">${Icons.help}</button>
+                                    <span id="tutoring-start-info" role="tooltip" class="tooltip-text">El BOJA establece expresamente en la disposición complementaria tercera, punto 4: «La función tutorial se valorará solo a partir del 1 de septiembre de 2007». Las tutorías anteriores no puntúan en 4.3.</span>
+                                </span>`, 's4_3_tutoria_years', 's4_3_tutoria_months', askTutorHistory && state.s4_3_tutoria_antes_2007 === '')}
                             <p id="s4-3-tutoria-warning" class="${(state.s4_3_tutoria_years * 12 + state.s4_3_tutoria_months) > MAX_TUTORING_MONTHS ? '' : 'hidden'} text-sm font-medium text-red-600 dark:text-red-400" role="alert">Solo han transcurrido 19 años y 2 meses de cursos académicos desde septiembre de 2007/08 hasta octubre de 2026/27, ambos inclusive. Revisa la cifra.</p>
                         </div>
                     </div>
@@ -1897,12 +2052,12 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nivel acreditado</label>
                         <select name="s5_4_competencia_digital" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="none" ${state.s5_4_competencia_digital === 'none' ? 'selected' : ''}>Seleccionar nivel de CDD...</option>
-                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>5.4 a) A1 de CDD (0,5 ptos.)</option>
-                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>5.4 b) A2 de CDD (1,0 ptos.)</option>
-                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>5.4 c) B1 de CDD (1,5 ptos.)</option>
-                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>5.4 d) B2 de CDD (2,0 ptos.)</option>
-                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>5.4 e) C1 de CDD (2,5 ptos.)</option>
-                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>5.4 f) C2 de CDD (3,0 ptos.)</option>
+                            <option value="A1" ${state.s5_4_competencia_digital === 'A1' ? 'selected' : ''}>A1 de CDD (0,5 ptos.)</option>
+                            <option value="A2" ${state.s5_4_competencia_digital === 'A2' ? 'selected' : ''}>A2 de CDD (1,0 ptos.)</option>
+                            <option value="B1" ${state.s5_4_competencia_digital === 'B1' ? 'selected' : ''}>B1 de CDD (1,5 ptos.)</option>
+                            <option value="B2" ${state.s5_4_competencia_digital === 'B2' ? 'selected' : ''}>B2 de CDD (2,0 ptos.)</option>
+                            <option value="C1" ${state.s5_4_competencia_digital === 'C1' ? 'selected' : ''}>C1 de CDD (2,5 ptos.)</option>
+                            <option value="C2" ${state.s5_4_competencia_digital === 'C2' ? 'selected' : ''}>C2 de CDD (3,0 ptos.)</option>
                         </select>
                     </div>
                     ${SubTitle('5.5 Idiomas acreditados por ACLES', 'score-s55', 'Cambridge, Trinity, Alliance Française... Excluye EOI (va en 3.3).')}
@@ -1925,6 +2080,8 @@
         }
 
         function renderSection6() {
+            const askPracticeTutorHistory = needsTutorHistoryQuestion(state, '2023-09-01', true);
+            const isPractice = state.seniorityWizard.status === 'practice';
             const GridInputSmall = (name, pts) => `
                 <div class="flex flex-col items-center">
                     ${NumInput('', name, 'any', 99, 'w-full mb-0')}
@@ -2053,9 +2210,9 @@
                         ${NumInput('Cursos tutorizando prácticas de máster o grado (0,1 ptos. cada año, independientemente del n.º de alumnos tutorizados simultáneamente)', 's6_6_tutor_master_grado')}
                         </div>
                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
-                        <div>
-                            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">¿Tutorizaste a funcionariado aspirante en cursos anteriores a 2023/24?</p>
-                            <div class="grid grid-cols-2 gap-2" role="group" aria-label="Tutorización de aspirantes antes del curso 2023/24">
+                        ${askPracticeTutorHistory ? `<div>
+                            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">¿Tutorizaste a <strong>funcionario/a en prácticas</strong> en cursos anteriores a 2023/24?</p>
+                            <div class="grid grid-cols-2 gap-2" role="group" aria-label="Tutorización de funcionario/a en prácticas antes del curso 2023/24">
                                 ${['si', 'no'].map(value => {
                                     const active = state.s6_6_tutor_aspirantes_anteriores === value;
                                     const classes = active
@@ -2066,17 +2223,39 @@
                             </div>
                         </div>
                         <div class="${state.s6_6_tutor_aspirantes_anteriores === 'si' ? '' : 'hidden'} rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
-                            <strong>¡Atención!</strong> La tutorización de funcionarios/as en prácticas solo cuenta desde el curso 2023/2024, inclusive. Las tutorizaciones de prácticas anteriores no son reconocidas por el baremo de la <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Resolución de 23 de octubre de 2026</a>.
+                            <strong>¡Atención!</strong> La tutorización de funcionario/a en prácticas solo cuenta desde el curso 2023/2024, inclusive. Las tutorizaciones de prácticas anteriores no son reconocidas por el baremo de la <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Resolución de 23 de octubre de 2026</a>.
                         </div>
-                        ${NumInput('Cursos tutorizando fase de prácticas de funcionarios/as en prácticas (0,2 ptos. cada curso desde 2023/24, independientemente del n.º de personas tutorizadas simultáneamente)', 's6_6_tutor_aspirantes', 1, 999, 'flex-col', state.s6_6_tutor_aspirantes_anteriores === '')}
+                        ` : ''}
+                        ${isPractice ? '<p class="text-sm text-gray-600 dark:text-gray-300">La tutorización de funcionario/a en prácticas requiere ser funcionario/a de carrera. Este mérito no computa si actualmente estás en prácticas.</p>' : ''}
+                        ${NumInput('Cursos tutorizando a funcionario/a en prácticas (0,2 ptos. cada curso desde 2023/24, independientemente del n.º de personas tutorizadas simultáneamente)', 's6_6_tutor_aspirantes', 1, 999, 'flex-col', isPractice || (askPracticeTutorHistory && state.s6_6_tutor_aspirantes_anteriores === ''))}
                         <p id="s6-6-tutor-aspirantes-warning" class="${state.s6_6_tutor_aspirantes > 3 ? '' : 'hidden'} text-sm font-medium text-red-600 dark:text-red-400" role="alert">Solo han transcurrido 3 cursos académicos desde 2023/24 (23/24, 24/25 y 25/26). Revisa la cifra.</p>
                         </div>
                     </div>
                 </div>`;
         }
 
+        function renderServiceLimitSummary() {
+            const notices = [];
+            Object.entries(SERVICE_PERIODS).forEach(([prefix, label]) => {
+                if (getDurationMonths(state, prefix) > getServicePeriodLimit(state, prefix)) {
+                    notices.push(`${label}: ${getServicePeriodNotice(state, prefix)}`);
+                }
+            });
+            Object.entries(SERVICE_COUNTS).forEach(([name, label]) => {
+                if (Number(state[name]) > getServiceCountLimit(state, name)) {
+                    notices.push(`${label}: ${getServiceCountNotice(state, name)}`);
+                }
+            });
+            if (!notices.length) return '';
+            return `<div class="merit-limit-notice mb-4 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
+                <p class="font-bold mb-2">Se han limitado méritos para mantener la coherencia con tu antigüedad.</p>
+                <ul class="list-disc pl-4 space-y-2">${notices.map(notice => `<li>${notice}</li>`).join('')}</ul>
+                <p class="mt-2">Los datos introducidos se conservan para que puedas revisarlos. El desglose muestra las cantidades computadas, no los excesos.</p>
+            </div>`;
+        }
+
         function renderBreakdown() {
-            const s = state;
+            const s = getLimitedMeritState(state);
             const blocks = [];
             const push = (arr, label, pts) => { if (pts > 0.00005) arr.push({ label, pts }); };
             const addBlock = (title, rows, max, total) => blocks.push({ title, rows, max, total });
@@ -2121,8 +2300,8 @@
             push(b4, `4.2 Vicedirección / jefatura / secretaría (${formatDuration(s.s4_2_vicedir_years, s.s4_2_vicedir_months)})`, calcTime(s.s4_2_vicedir_years, s.s4_2_vicedir_months, 3.0, 0.2500));
             push(b4, `4.3 Jefatura de departamento (${formatDuration(s.s4_3_jefatura_years, s.s4_3_jefatura_months)})`, calcTime(s.s4_3_jefatura_years, s.s4_3_jefatura_months, 1.5, 0.1250));
             push(b4, `4.3 Coordinación de ciclo / EOE / CEP (${formatDuration(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months)})`, calcTime(s.s4_3_coordinacion_years, s.s4_3_coordinacion_months, 1.5, 0.1250));
-            const maxTutor43Years = Math.floor(MAX_TUTORING_MONTHS / 12);
-            const maxTutor43Months = MAX_TUTORING_MONTHS % 12;
+            const maxTutor43Years = Math.floor(getServicePeriodLimit(state, 's4_3_tutoria') / 12);
+            const maxTutor43Months = getServicePeriodLimit(state, 's4_3_tutoria') % 12;
             push(b4, `4.3 Tutoría desde LOE 2006 (${formatDuration(s.s4_3_tutoria_years, s.s4_3_tutoria_months)}; máximo computable: ${formatDuration(maxTutor43Years, maxTutor43Months)})`, calcTutor43(s));
             addBlock('4. Cargos directivos', b4, 30.0, Calculators.section4(s));
 
@@ -2181,7 +2360,7 @@
             push(b6, `6.4 Puestos en la administración (${formatDuration(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months)})`, calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125));
             push(b6, `6.5 Tribunales (${formatQuantity(s.s6_5_tribunales, 'convocatoria', 'convocatorias')})`, s.s6_5_tribunales * 0.5);
             push(b6, `6.6 Tutorización máster/grado (${formatQuantity(s.s6_6_tutor_master_grado, 'curso', 'cursos')})`, s.s6_6_tutor_master_grado * 0.1);
-            push(b6, `6.6 Tutorización fase aspirantes (${formatQuantity(s.s6_6_tutor_aspirantes, 'curso', 'cursos')}; máximo computable: 3 cursos)`, Math.min(s.s6_6_tutor_aspirantes, 3) * 0.2);
+            push(b6, `6.6 Tutorización de funcionario/a en prácticas (${formatQuantity(s.s6_6_tutor_aspirantes, 'curso', 'cursos')}; máximo computable: ${getServiceCountLimit(state, 's6_6_tutor_aspirantes')} cursos)`, s.s6_6_tutor_aspirantes * 0.2);
             addBlock('6. Otros méritos', b6, 15.0, Calculators.section6(s));
 
             return `
@@ -2257,7 +2436,7 @@
                                 <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                 <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
                             </div>` : ''}
-                            <table class="w-full text-left border-collapse">
+                            <table class="w-full text-left border-collapse print-summary-table">
                                 <thead>
                                     <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider print-summary-table-heading">
                                         <th class="py-3">Apartado</th>
@@ -2283,6 +2462,15 @@
                         </div>
                     </div>
                     ${renderBreakdown()}
+                    ${renderServiceLimitSummary()}
+                    <div class="simulation-notice mt-6 rounded-r border-l-4 border-orange-500 bg-orange-50 p-4 text-sm text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" role="note">
+                        <p class="font-bold mb-1">AVISO IMPORTANTE · SIMULACIÓN NO OFICIAL</p>
+                        <p>Esta puntuación es simbólica, indicativa y orientativa: no es una baremación oficial ni garantiza la puntuación que reconocerá la Administración. Los autores no se responsabilizan de errores. Comprueba los requisitos y justificantes en el <a href="https://www.juntadeandalucia.es/boja/2026/210/16" target="_blank" rel="noopener noreferrer" class="font-semibold underline">baremo del BOJA</a>. La valoración definitiva corresponde a la comisión baremadora.</p>
+                    </div>
+                    <div class="claims-notice no-print mt-3 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200 break-inside-avoid" role="note">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v5m0-8h.01"/></svg>
+                        <p>Ante la posibilidad de que no se bareme un mérito, existe un plazo (tras la publicación de la adjudicación provisional) para presentar reclamaciones y renuncias.</p>
+                    </div>
                     <div class="mt-6 flex justify-center gap-3 no-print flex-wrap">
                         <button id="summary-print-button" onclick="printReport()" class="bg-secondary hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
@@ -2309,6 +2497,7 @@
 
         function closeLanding() {
             document.getElementById('landing-page').classList.add('hidden');
+            document.documentElement.classList.remove('landing-open');
             document.getElementById('app-container').classList.remove('opacity-0');
             window.scrollTo({ top: 0, behavior: 'instant' });
         }
@@ -2323,17 +2512,23 @@
             const wrapper = document.getElementById('tabs-scroll-wrapper');
             if (wrapper) wrapper.scrollBy({ left: direction * Math.max(wrapper.clientWidth * 0.65, 140), behavior: 'smooth' });
         }
-        function updateSection4OtherBodyServiceWarnings() {
-            const fields = [
-                ['s4-1-other-body-warning', 's4_1_director_years', 's4_1_director_months'],
-                ['s4-2-other-body-warning', 's4_2_vicedir_years', 's4_2_vicedir_months'],
-                ['s4-3-jefatura-other-body-warning', 's4_3_jefatura_years', 's4_3_jefatura_months'],
-                ['s4-3-coordinacion-other-body-warning', 's4_3_coordinacion_years', 's4_3_coordinacion_months'],
-                ['s4-3-tutoria-other-body-warning', 's4_3_tutoria_years', 's4_3_tutoria_months']
-            ];
-            fields.forEach(([id, yearsName, monthsName]) => {
-                const warning = document.getElementById(id);
-                if (warning) warning.classList.toggle('hidden', !section4ExceedsOtherBodyService(state, yearsName, monthsName));
+        function updateServiceLimitWarnings() {
+            document.querySelectorAll('[data-service-period]').forEach(warning => {
+                const prefix = warning.dataset.servicePeriod;
+                warning.textContent = getServicePeriodNotice(state, prefix);
+                warning.classList.toggle('hidden', getDurationMonths(state, prefix) <= getServicePeriodLimit(state, prefix));
+            });
+            document.querySelectorAll('[data-service-count]').forEach(notice => {
+                const name = notice.dataset.serviceCount;
+                const exceeded = Number(state[name]) > getServiceCountLimit(state, name);
+                notice.textContent = getServiceCountNotice(state, name);
+                notice.classList.toggle('hidden', !exceeded);
+                notice.classList.toggle('text-red-600', exceeded);
+                notice.classList.toggle('dark:text-red-400', exceeded);
+                notice.classList.toggle('text-gray-600', !exceeded);
+                notice.classList.toggle('dark:text-gray-300', !exceeded);
+                const input = document.querySelector(`input[name="${name}"]`);
+                if (input) input.max = getServiceCountLimit(state, name);
             });
         }
         function handleInput(element) {
@@ -2345,9 +2540,6 @@
             if (numeric && value < 0) { value = 0; element.value = 0; }
             if (name.endsWith('_months') && element.type === 'number' && value > 11) { value = 11; element.value = 11; }
             state[name] = value;
-            if (name.startsWith('s1_2_1_') || name === 's1_2_2_years' || name === 's1_2_2_months' || name.startsWith('s4_')) {
-                updateSection4OtherBodyServiceWarnings();
-            }
             if (['s1_1_1_years', 's1_1_1_months', 's1_1_2_years', 's1_1_2_months', 's1_1_3_years', 's1_1_3_months', 's1_2_1_years', 's1_2_1_months'].includes(name)) {
                 const warning = document.getElementById('s1-1-body-service-warning');
                 if (warning) warning.classList.toggle('hidden', !section11ExceedsBodyService(state));
@@ -2378,6 +2570,7 @@
         }
         function handleCheck(element) { state[element.name] = element.checked; saveState(); updateCalculations(); }
         function updateCalculations() {
+            updateServiceLimitWarnings();
             const h = document.getElementById('header-total-score');
             const isPractice = state.seniorityWizard.status === 'practice';
             const headerNote = document.getElementById('header-total-note');

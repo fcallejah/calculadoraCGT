@@ -19,6 +19,13 @@ Esta versión 2026 es una actualización de [MaestroRafa](https://github.com/rbu
 *   **⚖️ Bug del 6.2 solucionado:** se ha corregido el error que permitía superar el tope máximo de **2,5 ptos.** en premios y proyectos. Se ha aplicado un `Math.min` estricto en todos los apartados para garantizar que nunca se sobrepasen los límites legales.
 *   **📊 Desglose del 4.3 (coordinación):** se ha dividido la caja genérica en **tres apartados independientes** (jefatura de departamento, coordinación de ciclo/EOE/CEP y tutoría LOE), cada uno con su propia caja de años/meses.
 *   **👩‍🏫 Tutorización (6.6) diferenciada:** máster/grado (0,1 pto./curso) frente a fase de aspirantes (0,2 ptos./curso), con un aviso para los cursos anteriores a 2023/24.
+*   **Controles de coherencia con 1.2.1:** los periodos de 4.1, 4.2 y 4.3 no superan los servicios del mismo cuerpo. Los cursos de proyectos de 6.2, las convocatorias de 6.5 y los cursos de 6.6 se limitan, como control de esta calculadora, a los años completos de 1.2.1; esto no convierte las convocatorias o cursos del BOJA en méritos por año de servicio. Se mantienen los topes de puntos y de tutorización desde 2023/24.
+*   **Especial dificultad (1.1.3):** solo computa servicios como funcionario/a de carrera, dentro del periodo de destino definitivo o provisionalidad que corresponda y sin superar 1.2.1. En prácticas, todo 1.1 queda deshabilitado y no puntúa. Si se completó el cuestionario, también se utiliza la fecha de nombramiento de carrera para excluir prácticas e interinidad; si se rellena manualmente, deben excluirse esos periodos.
+*   **Datos y desglose:** los excesos se conservan para su revisión, con avisos explícitos, pero no se suman. El desglose y el PDF muestran las cantidades efectivamente computadas. El resumen y la impresión incluyen un aviso de simulación no oficial.
+
+### Comprobaciones locales
+
+Sin instalar dependencias, ejecutar `python3 -m http.server 8011 --bind 127.0.0.1` y abrir `http://127.0.0.1:8011/tests/calculator.html`. Las pruebas ejercitan la aplicación real: niveles EOI/ACLES, límites, situaciones del cuestionario, avisos, desglose y anchos móviles de 320 a 430 píxeles. La página de pruebas no guarda cambios en los datos de la calculadora.
 
 ### 🧙‍♂️ 3. El nuevo cuestionario de Antigüedad
 Se ha pasado de tener simples cajas de texto a un **asistente interactivo (Wizard)** de varios pasos:

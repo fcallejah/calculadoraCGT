@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pruebas de la calculadora</title>
+</head>
+<body>
+    <h1>Pruebas de la calculadora</h1>
+    <pre id="results" aria-live="polite">Ejecutando...</pre>
+    <iframe id="calculator" title="Calculadora de prueba" style="width: 375px; height: 740px; border: 0"></iframe>
+    <script>
+        const results = [];
+        const assert = (condition, message) => { if (!condition) throw new Error(message); };
+        const near = (actual, expected) => assert(Math.abs(actual - expected) < 0.000001, `${actual} != ${expected}`);
+        const test = async (name, check) => {
+            try {
+                await check();
+                results.push({ name, passed: true });
+            } catch (error) {
+                results.push({ name, passed: false, error: error.message });
+            }
+        };
+        const frame = document.getElementById('calculator');
+        frame.onload = async () => {
+            const app = frame.contentWindow;
+            const api = app.eval(`({
+                INITIAL_STATE, Calculators, SERVICE_PERIODS, SERVICE_COUNTS, ACLES_CERTIFICATES,
+                getLimitedMeritState, getServiceCountLimit, getIdiomasBreakdown,
+                renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderSummary, renderBreakdown,
+                renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
+                renderSeniorityWizardStep, applySeniorityWizard,
+                getState: () => state,
+                setState: value => { state = value; },
+                disableSaving: () => { saveState = () => {}; }
+            })`);
+            api.disableSaving();
+            const fresh = (overrides = {}) => ({ ...structuredClone(api.INITIAL_STATE), ...overrides });
+            const parsed = html => {
+                const element = app.document.createElement('div');
+                element.innerHTML = html;
+                return element;
+            };
+            await test('Bienvenida bloquea el fondo y permite leer la tarjeta en pantallas bajas', () => {
+                const root = app.document.documentElement;
+                const card = app.document.querySelector('#landing-page > .landing-card');
+                assert(app.getComputedStyle(root).overflowY === 'hidden', 'El fondo se desplaza');
+                frame.style.height = '400px';
+                assert(card.getBoundingClientRect().top >= 0, 'Se corta el inicio de la tarjeta');
+                assert(card.getBoundingClientRect().bottom <= app.innerHeight, 'Se corta el final de la tarjeta');
+                assert(app.getComputedStyle(card).overflowY === 'auto', 'La tarjeta no permite desplazarse');
+                app.closeLanding();
+                assert(!root.classList.contains('landing-open'), 'El bloqueo persiste al entrar');
+                assert(app.getComputedStyle(root).overflowY !== 'hidden', 'No se restaura el scroll');
+                frame.style.height = '740px';
+            });
+            await test('Estado inicial sin puntos', () => near(api.Calculators.total(fresh()), 0));
+            await test('Preguntas de tutoria adaptadas a las fechas y a la condicion de carrera', () => {
+                for (const [bodyStartDate, careerStartDate, ask4, ask6] of [
+                    ['', '', true, true],
+                    ['2007-08-31', '2023-08-31', true, true],
+                    ['2007-09-01', '2023-09-01', false, false],
+                    ['2020-09-01', '2024-09-01', false, false]
+                ]) {
+                    api.setState(fresh({ seniorityWizard: { status: 'provisional', bodyStartDate, careerStartDate } }));
+                    const section4 = parsed(api.renderSection4());
+                    const section6 = parsed(api.renderSection6());
+                    assert(!!section4.querySelector('[aria-label="Funciones de tutoría anteriores al 1 de septiembre de 2007"]') === ask4, 'Pregunta 2007 incorrecta');
+                    assert(!!section6.querySelector('[aria-label="Tutorización de funcionario/a en prácticas antes del curso 2023/24"]') === ask6, 'Pregunta 2023 incorrecta');
+                    assert(section4.querySelector('[name="s4_3_tutoria_years"]').disabled === ask4, 'Campo 4.3 incorrecto');
+                    assert(section6.querySelector('[name="s6_6_tutor_aspirantes"]').disabled === ask6, 'Campo 6.6 incorrecto');
+                }
+                const s = fresh({ s1_2_1_years: 20, s6_6_tutor_aspirantes: 3, seniorityWizard: { status: 'practice' } });
+                api.setState(s);
+                assert(parsed(api.renderSection6()).querySelector('[name="s6_6_tutor_aspirantes"]').disabled, 'En practicas puede tutorizar');
+                near(api.Calculators.calc66(s), 0);
+                s.seniorityWizard = { status: 'provisional', careerStartDate: '2025-09-01' };
+                near(api.Calculators.calc66(s), 0.2);
+            });
+            await test('EOI no selecciona B1 ni puntua sin elegir nivel', () => {
+                api.setState(fresh({ lang33Mode: 'eoi' }));
+                app.switchTab(3);
+                api.addIdiomaForOrigin('EOI');
+                assert(api.getState().idiomas[0].nivel === '', 'Nivel inicial no vacio');
+                api.updateIdioma(0, 'idioma', 'Inglés');
+                const select = app.document.querySelector('[aria-label="Nivel del certificado EOI"]');
+                assert(select.value === '', 'Selector con nivel preseleccionado');
+                near(api.Calculators.calc33(api.getState()), 0);
+                api.updateIdioma(0, 'nivel', 'C1');
+                near(api.Calculators.calc33(api.getState()), 3);
+                api.updateIdioma(0, 'nivel', '');
+                near(api.Calculators.calc33(api.getState()), 0);
+            });
+            await test('Conserva niveles EOI guardados y mayor nivel por idioma', () => {
+                const s = fresh({ idiomas: [
+                    { idioma: 'Inglés', nivel: 'B1', origen: 'EOI' },
+                    { idioma: 'Inglés', nivel: 'C2', origen: 'EOI' },
+                    { idioma: 'Francés', nivel: '', origen: 'EOI' }
+                ] });
+                near(api.Calculators.calc33(s), 4);
+            });
+            await test('ACLES sigue requiriendo un certificado reconocido', () => {
+                const [certificado, nivel] = api.ACLES_CERTIFICATES.Inglés.find(([, level]) => level === 'B2');
+                const s = fresh({ idiomas: [{ idioma: 'Inglés', nivel, certificado, origen: 'ACLES' }] });
+                near(api.Calculators.calc55(s), 2);
+                s.idiomas[0].certificado = '';
+                near(api.Calculators.calc55(s), 0);
+            });
+            await test('Letras solo en desglose, no en formularios de 3.3 y 5.4', () => {
+                api.setState(fresh({
+                    lang33Mode: 'eoi', s5_4_competencia_digital: 'C2',
+                    idiomas: [{ idioma: 'Inglés', nivel: 'B1', origen: 'EOI' }]
+                }));
+                assert(!/3\.3 [a-g]\)/.test(api.renderSection3()), 'Letras visibles en 3.3');
+                assert(!/5\.4 [a-f]\)/.test(api.renderSection5()), 'Letras visibles en 5.4');
+                assert(api.renderBreakdown().includes('3.3 d)'), 'Falta letra EOI en desglose');
+                assert(api.renderBreakdown().includes('5.4 f)'), 'Falta letra CDD en desglose');
+            });
+            await test('Todos los periodos del 4 dependen solo de 1.2.1', () => {
+                const s = fresh({ s1_2_1_years: 2, s1_2_1_months: 2, s1_2_2_years: 99 });
+                Object.keys(api.SERVICE_PERIODS).filter(p => p.startsWith('s4_')).forEach(p => { s[`${p}_years`] = 9; });
+                const limited = api.getLimitedMeritState(s);
+                Object.keys(api.SERVICE_PERIODS).filter(p => p.startsWith('s4_')).forEach(p => {
+                    assert(limited[`${p}_years`] === 2 && limited[`${p}_months`] === 2, `Limite incorrecto: ${p}`);
+                });
+                near(api.Calculators.calc41(s), 9.75);
+                near(api.Calculators.calc42(s), 6.5);
+                near(api.Calculators.calc43(s), 9.75);
+                s.s1_2_2_years = 0;
+                near(api.Calculators.calc41(s), 9.75);
+                assert(s.s4_1_director_years === 9, 'Se borraron los datos introducidos');
+            });
+            await test('6.2, 6.5 y 6.6 usan anos completos y mantienen topes', () => {
+                const s = fresh({ s1_2_1_years: 2, s1_2_1_months: 11 });
+                Object.keys(api.SERVICE_COUNTS).forEach(name => { s[name] = 9; });
+                const limited = api.getLimitedMeritState(s);
+                Object.keys(api.SERVICE_COUNTS).forEach(name => assert(limited[name] === 2, name));
+                near(api.Calculators.calc62(s), 2.5);
+                near(api.Calculators.calc65(s), 1);
+                near(api.Calculators.calc66(s), 0.6);
+                s.s1_2_1_years = 10;
+                assert(api.getServiceCountLimit(s, 's6_6_tutor_aspirantes') === 3, 'Supera 3 cursos');
+            });
+            await test('Sin servicios de 1.2.1 no se computan periodos o cursos dependientes', () => {
+                const s = fresh({ s1_2_2_years: 99 });
+                Object.keys(api.SERVICE_PERIODS).forEach(p => { s[`${p}_years`] = 9; });
+                Object.keys(api.SERVICE_COUNTS).forEach(name => { s[name] = 9; });
+                near(api.Calculators.calc11(s), 0);
+                near(api.Calculators.section4(s), 0);
+                near(api.Calculators.calc62(s), 0);
+                near(api.Calculators.calc65(s), 0);
+                near(api.Calculators.calc66(s), 0);
+            });
+            await test('Meses sueltos no completan un ano y se mantiene el tope de tutoria de 2007', () => {
+                const s = fresh({ s1_2_1_months: 11, s6_6_tutor_master_grado: 1 });
+                near(api.Calculators.calc66(s), 0);
+                s.s1_2_1_years = 1;
+                near(api.Calculators.calc66(s), 0.1);
+                s.s1_2_1_years = 40;
+                s.s4_3_tutoria_years = 30;
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s4_3_tutoria_years === 19 && limited.s4_3_tutoria_months === 2, 'No conserva el tope de 2007');
+            });
+            await test('No limita premios o proyectos de investigacion por antiguedad', () => {
+                const s = fresh({ s6_2_intl_1: 1, s6_2_investigacion_projects: 2 });
+                near(api.Calculators.calc62(s), 1.9);
+            });
+            await test('1.1 excluye practicas e interinidad cuando se conoce el nombramiento', () => {
+                const s = fresh({
+                    s1_2_1_years: 20, s1_1_1_years: 20, s1_1_2_years: 20, s1_1_3_years: 20,
+                    seniorityWizard: { status: 'definitive', careerStartDate: '2025-09-01' }
+                });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_1_years === 1 && limited.s1_1_1_months === 2, 'Incluye servicios anteriores a carrera');
+                assert(limited.s1_1_2_years === 0, 'Computa provisionalidad con destino definitivo');
+                assert(limited.s1_1_3_years === 1 && limited.s1_1_3_months === 2, 'Compensatoria supera carrera');
+            });
+            await test('Compensatoria provisional permitida pero limitada por 1.1.2', () => {
+                const s = fresh({
+                    s1_2_1_years: 20, s1_1_2_years: 2, s1_1_2_months: 3, s1_1_3_years: 9,
+                    seniorityWizard: { status: 'provisional', careerStartDate: '2020-09-01' }
+                });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_3_years === 2 && limited.s1_1_3_months === 3, 'No limita a provisionalidad');
+                api.setState(s);
+                const input = parsed(api.renderSection1()).querySelector('[name="s1_1_3_years"]');
+                assert(!input.disabled, 'Compensatoria provisional deshabilitada');
+            });
+            await test('Funcionario/a en practicas: todo 1.1 a cero, incluso datos antiguos', () => {
+                const s = fresh({
+                    s1_2_1_years: 9, s1_1_1_years: 9, s1_1_2_years: 9, s1_1_3_years: 9,
+                    seniorityWizard: { status: 'practice' }
+                });
+                near(api.Calculators.calc11(s), 0);
+                api.setState(s);
+                const input = parsed(api.renderSection1()).querySelector('[name="s1_1_3_years"]');
+                assert(input.disabled, 'Compensatoria en practicas habilitada');
+            });
+            await test('Cuestionario adapta la pregunta de compensatoria a las tres situaciones', () => {
+                for (const status of ['definitive', 'provisional', 'practice']) {
+                    app.document.getElementById('wizard-status').value = status;
+                    api.renderSeniorityWizardStep();
+                    const title = app.document.getElementById('wizard-hardship-title').textContent;
+                    assert(title.includes(status === 'definitive' ? 'último destino definitivo' : status === 'provisional' ? 'provisionalidad' : 'prácticas'), title);
+                    assert(app.document.getElementById('wizard-hardship-years').disabled === (status === 'practice'), 'Estado incorrecto del campo');
+                }
+            });
+            await test('Paso de compensatoria provisional destaca solo el contexto y actualiza la fecha', () => {
+                app.document.getElementById('wizard-status').value = 'provisional';
+                const date = app.document.getElementById('wizard-career-start');
+                const title = app.document.getElementById('wizard-hardship-title');
+                for (const value of ['2020-09-01', '2022-09-01', '']) {
+                    date.value = value;
+                    api.renderSeniorityWizardStep();
+                    const strong = title.querySelector('strong');
+                    assert(strong && title.querySelectorAll('strong').length === 1, 'Falta el contexto destacado');
+                    assert(title.classList.contains('font-normal'), 'Todo el titulo sigue en negrita');
+                    assert(strong.textContent.startsWith('solo durante tu actual provisionalidad'), 'Contexto incorrecto');
+                    if (value) assert(strong.textContent.includes(value === '2020-09-01' ? '01/09/2020' : '01/09/2022'), 'Fecha desactualizada');
+                    else assert(strong.textContent.includes('paso 2'), 'Falta indicacion cuando no hay fecha');
+                }
+            });
+            await test('Cambiar de paso enfoca el titulo sin activar campos de texto', () => {
+                api.setState(fresh());
+                frame.style.width = '320px';
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'provisional';
+                const dialog = app.document.getElementById('seniority-wizard');
+                for (let step = 0; step < 7; step++) {
+                    app.document.getElementById('wizard-hardship-years').focus();
+                    dialog.dataset.stepIndex = String(step);
+                    api.renderSeniorityWizardStep();
+                    assert(app.document.activeElement.tagName === 'H3', 'Se enfoca un campo en vez del titulo');
+                    assert(!app.document.activeElement.closest('.hidden'), 'Se enfoca un paso oculto');
+                }
+                app.closeSeniorityWizard();
+            });
+            await test('Aviso de exceso y puntuacion se actualizan sin borrar la entrada', () => {
+                api.setState(fresh({ s1_2_1_years: 2 }));
+                app.switchTab(6);
+                const input = app.document.querySelector('[name="s6_5_tribunales"]');
+                const notice = app.document.querySelector('[data-service-count="s6_5_tribunales"]');
+                assert(notice.classList.contains('hidden'), 'Aviso visible sin exceso');
+                input.value = '5';
+                api.handleInput(input);
+                assert(api.getState().s6_5_tribunales === 5, 'Entrada borrada');
+                assert(notice.classList.contains('text-red-600'), 'No muestra aviso rojo');
+                assert(!notice.classList.contains('hidden'), 'Aviso oculto con exceso');
+                near(api.Calculators.calc65(api.getState()), 1);
+                input.value = '2';
+                api.handleInput(input);
+                assert(notice.classList.contains('hidden'), 'Aviso visible al corregir el exceso');
+            });
+            await test('Resumen e impresion muestran disclaimer y cantidades efectivamente computadas', () => {
+                api.setState(fresh({ s1_2_1_years: 2, s4_1_director_years: 9, s6_6_tutor_aspirantes: 9 }));
+                const summary = parsed(api.renderSummary());
+                assert(summary.querySelector('.simulation-notice'), 'Falta aviso de simulacion');
+                assert(!summary.querySelector('.simulation-notice').classList.contains('no-print'), 'Aviso oculto al imprimir');
+                assert(api.renderServiceLimitSummary().includes('4.1 Dirección'), 'Falta explicacion del limite');
+                assert(parsed(api.renderBreakdown()).textContent.includes('Dirección (2 años y 0 meses)'), 'Desglose incluye exceso');
+                assert(api.renderBreakdown().includes('funcionario/a en prácticas'), 'Terminologia no uniforme');
+            });
+            await test('La caja de ayuda intercepta los toques sobre botones situados debajo', async () => {
+                api.setState(fresh({ s4_3_tutoria_antes_2007: 'no' }));
+                frame.style.width = '375px';
+                app.closeLanding();
+                app.switchTab(4);
+                const trigger = app.document.querySelector('[aria-describedby="tutoring-start-info"]');
+                trigger.focus();
+                await new Promise(resolve => setTimeout(resolve, 350));
+                const tooltip = app.document.getElementById('tutoring-start-info');
+                const bounds = tooltip.getBoundingClientRect();
+                const button = app.document.createElement('button');
+                let clicked = false;
+                button.onclick = () => { clicked = true; };
+                button.style.cssText = `position:fixed;left:${bounds.left}px;top:${bounds.top}px;width:${bounds.width}px;height:${bounds.height}px`;
+                app.document.getElementById('main-content').append(button);
+                try {
+                    const target = app.document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+                    assert(target === tooltip || tooltip.contains(target), `El toque atraviesa la ayuda: ${target?.outerHTML.slice(0, 180)}, ${app.getComputedStyle(tooltip).visibility}, ${app.getComputedStyle(tooltip).pointerEvents}`);
+                    target.click();
+                    assert(!clicked, 'Se activa el boton inferior');
+                } finally {
+                    button.remove();
+                    trigger.blur();
+                }
+            });
+            await test('Primera y ultima pestana quedan fuera de las flechas en movil', () => {
+                frame.style.width = '375px';
+                for (const tab of [1, 7]) {
+                    app.switchTab(tab);
+                    const active = app.document.getElementById(`tab-${tab}`).getBoundingClientRect();
+                    const left = app.document.getElementById('tabs-scroll-left').getBoundingClientRect();
+                    const right = app.document.getElementById('tabs-scroll-right').getBoundingClientRect();
+                    assert(active.left >= left.right - 1, 'La flecha izquierda tapa la pestana');
+                    assert(active.right <= right.left + 1, 'La flecha derecha tapa la pestana');
+                }
+            });
+            await test('Sin desbordamiento en todas las pestanas, modos y cambios de ancho', async () => {
+                api.setState(fresh({
+                    s1_2_1_years: 40, s1_1_1_years: 40, s3_1_1_doctor: 99,
+                    lang33Mode: 'eoi', lang55Mode: 'other', s5_4_competencia_digital: 'C2',
+                    idiomas: [
+                        { idioma: 'Inglés', nivel: 'C2', origen: 'EOI' },
+                        { idioma: 'Francés', nivel: '', origen: 'ACLES' }
+                    ]
+                }));
+                app.closeLanding();
+                for (const width of [320, 360, 375, 390, 430, 640, 768, 1024, 320]) {
+                    frame.style.width = `${width}px`;
+                    for (const dark of [false, true]) {
+                      app.document.documentElement.classList.toggle('dark', dark);
+                      for (let tab = 1; tab <= 7; tab++) {
+                        app.switchTab(tab);
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        const root = app.document.documentElement;
+                        assert(root.scrollWidth <= root.clientWidth, `${width}px, pestana ${tab}, oscuro=${dark}: ${root.scrollWidth}px > ${root.clientWidth}px`);
+                      }
+                    }
+                }
+            });
+            window.testResults = results;
+            document.body.dataset.testStatus = results.every(r => r.passed) ? 'passed' : 'failed';
+            document.getElementById('results').textContent = results.map(r => `${r.passed ? 'PASS' : 'FAIL'} ${r.name}${r.error ? ': ' + r.error : ''}`).join('\n');
+        };
+        frame.src = '../index.html?calculator-tests';
+    </script>
+</body>
+</html>
