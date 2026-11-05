@@ -1931,6 +1931,10 @@
                     ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2', 5, Calculators.section2(state))}
                     ${InfoBox('Pertenencia a los Cuerpos de Catedráticos de Enseñanza Secundaria, Música y Artes Escénicas, EOI y Artes Plásticas y Diseño.')}
                     ${Checkbox('Soy funcionario/a de carrera del Cuerpo de Catedráticos (5 ptos.)', 's2_catedratico')}
+                    <div id="catedraticos-eligibility-warning" class="${state.s2_catedratico && getCareerServiceMonths(state) < 96 ? '' : 'hidden'} mt-3 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>El acceso al Cuerpo de Catedráticos exige al menos <strong>8 años de antigüedad como funcionario/a de carrera</strong>. Es un procedimiento independiente del concurso de traslados y la convocatoria de 2026 finalizó el <strong>13 de octubre de 2026</strong>. <a href="https://www.juntadeandalucia.es/educacion/portales/web/educacion/w/acceso-a-catedras-2026-procedimiento" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Consulta la información oficial del procedimiento<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.</span>
+                    </div>
                 </div>`;
         }
 
@@ -2571,6 +2575,10 @@
         function handleCheck(element) { state[element.name] = element.checked; saveState(); updateCalculations(); }
         function updateCalculations() {
             updateServiceLimitWarnings();
+            const catedraticosWarning = document.getElementById('catedraticos-eligibility-warning');
+            if (catedraticosWarning) {
+                catedraticosWarning.classList.toggle('hidden', !state.s2_catedratico || getCareerServiceMonths(state) >= 96);
+            }
             const h = document.getElementById('header-total-score');
             const isPractice = state.seniorityWizard.status === 'practice';
             const headerNote = document.getElementById('header-total-note');
@@ -2719,12 +2727,22 @@
             if (activeTabId === 1 || activeTabId === 7) {
                 c.insertAdjacentHTML('beforeend', renderCreditsFooter());
             }
+            randomizeWavePhases(c);
+        }
+
+        function randomizeWavePhases(root = document) {
+            root.querySelectorAll('.landing-wave, .summary-wave, .credits-wave').forEach(wave => {
+                const duration = Number.parseFloat(getComputedStyle(wave).animationDuration);
+                if (!Number.isFinite(duration) || duration <= 0) return;
+                wave.style.animationDelay = `${-Math.random() * duration}s`;
+            });
         }
 
         applyTheme();
         loadState();
         renderNavigation();
         renderMainContent();
+        randomizeWavePhases(document.getElementById('landing-page'));
         updateCalculations();
     </script>
     <script>

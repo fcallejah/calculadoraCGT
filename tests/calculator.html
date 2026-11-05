@@ -30,6 +30,7 @@
                 renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderSummary, renderBreakdown,
                 renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
                 renderSeniorityWizardStep, applySeniorityWizard,
+                randomizeWavePhases,
                 getState: () => state,
                 setState: value => { state = value; },
                 disableSaving: () => { saveState = () => {}; }
@@ -55,6 +56,46 @@
                 frame.style.height = '740px';
             });
             await test('Estado inicial sin puntos', () => near(api.Calculators.total(fresh()), 0));
+            await test('Fase de todas las olas vuelve a aleatorizarse entre cargas', () => {
+                api.setState(fresh());
+                app.switchTab(1);
+                app.switchTab(7);
+                const waves = [...app.document.querySelectorAll('.landing-wave, .summary-wave, .credits-wave')];
+                assert(waves.length >= 12, `Olas insuficientes: ${waves.length}`);
+                const originalRandom = app.Math.random;
+                try {
+                    app.Math.random = () => 0.1;
+                    api.randomizeWavePhases();
+                    const firstPhases = waves.map(wave => wave.style.animationDelay);
+                    app.Math.random = () => 0.8;
+                    api.randomizeWavePhases();
+                    const secondPhases = waves.map(wave => wave.style.animationDelay);
+                    assert(firstPhases.every((phase, index) => phase !== secondPhases[index]), 'La fase no cambia');
+                    assert(waves.every(wave => Number.parseFloat(wave.style.animationDelay) < 0), 'Fase aleatoria no negativa');
+                } finally {
+                    app.Math.random = originalRandom;
+                }
+            });
+            await test('Aviso de acceso a catedraticos depende de los 8 anos de carrera', () => {
+                for (const [serviceYears, careerStartDate, shouldWarn] of [
+                    [7, '', true],
+                    [8, '', false],
+                    [20, '2019-11-26', true],
+                    [20, '2018-11-26', false]
+                ]) {
+                    api.setState(fresh({
+                        s2_catedratico: true,
+                        s1_2_1_years: serviceYears,
+                        seniorityWizard: { status: careerStartDate ? 'definitive' : '', careerStartDate }
+                    }));
+                    const section2 = parsed(app.renderSection2());
+                    const warning = section2.querySelector('#catedraticos-eligibility-warning');
+                    assert(warning.classList.contains('hidden') !== shouldWarn, 'Aviso no coincide con los años de carrera');
+                    if (shouldWarn) assert(section2.querySelector('#catedraticos-eligibility-warning a').href.includes('/acceso-a-catedras-2026-procedimiento'), 'Falta enlace oficial');
+                }
+                api.setState(fresh({ s2_catedratico: true, s1_2_1_years: 20, seniorityWizard: { status: 'practice' } }));
+                assert(parsed(app.renderSection2()).querySelector('#catedraticos-eligibility-warning'), 'No advierte en prácticas');
+            });
             await test('Preguntas de tutoria adaptadas a las fechas y a la condicion de carrera', () => {
                 for (const [bodyStartDate, careerStartDate, ask4, ask6] of [
                     ['', '', true, true],
