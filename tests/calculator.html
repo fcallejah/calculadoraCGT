@@ -26,7 +26,7 @@
             const app = frame.contentWindow;
             const api = app.eval(`({
                 INITIAL_STATE, Calculators, SERVICE_PERIODS, SERVICE_COUNTS, ACLES_CERTIFICATES,
-                getLimitedMeritState, getServiceCountLimit, getIdiomasBreakdown,
+                getLimitedMeritState, getServiceCountLimit, getIdiomasBreakdown, completeMonthsBetween,
                 renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderSummary, renderBreakdown,
                 renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
                 renderSeniorityWizardStep, applySeniorityWizard,
@@ -206,6 +206,51 @@
                 const s = fresh({ s6_2_intl_1: 1, s6_2_investigacion_projects: 2 });
                 near(api.Calculators.calc62(s), 1.9);
             });
+            await test('Formulario 6.2.a agrupa premios e investigacion y 6.2.b agrupa planes educativos', () => {
+                api.setState(fresh({ s6_2_investigacion_projects: 2 }));
+                const section = parsed(api.renderSection6());
+                const headings = [...section.querySelectorAll('h4')];
+                const groupA = headings.find(heading => heading.textContent.startsWith('6.2.a '))?.parentElement;
+                const groupB = headings.find(heading => heading.textContent.startsWith('6.2.b '))?.parentElement;
+                assert(groupA && groupB, 'Faltan los dos subapartados oficiales');
+                const research = groupA.querySelector('[name="s6_2_investigacion_projects"]');
+                assert(research && research.value === '2', 'No muestra la participacion en investigacion guardada');
+                assert(!research.disabled && !groupB.contains(research), 'La investigacion no corresponde al 6.2.a');
+                assert(groupA.querySelector('[name="s6_2_intl_1"]'), 'Premios fuera del 6.2.a');
+                for (const name of ['s6_2_coord_plan_igualdad_years', 's6_2_coord_proyectos_years', 's6_2_part_proyectos_years']) {
+                    assert(groupB.querySelector(`[name="${name}"]`), `${name} fuera del 6.2.b`);
+                }
+            });
+            await test('Investigacion en 6.2.a actualiza la puntuacion y aparece en el desglose y PDF', () => {
+                api.setState(fresh());
+                app.switchTab(6);
+                const input = app.document.querySelector('[name="s6_2_investigacion_projects"]');
+                input.value = '2';
+                api.handleInput(input);
+                near(api.Calculators.calc62(api.getState()), 0.4);
+                assert(app.document.getElementById('score-s62').textContent.includes('0,4000'), 'Puntuacion de 6.2 desactualizada');
+                const breakdown = parsed(api.renderBreakdown()).textContent;
+                assert(breakdown.includes('6.2.a Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el desglose');
+                assert(breakdown.includes('0,4000'), 'Valor incorrecto en el desglose');
+                assert(parsed(api.renderSummary()).textContent.includes('6.2.a Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el informe imprimible');
+            });
+            await test('6.2.a y 6.2.b comparten el tope sin cambiar las puntuaciones existentes', () => {
+                const s = fresh({
+                    s1_2_1_years: 5, s6_2_auto_1: 1, s6_2_investigacion_projects: 2,
+                    s6_2_coord_proyectos_years: 1, s6_2_part_proyectos_years: 2
+                });
+                near(api.Calculators.calc62(s), 1.8);
+                api.setState(s);
+                const breakdown = parsed(api.renderBreakdown()).textContent;
+                for (const label of ['6.2.a Premio', '6.2.b Coordinación de otros proyectos', '6.2.b Participación en proyectos']) {
+                    assert(breakdown.includes(label), `Falta ${label}`);
+                }
+                s.s6_2_coord_plan_igualdad_years = 1;
+                near(api.Calculators.calc62(s), 2.5);
+                s.s6_2_investigacion_projects = 20;
+                near(api.Calculators.calc62(s), 2.5);
+                assert(s.s6_2_investigacion_projects === 20, 'Borra los meritos al alcanzar el tope');
+            });
             await test('1.1 excluye practicas e interinidad cuando se conoce el nombramiento', () => {
                 const s = fresh({
                     s1_2_1_years: 20, s1_1_1_years: 20, s1_1_2_years: 20, s1_1_3_years: 20,
@@ -213,8 +258,157 @@
                 });
                 const limited = api.getLimitedMeritState(s);
                 assert(limited.s1_1_1_years === 1 && limited.s1_1_1_months === 2, 'Incluye servicios anteriores a carrera');
-                assert(limited.s1_1_2_years === 0, 'Computa provisionalidad con destino definitivo');
+                assert(limited.s1_1_2_years === 0, 'Computa provisionalidad sin confirmar el supuesto del primer destino');
                 assert(limited.s1_1_3_years === 1 && limited.s1_1_3_months === 2, 'Compensatoria supera carrera');
+            });
+            await test('Primer definitivo voluntario suma provisionalidad anterior en calculo y desglose', () => {
+                const s = fresh({
+                    s1_2_1_years: 3, s1_2_1_months: 2,
+                    s1_1_1_years: 1, s1_1_1_months: 2,
+                    s1_1_2_years: 1, s1_1_3_years: 3,
+                    seniorityWizard: {
+                        status: 'definitive', firstDefinitiveParticipation: 'yes',
+                        careerStartDate: '2024-09-01', definitiveStartDate: '2025-09-01'
+                    }
+                });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_2_years === 1 && limited.s1_1_2_months === 0, 'No computa el año provisional anterior');
+                assert(limited.s1_1_3_years === 1 && limited.s1_1_3_months === 2, 'Recupera especial dificultad anterior al definitivo');
+                s.s1_1_3_years = 0;
+                near(api.Calculators.calc11(s), 8.6666);
+                api.setState(s);
+                const breakdown = parsed(api.renderBreakdown()).textContent;
+                assert(breakdown.includes('Provisionalidad anterior al primer destino definitivo (1 año y 0 meses)'), 'No identifica el periodo historico en el informe');
+                assert(breakdown.includes('4,0000'), 'No muestra los cuatro puntos historicos');
+                assert(!parsed(api.renderSection1()).querySelector('[name="s1_1_2_years"]').disabled, 'El periodo historico sigue deshabilitado');
+            });
+            await test('Provisionalidad anterior limitada por fechas y no por un maximo de dos años', () => {
+                const s = fresh({
+                    s1_2_1_years: 10, s1_1_1_years: 2, s1_1_1_months: 2, s1_1_2_years: 9,
+                    seniorityWizard: {
+                        status: 'definitive', firstDefinitiveParticipation: 'yes',
+                        careerStartDate: '2020-09-01', definitiveStartDate: '2024-09-01'
+                    }
+                });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_2_years === 4 && limited.s1_1_2_months === 0, 'No respeta los cuatro años anteriores');
+                assert(s.s1_1_2_years === 9, 'Borra el exceso introducido');
+                near(api.completeMonthsBetween('2024-09-15', '2025-09-01'), 11);
+                near(api.completeMonthsBetween('2024-09-01', '2025-09-01'), 12);
+                assert(api.completeMonthsBetween('2025-09-01', '2024-09-01') === null, 'Acepta un intervalo invertido');
+                api.setState(s);
+                const notice = parsed(api.renderSection1()).querySelector('[data-service-period="s1_1_2"]');
+                assert(!notice.classList.contains('hidden') && notice.textContent.includes('4 años y 0 meses'), 'Falta el aviso del limite historico');
+            });
+            await test('Sin fechas, la provisionalidad anterior no duplica los meses de 1.1.1', () => {
+                const s = fresh({
+                    s1_2_1_years: 4, s1_1_1_years: 2, s1_1_2_years: 3,
+                    seniorityWizard: { status: 'definitive', firstDefinitiveParticipation: 'yes' }
+                });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_2_years === 2, 'Duplica tiempo definitivo y provisional');
+                near(api.Calculators.calc11(s), 16);
+                assert(JSON.stringify(api.getLimitedMeritState(limited)) === JSON.stringify(limited), 'La limitacion cambia al aplicarla otra vez');
+            });
+            await test('Confirmacion manual del primer definitivo habilita 1.1.2 sin borrar las cifras', () => {
+                api.setState(fresh({
+                    s1_2_1_years: 4, s1_1_1_years: 2, s1_1_2_years: 1,
+                    seniorityWizard: { status: 'definitive', firstDefinitiveParticipation: '' }
+                }));
+                app.switchTab(1);
+                for (const answer of ['yes', 'no', '', 'yes']) {
+                    const select = app.document.getElementById('first-definitive-participation');
+                    select.value = answer;
+                    select.dispatchEvent(new app.Event('change', { bubbles: true }));
+                    const input = app.document.querySelector('[name="s1_1_2_years"]');
+                    assert(input.disabled === (answer !== 'yes'), 'Estado incorrecto del campo historico');
+                    assert(api.getState().s1_1_2_years === 1, 'Borra la cifra al cambiar la confirmacion');
+                    near(api.Calculators.calc11(api.getState()), answer === 'yes' ? 12 : 8);
+                }
+                app.openSeniorityWizard();
+                assert(app.document.getElementById('wizard-first-definitive').value === 'yes', 'Cuestionario no recupera confirmacion manual');
+                assert(app.document.getElementById('wizard-provisional-years').value === '1', 'Cuestionario no recupera duracion manual');
+                app.closeSeniorityWizard();
+            });
+            await test('Cuestionario recoge y recupera la provisionalidad anterior al primer definitivo', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'definitive';
+                app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
+                app.setWizardDateValue('wizard-practice-start', '2023-09-01');
+                app.setWizardDateValue('wizard-career-start', '2024-09-01');
+                app.setWizardDateValue('wizard-body-start', '2023-09-01');
+                const steps = app.getSeniorityWizardSteps();
+                const history = steps.find(step => step.querySelector('#wizard-first-definitive'));
+                assert(history && app.validateSeniorityWizardStep(history), 'Permite omitir la confirmacion del supuesto');
+                app.document.getElementById('wizard-first-definitive').value = 'yes';
+                app.toggleWizardProvisionalHistory();
+                assert(!app.document.getElementById('wizard-provisional-years').disabled, 'No habilita años historicos');
+                app.document.getElementById('wizard-provisional-years').value = '1';
+                app.document.getElementById('wizard-provisional-months').value = '0';
+                assert(!app.validateSeniorityWizardStep(history), 'Rechaza respuestas validas');
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(s.seniorityWizard.firstDefinitiveParticipation === 'yes', 'No guarda la confirmacion');
+                assert(s.s1_1_1_years === 1 && s.s1_1_1_months === 2, 'Altera la permanencia definitiva');
+                assert(s.s1_1_2_years === 1 && s.s1_1_2_months === 0, 'No guarda el periodo historico');
+                near(api.Calculators.calc11(s), 8.6666);
+                app.openSeniorityWizard();
+                assert(app.document.getElementById('wizard-first-definitive').value === 'yes', 'No recupera la confirmacion');
+                assert(app.document.getElementById('wizard-provisional-years').value === '1', 'No recupera los años');
+                app.document.getElementById('wizard-status').value = 'provisional';
+                assert(!app.getSeniorityWizardSteps().some(step => step.querySelector('#wizard-first-definitive')), 'Pregunta historica aparece estando provisional');
+                app.applySeniorityWizard();
+                assert(api.getState().s1_1_2_years === 2 && api.getState().s1_1_2_months === 2, 'No mantiene el calculo de la provisionalidad actual');
+                assert(api.getState().seniorityWizard.firstDefinitiveParticipation === '', 'Mantiene una confirmacion que ya no corresponde');
+                app.closeSeniorityWizard();
+            });
+            await test('Pregunta de provisionalidad anterior actualiza la fecha de carrera al volver al paso', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'definitive';
+                app.document.getElementById('wizard-first-definitive').value = 'yes';
+                app.toggleWizardProvisionalHistory();
+                const dialog = app.document.getElementById('seniority-wizard');
+                const historyIndex = app.getSeniorityWizardSteps().findIndex(step => step.querySelector('#wizard-first-definitive'));
+                for (const [date, expected] of [
+                    ['2024-09-01', 'el 01/09/2024'],
+                    ['2022-10-15', 'el 15/10/2022'],
+                    ['', 'tu nombramiento']
+                ]) {
+                    dialog.dataset.stepIndex = String(historyIndex - 1);
+                    api.renderSeniorityWizardStep();
+                    app.setWizardDateValue('wizard-career-start', date);
+                    dialog.dataset.stepIndex = String(historyIndex);
+                    api.renderSeniorityWizardStep();
+                    const question = app.document.getElementById('wizard-provisional-history-question');
+                    assert(question.textContent === `¿Cuánto tiempo estuviste en provisionalidad como funcionario/a de carrera desde ${expected} hasta obtener tu primer destino definitivo?`, 'Fecha o texto desactualizado');
+                    assert(!question.closest('[data-wizard-step]').classList.contains('hidden'), 'Pregunta oculta');
+                }
+                app.closeSeniorityWizard();
+            });
+            await test('Cuestionario rechaza meses invalidos y primer definitivo anterior a carrera', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'definitive';
+                app.document.getElementById('wizard-first-definitive').value = 'yes';
+                app.toggleWizardProvisionalHistory();
+                app.setWizardDateValue('wizard-definitive-start', '2024-09-01');
+                app.setWizardDateValue('wizard-practice-start', '2024-09-01');
+                app.setWizardDateValue('wizard-career-start', '2025-09-01');
+                const history = app.getSeniorityWizardSteps().find(step => step.querySelector('#wizard-first-definitive'));
+                assert(app.validateSeniorityWizardStep(history).includes('anterior'), 'Acepta definitivo anterior a carrera');
+                const before = JSON.stringify(api.getState());
+                app.applySeniorityWizard();
+                assert(JSON.stringify(api.getState()) === before, 'Aplica respuestas con fechas incoherentes');
+                assert(!app.document.getElementById('seniority-wizard-error').classList.contains('hidden'), 'Oculta el error');
+                app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
+                const months = app.document.getElementById('wizard-provisional-months');
+                for (const value of ['12', '-1', '1.5']) {
+                    months.value = value;
+                    assert(app.validateSeniorityWizardStep(history).includes('meses completos'), 'Acepta meses invalidos');
+                }
+                app.closeSeniorityWizard();
             });
             await test('Compensatoria provisional permitida pero limitada por 1.1.2', () => {
                 const s = fresh({
@@ -275,6 +469,154 @@
                     assert(!app.document.activeElement.closest('.hidden'), 'Se enfoca un paso oculto');
                 }
                 app.closeSeniorityWizard();
+            });
+            await test('Enter avanza una sola vez y aplica al final en las situaciones del cuestionario', () => {
+                for (const status of ['definitive', 'provisional', 'practice', 'other']) {
+                    api.setState(fresh());
+                    app.openSeniorityWizard();
+                    app.document.getElementById('wizard-status').value = status;
+                    app.setWizardDateValue('wizard-practice-start', '2023-09-01');
+                    app.setWizardDateValue('wizard-career-start', '2024-09-01');
+                    app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
+                    app.setWizardDateValue('wizard-practice-only-start', '2025-09-01');
+                    app.setWizardDateValue('wizard-body-start', '2023-09-01');
+                    app.document.getElementById('wizard-first-definitive').value = 'yes';
+                    app.toggleWizardProvisionalHistory();
+                    app.document.getElementById('wizard-provisional-years').value = '1';
+                    const dialog = app.document.getElementById('seniority-wizard');
+                    const steps = app.getSeniorityWizardSteps();
+                    api.renderSeniorityWizardStep();
+                    for (let index = 0; index < steps.length; index++) {
+                        assert(Number(dialog.dataset.stepIndex) === index, 'Enter omite un paso');
+                        const input = [...steps[index].querySelectorAll('input')]
+                            .find(element => !element.disabled && ['text', 'number'].includes(element.type));
+                        const target = input || steps[index].querySelector('h3');
+                        target.focus();
+                        const enter = new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+                        target.dispatchEvent(enter);
+                        assert(enter.defaultPrevented, 'No intercepta Enter en el campo o titulo');
+                        if (index < steps.length - 1) {
+                            assert(Number(dialog.dataset.stepIndex) === index + 1, 'Enter no avanza exactamente un paso');
+                            assert(!dialog.classList.contains('hidden'), 'Aplica antes del ultimo paso');
+                        } else {
+                            assert(dialog.classList.contains('hidden'), 'No aplica al pulsar Enter al final');
+                            assert(api.getState().seniorityWizard.status === status, 'No aplica las respuestas correctas');
+                        }
+                    }
+                }
+            });
+            await test('Enter respeta las validaciones y no altera las respuestas cuando hay errores', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                const dialog = app.document.getElementById('seniority-wizard');
+                const enter = target => target.dispatchEvent(new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+                api.renderSeniorityWizardStep();
+                enter(app.document.activeElement);
+                assert(dialog.dataset.stepIndex === '0', 'Avanza sin situacion actual');
+                assert(!app.document.getElementById('seniority-wizard-error').classList.contains('hidden'), 'No muestra el error de situacion');
+                app.document.getElementById('wizard-status').value = 'definitive';
+                app.setWizardDateValue('wizard-practice-start', '2023-09-01');
+                app.setWizardDateValue('wizard-career-start', '2024-09-01');
+                app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
+                app.setWizardDateValue('wizard-body-start', '2023-09-01');
+                dialog.dataset.stepIndex = '1';
+                api.renderSeniorityWizardStep();
+                const date = app.document.getElementById('wizard-definitive-start-text');
+                date.value = '31/02/2025';
+                app.syncWizardDateText(date);
+                enter(date);
+                assert(dialog.dataset.stepIndex === '1', 'Enter acepta una fecha invalida');
+                assert(!app.document.getElementById('seniority-wizard-error').classList.contains('hidden'), 'No muestra el error de fecha');
+                app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
+                const steps = app.getSeniorityWizardSteps();
+                const historyIndex = steps.findIndex(step => step.querySelector('#wizard-first-definitive'));
+                dialog.dataset.stepIndex = String(historyIndex);
+                api.renderSeniorityWizardStep();
+                enter(app.document.activeElement);
+                assert(Number(dialog.dataset.stepIndex) === historyIndex, 'Enter omite la confirmacion del primer definitivo');
+                app.document.getElementById('wizard-first-definitive').value = 'yes';
+                app.toggleWizardProvisionalHistory();
+                const months = app.document.getElementById('wizard-provisional-months');
+                months.value = '12';
+                enter(months);
+                assert(Number(dialog.dataset.stepIndex) === historyIndex, 'Enter acepta meses invalidos');
+                dialog.dataset.stepIndex = String(steps.length - 1);
+                api.renderSeniorityWizardStep();
+                const before = JSON.stringify(api.getState());
+                enter(app.document.getElementById('wizard-other-lower-years'));
+                assert(!dialog.classList.contains('hidden'), 'Enter cierra el cuestionario con respuestas invalidas');
+                assert(JSON.stringify(api.getState()) === before, 'Enter aplica respuestas invalidas');
+                app.closeSeniorityWizard();
+            });
+            await test('Enter avanza desde la casilla del paso de antiguedad y al perder el foco', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'definitive';
+                app.setWizardDateValue('wizard-practice-start', '2023-09-01');
+                const dialog = app.document.getElementById('seniority-wizard');
+                const index = app.getSeniorityWizardSteps().findIndex(step => step.querySelector('#wizard-no-interino'));
+                const checkbox = app.document.getElementById('wizard-no-interino');
+                const date = app.document.getElementById('wizard-body-start-text');
+                for (const useCheckboxFocus of [true, false]) {
+                    dialog.dataset.stepIndex = String(index);
+                    api.renderSeniorityWizardStep();
+                    checkbox.checked = false;
+                    app.toggleNoInterino();
+                    date.focus();
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new app.Event('change', { bubbles: true }));
+                    assert(date.disabled, 'No bloquea la fecha automatica');
+                    if (useCheckboxFocus) checkbox.focus();
+                    else app.document.activeElement.blur();
+                    const event = new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+                    app.document.activeElement.dispatchEvent(event);
+                    assert(event.defaultPrevented, 'No recibe Enter tras marcar No fui interino/a');
+                    assert(Number(dialog.dataset.stepIndex) === index + 1, 'Enter no avanza al paso siguiente');
+                    assert(checkbox.checked, 'Enter modifica la respuesta de la casilla');
+                }
+                dialog.dataset.stepIndex = String(index);
+                api.renderSeniorityWizardStep();
+                checkbox.focus();
+                const space = new app.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+                checkbox.dispatchEvent(space);
+                assert(!space.defaultPrevented && Number(dialog.dataset.stepIndex) === index, 'Intercepta Espacio para avanzar');
+                app.closeSeniorityWizard();
+                const enter = new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+                app.document.body.dispatchEvent(enter);
+                assert(!enter.defaultPrevented && Number(dialog.dataset.stepIndex) === index, 'Activa el atajo fuera del cuestionario');
+            });
+            await test('Enter no interfiere con controles nativos, modificadores, composicion ni repeticion', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                const dialog = app.document.getElementById('seniority-wizard');
+                const select = app.document.getElementById('wizard-status');
+                select.value = 'provisional';
+                for (const target of [
+                    select, app.document.getElementById('wizard-next'),
+                    app.document.getElementById('wizard-back')
+                ]) {
+                    const event = new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+                    target.dispatchEvent(event);
+                    assert(!event.defaultPrevented, 'Intercepta el teclado de un control nativo');
+                    assert(dialog.dataset.stepIndex === '0', 'El atajo avanza desde un control nativo');
+                }
+                const heading = dialog.querySelector('[data-wizard-step] h3');
+                for (const options of [
+                    { key: 'Escape' }, { key: 'Enter', repeat: true }, { key: 'Enter', isComposing: true },
+                    { key: 'Enter', ctrlKey: true }, { key: 'Enter', altKey: true },
+                    { key: 'Enter', metaKey: true }, { key: 'Enter', shiftKey: true }
+                ]) {
+                    const event = new app.KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...options });
+                    heading.dispatchEvent(event);
+                    assert(!event.defaultPrevented && dialog.dataset.stepIndex === '0', 'Activa el atajo con otra tecla o modificador');
+                }
+                const handled = new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+                handled.preventDefault();
+                heading.dispatchEvent(handled);
+                assert(dialog.dataset.stepIndex === '0', 'Procesa un evento ya atendido');
+                app.closeSeniorityWizard();
+                heading.dispatchEvent(new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+                assert(dialog.dataset.stepIndex === '0', 'Avanza con el cuestionario cerrado');
             });
             await test('Aviso de exceso y puntuacion se actualizan sin borrar la entrada', () => {
                 api.setState(fresh({ s1_2_1_years: 2 }));

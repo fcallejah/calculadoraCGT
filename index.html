@@ -613,6 +613,30 @@
                     </p>
                 </div>
 
+                <div data-wizard-step="definitive" class="hidden">
+                    <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Provisionalidad anterior al primer destino definitivo</h3>
+                    <label for="wizard-first-definitive" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Participas voluntariamente desde tu primer destino definitivo obtenido por concurso?</label>
+                    <select id="wizard-first-definitive" onchange="toggleWizardProvisionalHistory()" aria-describedby="wizard-first-definitive-note" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <option value="">Selecciona una respuesta...</option>
+                        <option value="yes">Sí, participo desde mi primer destino definitivo</option>
+                        <option value="no">No</option>
+                    </select>
+                    <div id="wizard-provisional-history-fields" class="hidden mt-4">
+                        <p id="wizard-provisional-history-question" class="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">¿Cuánto tiempo estuviste en provisionalidad como funcionario/a de carrera desde tu nombramiento hasta obtener tu primer destino definitivo?</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label for="wizard-provisional-years" class="block text-sm text-gray-700 dark:text-gray-300">Años</label>
+                                <input id="wizard-provisional-years" type="number" min="0" max="99" step="1" value="0" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            </div>
+                            <div>
+                                <label for="wizard-provisional-months" class="block text-sm text-gray-700 dark:text-gray-300">Meses</label>
+                                <input id="wizard-provisional-months" type="number" min="0" max="11" step="1" value="0" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            </div>
+                        </div>
+                        <p id="wizard-first-definitive-note" class="mt-2 text-xs text-gray-500 dark:text-gray-400">En este supuesto, el BOJA permite sumar en 1.1.2 la provisionalidad anterior a ese primer destino. Una vez obtenido otro destino definitivo, esta puntuación ya no se acumula.</p>
+                    </div>
+                </div>
+
                 <!-- PASO PRÁCTICAS -->
 
                 <div data-wizard-step="practice" class="hidden">
@@ -806,6 +830,7 @@
             seniorityWizard: { 
                 status: '', 
                 definitiveStartDate: '', 
+                firstDefinitiveParticipation: '',
                 practiceStartDate: '', 
                 careerStartDate: '', 
                 isStabilized: false,
@@ -909,13 +934,16 @@
             const date = new Date(year, month - 1, day);
             return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
         }
-        function completeMonthsSince(dateValue) {
-            const start = parseSeniorityDate(dateValue);
-            const end = parseSeniorityDate(CUTOFF_DATE);
+        function completeMonthsBetween(startValue, endValue) {
+            const start = parseSeniorityDate(startValue);
+            const end = parseSeniorityDate(endValue);
             if (!start || !end || start > end) return null;
             let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
             if (end.getDate() < start.getDate()) months--;
             return Math.max(0, months);
+        }
+        function completeMonthsSince(dateValue) {
+            return completeMonthsBetween(dateValue, CUTOFF_DATE);
         }
         function setYearMonthFields(prefix, totalMonths) {
             state[`${prefix}_years`] = Math.floor(totalMonths / 12);
@@ -950,6 +978,10 @@
             
             document.getElementById('wizard-status').value = wizard.status || '';
             setWizardDateValue('wizard-definitive-start', wizard.definitiveStartDate || defaultDate);
+            document.getElementById('wizard-first-definitive').value = wizard.firstDefinitiveParticipation || '';
+            document.getElementById('wizard-provisional-years').value = state.s1_1_2_years;
+            document.getElementById('wizard-provisional-months').value = state.s1_1_2_months;
+            toggleWizardProvisionalHistory();
             setWizardDateValue('wizard-practice-start', wizard.practiceStartDate || defaultDate);
             setWizardDateValue('wizard-career-start', wizard.careerStartDate || defaultDate);
             document.getElementById('wizard-is-stabilized').checked = Boolean(wizard.isStabilized);
@@ -1221,11 +1253,22 @@
             dialog.classList.add('hidden');
             dialog.classList.remove('flex');
         }
+        function toggleWizardProvisionalHistory() {
+            const enabled = document.getElementById('wizard-first-definitive').value === 'yes';
+            document.getElementById('wizard-provisional-history-fields').classList.toggle('hidden', !enabled);
+            ['wizard-provisional-years', 'wizard-provisional-months'].forEach(id => {
+                document.getElementById(id).disabled = !enabled;
+            });
+            document.getElementById('seniority-wizard-error').classList.add('hidden');
+        }
         function renderSeniorityWizardStep() {
             const dialog = document.getElementById('seniority-wizard');
             const steps = getSeniorityWizardSteps();
             const stepIndex = Math.min(Number(dialog.dataset.stepIndex) || 0, steps.length - 1);
             const status = document.getElementById('wizard-status').value;
+            const careerStart = document.getElementById('wizard-career-start').value;
+            const startDate = parseSeniorityDate(careerStart) ? formatWizardDateText(careerStart) : '';
+            document.getElementById('wizard-provisional-history-question').textContent = `¿Cuánto tiempo estuviste en provisionalidad como funcionario/a de carrera desde ${startDate ? `el ${startDate}` : 'tu nombramiento'} hasta obtener tu primer destino definitivo?`;
             const hardshipContext = status === 'practice'
                 ? 'No computable para funcionario/a en prácticas'
                 : status === 'provisional' ? 'Durante tu provisionalidad como funcionario/a de carrera' : 'Desde tu último destino definitivo';
@@ -1234,8 +1277,6 @@
             hardshipTitle.classList.toggle('font-normal', status === 'provisional');
             hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria y especial dificultad${status === 'provisional' ? ' ' : ` · ${hardshipContext}`}`;
             if (status === 'provisional') {
-                const careerStart = document.getElementById('wizard-career-start').value;
-                const startDate = parseSeniorityDate(careerStart) ? formatWizardDateText(careerStart) : '';
                 const context = document.createElement('strong');
                 context.textContent = `solo durante tu actual provisionalidad${startDate ? ` desde ${startDate}` : ' (indica la fecha de nombramiento en el paso 2)'}`;
                 hardshipTitle.append(context);
@@ -1268,10 +1309,42 @@
             if (step.querySelector('#wizard-status')) {
                 if (!status) return 'Selecciona tu situación actual para continuar.';
             }
+            if (step.querySelector('#wizard-first-definitive')) {
+                const answer = document.getElementById('wizard-first-definitive').value;
+                if (!answer) return 'Indica si participas voluntariamente desde tu primer destino definitivo obtenido por concurso.';
+                if (answer === 'yes') {
+                    const years = document.getElementById('wizard-provisional-years');
+                    const months = document.getElementById('wizard-provisional-months');
+                    if (!years.checkValidity() || !months.checkValidity()) {
+                        return 'Introduce años completos entre 0 y 99 y meses completos entre 0 y 11 para la provisionalidad anterior.';
+                    }
+                    const careerStart = document.getElementById('wizard-career-start').value;
+                    const definitiveStart = document.getElementById('wizard-definitive-start').value;
+                    if (careerStart && definitiveStart && careerStart > definitiveStart) {
+                        return 'El primer destino definitivo no puede ser anterior al nombramiento como funcionario/a de carrera. Revisa las fechas.';
+                    }
+                }
+            }
             
             return getWizardDateError(step);
         }
         
+        function handleSeniorityWizardEnter(event) {
+            if (event.key !== 'Enter' || event.repeat || event.isComposing || event.defaultPrevented
+                || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+            const dialog = document.getElementById('seniority-wizard');
+            if (dialog.classList.contains('hidden')) return;
+            if (!dialog.contains(event.target) && event.target !== document.body && event.target !== document.documentElement) return;
+            if (event.target.closest('button, select, textarea, a, input[type="radio"]')) return;
+            event.preventDefault();
+            const nextButton = document.getElementById('wizard-next');
+            if (nextButton.classList.contains('hidden')) {
+                document.getElementById('wizard-apply').click();
+            } else {
+                nextButton.click();
+            }
+        }
+
         function moveSeniorityWizard(direction) {
             const dialog = document.getElementById('seniority-wizard');
             const steps = getSeniorityWizardSteps();
@@ -1300,6 +1373,7 @@
         function applySeniorityWizard() {
             const status = document.getElementById('wizard-status').value;
             const defDate = document.getElementById('wizard-definitive-start').value;
+            const firstDefinitiveParticipation = status === 'definitive' ? document.getElementById('wizard-first-definitive').value : '';
             const carrStart = document.getElementById('wizard-career-start').value;
             const isStabilized = document.getElementById('wizard-is-stabilized').checked;
             const pracStart = isStabilized ? carrStart : document.getElementById('wizard-practice-start').value;
@@ -1313,8 +1387,8 @@
                 return;
             }
 
-            const dateError = [...document.querySelectorAll('#seniority-wizard [data-wizard-step]')]
-                .map(step => getWizardDateError(step))
+            const dateError = getSeniorityWizardSteps()
+                .map(step => validateSeniorityWizardStep(step))
                 .find(Boolean) || getPracticeCareerDateError(pracStart, carrStart);
             if (dateError) {
                 validarDuracionPracticas();
@@ -1340,6 +1414,11 @@
             } else if (status === 'provisional' && carrStart) {
                 setYearMonthFields('s1_1_2', completeMonthsSince(carrStart) || 0);
             }
+            if (firstDefinitiveParticipation === 'yes') {
+                const years = Number(document.getElementById('wizard-provisional-years').value);
+                const months = Number(document.getElementById('wizard-provisional-months').value);
+                setYearMonthFields('s1_1_2', years * 12 + months);
+            }
 
             if (bodyStart) {
                 const bodyGapMonths = Math.max(0, Math.floor(Number(document.getElementById('wizard-body-gap-months').value) || 0));
@@ -1351,7 +1430,7 @@
             setYearMonthFields('s1_2_3', Math.max(0, Number(document.getElementById('wizard-other-lower-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-lower-months').value) || 0)));
             
             state.seniorityWizard = { 
-                status, definitiveStartDate: defDate, practiceStartDate: pracStart,
+                status, definitiveStartDate: defDate, firstDefinitiveParticipation, practiceStartDate: pracStart,
                 careerStartDate: carrStart, isStabilized, practiceOnlyStartDate: pracOnlyStart,
                 bodyStartDate: bodyStart, bodyGapMonths: Number(document.getElementById('wizard-body-gap-months').value) || 0
             };
@@ -1449,9 +1528,9 @@
             s4_3_tutoria: '4.3 Tutoría'
         };
         const SERVICE_COUNTS = {
-            s6_2_coord_plan_igualdad_years: '6.2 Coordinación del Plan de Igualdad',
-            s6_2_coord_proyectos_years: '6.2 Coordinación de proyectos',
-            s6_2_part_proyectos_years: '6.2 Participación en proyectos',
+            s6_2_coord_plan_igualdad_years: '6.2.b Coordinación del Plan de Igualdad',
+            s6_2_coord_proyectos_years: '6.2.b Coordinación de proyectos',
+            s6_2_part_proyectos_years: '6.2.b Participación en proyectos',
             s6_5_tribunales: '6.5 Convocatorias de tribunales',
             s6_6_tutor_master_grado: '6.6 Cursos de tutorización de máster/grado',
             s6_6_tutor_aspirantes: '6.6 Cursos de tutorización de funcionario/a en prácticas'
@@ -1462,13 +1541,21 @@
             const careerMonths = completeMonthsSince(s.seniorityWizard?.careerStartDate);
             return Math.min(bodyMonths, careerMonths === null ? bodyMonths : careerMonths);
         };
+        const canAccumulateHistoricalProvisionality = (s) => s.seniorityWizard?.status === 'definitive'
+            && s.seniorityWizard.firstDefinitiveParticipation === 'yes';
         const getServicePeriodLimit = (s, prefix) => {
             const bodyMonths = getDurationMonths(s, 's1_2_1');
             const status = s.seniorityWizard?.status;
             if (prefix.startsWith('s1_1_')) {
                 const careerMonths = getCareerServiceMonths(s);
                 if (prefix === 's1_1_1') return status === 'provisional' ? 0 : careerMonths;
-                if (prefix === 's1_1_2') return status === 'definitive' ? 0 : careerMonths;
+                if (prefix === 's1_1_2') {
+                    if (status !== 'definitive') return careerMonths;
+                    if (!canAccumulateHistoricalProvisionality(s)) return 0;
+                    const remainingMonths = Math.max(0, careerMonths - getDurationMonths(s, 's1_1_1'));
+                    const previousMonths = completeMonthsBetween(s.seniorityWizard.careerStartDate, s.seniorityWizard.definitiveStartDate);
+                    return Math.min(remainingMonths, previousMonths === null ? remainingMonths : previousMonths);
+                }
                 const centreMonths = status === 'definitive' ? getDurationMonths(s, 's1_1_1')
                     : status === 'provisional' ? getDurationMonths(s, 's1_1_2')
                     : Math.max(getDurationMonths(s, 's1_1_1'), getDurationMonths(s, 's1_1_2'));
@@ -1740,6 +1827,12 @@
         };
         const getServicePeriodNotice = (s, prefix) => {
             const months = getServicePeriodLimit(s, prefix);
+            if (prefix === 's1_1_2' && s.seniorityWizard?.status === 'definitive') {
+                if (!canAccumulateHistoricalProvisionality(s)) {
+                    return 'La provisionalidad anterior no se suma salvo participación voluntaria desde el primer destino definitivo obtenido por concurso. Las cifras se conservan para su revisión, pero no puntúan.';
+                }
+                return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. Solo cuenta la provisionalidad como funcionario/a de carrera anterior al primer destino definitivo, sin superar 1.2.1 ni duplicar el tiempo de 1.1.1; si constan las fechas del cuestionario, también se limita al periodo entre carrera y primer destino definitivo.`;
+            }
             return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. La referencia es ${prefix === 's4_3_tutoria' ? 'la que has escrito en el 1.2.1' : '1.2.1'}${prefix.startsWith('s1_1_') ? ', solo como funcionario/a de carrera y según tu situación; en 1.1.3, también el periodo de 1.1.1 o 1.1.2 que corresponda' : ''}${prefix === 's4_3_tutoria' ? ', sin superar el tiempo transcurrido desde septiembre de 2007' : ''}.`;
         };
         const YMInput = (label, yName, mName, disabled=false) => {
@@ -1905,25 +1998,35 @@
                             <svg id="warning-chevron" class="w-4 h-4 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <div id="warning-content" class="px-4 pb-4 hidden">
-                            <p class="mb-2"><strong>Si tienes destino definitivo, solo cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si has tenido varios destinos definitivos a lo largo de tu carrera, los anteriores <strong>no se suman aquí</strong> — solo el último que obtuviste. Si estás en provisionalidad, indica el periodo correspondiente como funcionario/a de carrera.</p>
+                            <p class="mb-2"><strong>En 1.1.1, si tienes destino definitivo, cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si participas voluntariamente desde el primero obtenido por concurso, puedes sumar además la provisionalidad anterior en 1.1.2. Una vez obtenido otro destino definitivo, esa puntuación histórica ya no se acumula.</p>
                             <ul class="list-disc list-inside space-y-1 ml-1 mb-2">
-                                <li><strong>Tienes destino definitivo ahora</strong> → rellena solo <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino.</li>
+                                <li><strong>Tienes destino definitivo ahora</strong> → rellena <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino y, solo si participas voluntariamente desde el primero obtenido por concurso, <strong>1.1.2</strong> con la provisionalidad anterior como funcionario/a de carrera.</li>
                                 <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → deja 1.1.1 en blanco y rellena solo <strong>1.1.2</strong>.</li>
                                 <li><strong>Eres funcionario/a en prácticas</strong> → deja <strong>todo el 1.1 en blanco</strong>; tu antigüedad va íntegra al <strong>1.2</strong>.</li>
-                                <li><strong>1.1.3</strong> (especial dificultad) se añade al 1.1.1 o al 1.1.2, según corresponda, solo por servicios como funcionario/a de carrera; no cuenta prácticas ni interinidad.</li>
+                                <li><strong>1.1.3</strong> (especial dificultad) se añade al 1.1.1 o al 1.1.2, según corresponda, solo por servicios como funcionario/a de carrera; no cuenta prácticas ni interinidad. Desde un destino definitivo, no recupera la especial dificultad de la provisionalidad anterior.</li>
                             </ul>
                             <p class="text-xs italic mt-2 pt-2 border-t border-blue-200 dark:border-blue-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
                         </div>
                     </div>
                     ${YMInput('1.1.1 Permanencia ininterrumpida (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_1_years', 's1_1_1_months', ['provisional', 'practice'].includes(state.seniorityWizard.status))}
-                    ${YMInput('1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', ['definitive', 'practice'].includes(state.seniorityWizard.status))}
+                    ${state.seniorityWizard.status === 'definitive' ? `
+                    <div class="mb-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4">
+                        <label for="first-definitive-participation" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Participas voluntariamente desde tu primer destino definitivo obtenido por concurso?</label>
+                        <select id="first-definitive-participation" onchange="setFirstDefinitiveParticipation(this.value)" aria-describedby="first-definitive-participation-note" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            <option value="" ${!state.seniorityWizard.firstDefinitiveParticipation ? 'selected' : ''}>Selecciona una respuesta...</option>
+                            <option value="yes" ${state.seniorityWizard.firstDefinitiveParticipation === 'yes' ? 'selected' : ''}>Sí, participo desde mi primer destino definitivo</option>
+                            <option value="no" ${state.seniorityWizard.firstDefinitiveParticipation === 'no' ? 'selected' : ''}>No</option>
+                        </select>
+                        <p id="first-definitive-participation-note" class="mt-2 text-xs text-gray-600 dark:text-gray-300">Solo en este supuesto se habilita 1.1.2 para sumar la provisionalidad anterior como funcionario/a de carrera. Una vez obtenido otro destino definitivo, deja de acumularse.</p>
+                    </div>` : ''}
+                    ${YMInput(canAccumulateHistoricalProvisionality(state) ? '1.1.2 Provisionalidad anterior al primer destino definitivo (solo funcionario/a de carrera)' : '1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', state.seniorityWizard.status === 'practice' || (state.seniorityWizard.status === 'definitive' && !canAccumulateHistoricalProvisionality(state)))}
                     ${YMInput(`1.1.3 Compensatoria y especial dificultad (${state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
                     ${InfoBox('En 1.1.1, 1.1.2 y 1.1.3 solo cuentan servicios como <strong>funcionario/a de carrera</strong>: no incluyas prácticas ni interinidad.')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
                     ${InfoBox('En <strong>1.2.1</strong> se computan todos los servicios en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas, Religión...).')}
                     ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
-                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios como funcionario/a de carrera, sin superar 1.2.1. En 1.1.3 tampoco se puede superar el periodo correspondiente de 1.1.1 o 1.1.2. Los excesos no se suman.</p>
+                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios como funcionario/a de carrera, sin superar 1.2.1. La provisionalidad anterior solo se acumula desde el primer destino definitivo obtenido por concurso con participación voluntaria, sin duplicar tiempo de 1.1.1. En 1.1.3 tampoco se puede superar el periodo correspondiente de 1.1.1 o 1.1.2. Los excesos no se suman.</p>
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
                     ${YMInput('1.2.3 Otros cuerpos (subgrupo inferior)', 's1_2_3_years', 's1_2_3_months')}
                 </div>`;
@@ -2125,10 +2228,9 @@
                     </div>
 
                     ${SubTitle('6.2 Premios y proyectos (máx. 2,5)', 'score-s62', 'Los premios se dividen por n.º de participantes. Si no se relacionan los participantes, se divide por el n.º de profesores del centro (mín. 0,05).', 2.5, Calculators.calc62(state))}
-                    ${InfoBox('Premios (DC Quinta.2): internacional 1,5/0,75/0,5 · nacional 1,0/0,5/0,25 · autonómico 0,5/0,25/0,1. Coordinación de proyectos: 0,5/curso (excepto Plan de Igualdad: 1,0/curso).')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">6.2 a) Premios</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">6.2.a Premios convocados por una Administración educativa y participación en proyectos de investigación o innovación educativa</h4>
                             <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-center bg-gray-50 dark:bg-gray-700 rounded-t py-2">
                                 <div class="text-left pl-2">Ámbito</div>
                                 <div>1.º premio</div>
@@ -2153,9 +2255,12 @@
                                 ${GridInputSmall('s6_2_auto_2', '0,25')}
                                 ${GridInputSmall('s6_2_auto_3', '0,1')}
                             </div>
+                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                                ${NumInput('Proyectos de investigación o innovación educativa en los que has participado (0,2 ptos./proyecto)', 's6_2_investigacion_projects')}
+                            </div>
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">6.2 b) Proyectos y planes</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">6.2.b Coordinación y participación en planes y proyectos educativos aprobados por la Consejería de Educación</h4>
                             ${NumInput('Cursos coordinando Plan de Igualdad (1,0 pto./año)', 's6_2_coord_plan_igualdad_years')}
                             ${NumInput('Cursos coordinando otros proyectos/planes (0,5 ptos./año)', 's6_2_coord_proyectos_years')}
                             ${NumInput('Cursos participando en proyectos/planes (0,2 ptos./año)', 's6_2_part_proyectos_years')}
@@ -2270,7 +2375,7 @@
 
             const b1 = [];
             push(b1, `1.1.1 Permanencia ininterrumpida en destino definitivo (${formatDuration(s.s1_1_1_years, s.s1_1_1_months)})`, calc111(s));
-            push(b1, `1.1.2 Provisionalidad (${formatDuration(s.s1_1_2_years, s.s1_1_2_months)})`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
+            push(b1, `1.1.2 ${canAccumulateHistoricalProvisionality(s) ? 'Provisionalidad anterior al primer destino definitivo' : 'Provisionalidad'} (${formatDuration(s.s1_1_2_years, s.s1_1_2_months)})`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
             push(b1, `1.1.3 Especial dificultad (${formatDuration(s.s1_1_3_years, s.s1_1_3_months)})`, calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333));
             push(b1, `1.2.1 Servicio activo en el cuerpo (${formatDuration(s.s1_2_1_years, s.s1_2_1_months)})`, calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666));
             push(b1, `1.2.2 Otros cuerpos — mismo o superior subgrupo (${formatDuration(s.s1_2_2_years, s.s1_2_2_months)})`, calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250));
@@ -2346,10 +2451,11 @@
                                 (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
                                 (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1);
             const premios_count = s.s6_2_intl_1 + s.s6_2_intl_2 + s.s6_2_intl_3 + s.s6_2_nat_1 + s.s6_2_nat_2 + s.s6_2_nat_3 + s.s6_2_auto_1 + s.s6_2_auto_2 + s.s6_2_auto_3;
-            push(b6, `6.2 a) ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
-            push(b6, `6.2 b) Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
-            push(b6, `6.2 b) Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
-            push(b6, `6.2 b) Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
+            push(b6, `6.2.a ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
+            push(b6, `6.2.a Participación en proyectos de investigación o innovación educativa (${formatQuantity(s.s6_2_investigacion_projects, 'proyecto', 'proyectos')})`, s.s6_2_investigacion_projects * 0.2);
+            push(b6, `6.2.b Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
+            push(b6, `6.2.b Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
+            push(b6, `6.2.b Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
             push(b6, '6.2 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc62(s));
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_intl, 'Premio internacional', 'Premios internacionales')}`, s.s6_3_premios_intl * 1.5);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_nat, 'Premio nacional', 'Premios nacionales')}`, s.s6_3_premios_nat * 1.0);
@@ -2577,6 +2683,12 @@
             updateCalculations();
         }
         function handleCheck(element) { state[element.name] = element.checked; saveState(); updateCalculations(); }
+        function setFirstDefinitiveParticipation(value) {
+            state.seniorityWizard.firstDefinitiveParticipation = value;
+            saveState();
+            renderMainContent();
+            updateCalculations();
+        }
         function updateCalculations() {
             updateServiceLimitWarnings();
             const catedraticosWarning = document.getElementById('catedraticos-eligibility-warning');
@@ -2742,6 +2854,7 @@
             });
         }
 
+        document.addEventListener('keydown', handleSeniorityWizardEnter);
         applyTheme();
         loadState();
         renderNavigation();

@@ -12,6 +12,7 @@ Esta versión 2026 es una actualización de [MaestroRafa](https://github.com/rbu
 *   **🎭 Sección 6.3 reescrita:** se ha desglosado completamente el apartado de méritos artísticos y deportivos (premios, espectáculos, composiciones, actuaciones, exposiciones, conservador-restaurador y deportistas).
 *   **📚 Obras literarias (6.1):** nueva tabla específica para autor, coautor, 3+ autores e ilustrador/a.
 *   **💜 Plan de Igualdad (6.2):** añadido como mérito específico (1,0 pto./curso).
+*   **Subapartados 6.2.a y 6.2.b:** el formulario y el desglose siguen la nomenclatura de la hoja de méritos de la Junta y de la disposición complementaria quinta, puntos 3 y 4, del [BOJA (página 45)](https://www.juntadeandalucia.es/boja/2026/210/BOJA26-210-00168-14181-01_00345411.pdf#page=45). El 6.2.a recoge premios y participación en proyectos de investigación o innovación educativa (0,2 puntos por proyecto); el 6.2.b, coordinación y participación en planes y proyectos educativos aprobados por la Consejería. Ambos comparten el tope de 2,5 puntos del 6.2.
 *   **🎓 Múltiples títulos (3.1 y 3.2):** los títulos de doctor, DEA y máster pasan de ser casillas únicas a contadores, permitiendo alegar varios títulos a la vez.
 
 ### 🧮 2. Correcciones críticas de cálculo
@@ -21,6 +22,7 @@ Esta versión 2026 es una actualización de [MaestroRafa](https://github.com/rbu
 *   **👩‍🏫 Tutorización (6.6) diferenciada:** máster/grado (0,1 pto./curso) frente a fase de aspirantes (0,2 ptos./curso), con un aviso para los cursos anteriores a 2023/24.
 *   **Controles de coherencia con 1.2.1:** los periodos de 4.1, 4.2 y 4.3 no superan los servicios del mismo cuerpo. Los cursos de proyectos de 6.2, las convocatorias de 6.5 y los cursos de 6.6 se limitan, como control de esta calculadora, a los años completos de 1.2.1; esto no convierte las convocatorias o cursos del BOJA en méritos por año de servicio. Se mantienen los topes de puntos y de tutorización desde 2023/24.
 *   **Especial dificultad (1.1.3):** solo computa servicios como funcionario/a de carrera, dentro del periodo de destino definitivo o provisionalidad que corresponda y sin superar 1.2.1. En prácticas, todo 1.1 queda deshabilitado y no puntúa. Si se completó el cuestionario, también se utiliza la fecha de nombramiento de carrera para excluir prácticas e interinidad; si se rellena manualmente, deben excluirse esos periodos.
+*   **Provisionalidad anterior (1.1.2):** puede sumarse a 1.1.1 cuando se participa voluntariamente desde el primer destino definitivo obtenido por concurso, según el BOJA. El cuestionario pregunta expresamente por este supuesto y recoge años y meses; también puede confirmarse y ajustarse en el formulario. No se limita a dos años, pero no incluye prácticas, interinidad ni tiempo ya computado en 1.1.1. Si constan las fechas, se limita al periodo entre el nombramiento de carrera y ese primer destino. Una vez obtenido otro destino definitivo, ya no se acumula; tampoco recupera la especial dificultad anterior en 1.1.3.
 *   **Datos y desglose:** los excesos se conservan para su revisión, con avisos explícitos, pero no se suman. El desglose y el PDF muestran las cantidades efectivamente computadas. El resumen y la impresión incluyen un aviso de simulación no oficial.
 
 ### Comprobaciones locales
@@ -29,6 +31,7 @@ Sin instalar dependencias, ejecutar `python3 -m http.server 8011 --bind 127.0.0.
 
 ### 🧙‍♂️ 3. El nuevo cuestionario de Antigüedad
 Se ha pasado de tener simples cajas de texto a un **asistente interactivo (Wizard)** de varios pasos:
+*   **Tecla Enter:** con el cuestionario abierto, avanza desde los campos, las casillas o el título del paso, incluso si se pierde el foco al deshabilitar un campo. Usa las mismas validaciones que «Siguiente»; en el último paso aplica las respuestas. Los botones y desplegables conservan su manejo normal de teclado; las casillas siguen marcándose con Espacio.
 *   **📅 Fechas por defecto:** los calendarios arrancan automáticamente en el 1 de septiembre más reciente.
 *   **🛡️ Validación estricta:** el sistema bloquea fechas de carrera anteriores a las de prácticas o que superen un margen lógico de 2 años. Además, se ha implementado un campo de texto `dd/mm/aaaa` sincronizado con el calendario nativo.
 *   **🔄 Casilla de estabilización:** nueva casilla para marcar «No realicé prácticas / Accedí por estabilización», que iguala automáticamente las fechas.
