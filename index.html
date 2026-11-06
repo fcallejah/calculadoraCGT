@@ -265,6 +265,14 @@
             overflow-y: auto;
             overscroll-behavior: contain;
         }
+        @media screen and (max-height: 800px) {
+            #landing-page > .landing-card { padding: 1rem 1.5rem; }
+            #landing-page .landing-card h1 { font-size: 1.5rem; }
+            #landing-page .landing-card .mb-6 { margin-bottom: 0.75rem; }
+            #landing-page .landing-card .mb-5 { margin-bottom: 0.75rem; }
+            #landing-page .landing-card .w-20 { width: 3.5rem; height: 3.5rem; }
+            #landing-page .landing-enter { margin-left: -1.5rem; margin-right: -1.5rem; padding-left: 1.5rem; padding-right: 1.5rem; }
+        }
         .credits-wave-box {
             position: relative;
             isolation: isolate;
@@ -416,9 +424,11 @@
                 </a>
             </div>
 
-            <button onclick="closeLanding()" class="w-full bg-primary hover:bg-[#00623b] text-white font-bold py-3 px-6 rounded-xl shadow-md mb-6">
-                Entendido, acceder a la calculadora
-            </button>
+            <div class="landing-enter sticky bottom-0 z-10 -mx-8 mb-4 bg-white dark:bg-gray-800 px-8 py-3">
+                <button onclick="closeLanding()" class="w-full bg-primary hover:bg-[#00623b] text-white font-bold py-3 px-6 rounded-xl shadow-md">
+                    Entendido, acceder a la calculadora
+                </button>
+            </div>
 
             <div class="mt-1 flex flex-col items-center text-center">
                 <p class="text-xs text-gray-600 dark:text-gray-200">
@@ -551,7 +561,7 @@
 <div id="seniority-wizard" class="hidden fixed inset-0 z-[60] items-center justify-center bg-black/50 p-4 no-print"
          role="dialog" aria-modal="true" aria-labelledby="seniority-wizard-title"
          onclick="if (event.target === this) closeSeniorityWizard()">
-        <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
+        <div class="w-full max-w-2xl max-h-[calc(100vh-2rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-xl bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
             <h2 id="seniority-wizard-title" class="text-xl font-bold text-gray-900 dark:text-gray-100">Cuestionario de antigüedad</h2>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Las fechas se calculan hasta el 26 de noviembre de 2026. El cuestionario rellena una estimación; después podrás revisar y ajustar cada apartado manualmente.</p>
             <div class="mt-5">
@@ -709,7 +719,7 @@
                 
                 <p id="seniority-wizard-error" class="hidden text-sm font-medium text-red-600 dark:text-red-400" role="alert"></p>
             </div>
-            <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="sticky -bottom-5 sm:-bottom-6 z-10 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 sm:px-6 py-3">
                 <button type="button" onclick="closeSeniorityWizard()" class="rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-100 transition">Cancelar</button>
                 <div class="flex gap-2">
                     <button id="wizard-back" type="button" onclick="moveSeniorityWizard(-1)" class="hidden rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2.5 font-semibold text-gray-800 dark:text-gray-100 transition">Atrás</button>
