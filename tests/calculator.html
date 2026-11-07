@@ -42,6 +42,24 @@
                 element.innerHTML = html;
                 return element;
             };
+            await test('Creditos enlazan Cuevas Bajas y los cuatro emojis en bienvenida y pie', () => {
+                for (const context of ['landing', 1, 7]) {
+                    if (context !== 'landing') app.switchTab(context);
+                    const container = context === 'landing'
+                        ? app.document.querySelector('#landing-page')
+                        : app.document.querySelector('.credits-wave-credit');
+                    const links = [...container.querySelectorAll('a[href="https://youtu.be/dGbyNi_Z25c"]')];
+                    assert(links.length === 2, `Enlaces incorrectos en ${context}`);
+                    assert(links[0].textContent.trim() === 'Cuevas Bajas (Málaga)', 'Falta el enlace de Cuevas Bajas');
+                    assert(links[1].textContent.trim() === '🥕 💜 🫒 🏞️', 'Falta el enlace de los emojis');
+                    assert(links[1].getAttribute('aria-label').includes('Cuevas Bajas'), 'Enlace de emojis sin nombre accesible');
+                    for (const link of links) {
+                        assert(link.target === '_blank' && link.rel.includes('noopener') && link.rel.includes('noreferrer'), 'Enlace externo inseguro');
+                        assert(link.classList.contains('whitespace-nowrap'), 'El contenido del enlace puede dividirse');
+                        assert(link.querySelector('svg[aria-hidden="true"]'), 'Falta el icono de enlace externo');
+                    }
+                }
+            });
             await test('Bienvenida bloquea el fondo y permite leer la tarjeta en pantallas bajas', () => {
                 const root = app.document.documentElement;
                 const card = app.document.querySelector('#landing-page > .landing-card');
