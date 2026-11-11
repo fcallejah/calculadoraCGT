@@ -168,7 +168,7 @@
                         assert(!result.textContent.includes('Esto no garantiza'), 'Mantiene el texto sustituido');
                     }
                     const summary = parsed(api.renderSummary()).querySelector('[data-bilingual-result="yes"]');
-                    assert(summary.textContent.includes(`puestos bilingües de inglés gracias al título o certificado de ${label}`), 'Resumen sin idioma o certificado dinamico');
+                    assert(summary.textContent.includes(`puestos bilingües de inglés gracias al título o certificado de Cambridge English — ${label}`), 'Resumen sin idioma o certificado dinamico');
                     assert(!summary.textContent.includes('finalices tu instancia'), 'Resumen repite instrucciones de presentacion');
                     assert(summary.textContent.includes('Comprobación orientativa'), 'Resumen pierde aviso orientativo');
                 }
@@ -369,6 +369,41 @@
                 assert(api.getBilingualResult(api.getState()).status === 'no', 'B1 o ausencia no produce resultado negativo');
                 assert(!app.document.querySelector('#bilingual-certificate'), 'Ofrece titulos tras indicar que no tiene acreditacion');
             });
+            await test('Los desplegables bilingues no reciben foco de nuevo al seleccionar', () => {
+                api.setState(fresh());
+                app.switchTab(3);
+                api.setBilingualAnswer('enabled', true);
+                const nativeFocus = app.HTMLSelectElement.prototype.focus;
+                let refocusCount = 0;
+                app.HTMLSelectElement.prototype.focus = function (...args) {
+                    refocusCount++;
+                    return nativeFocus.apply(this, args);
+                };
+                try {
+                    for (const [id, value] of [
+                        ['bilingual-specialty', '590007'],
+                        ['bilingual-language', 'Inglés'],
+                        ['bilingual-level', 'B2'],
+                        ['bilingual-certificate', 'fce']
+                    ]) {
+                        const select = app.document.getElementById(id);
+                        nativeFocus.call(select);
+                        select.value = value;
+                        select.dispatchEvent(new app.Event('change', { bubbles: true }));
+                        assert(refocusCount === 0, `Reabre el desplegable ${id} al restaurar el foco`);
+                        assert(app.document.getElementById(id).value === value, `Pierde la seleccion ${id}`);
+                    }
+                    near(api.Calculators.calc55(api.getState()), 2);
+                    assert(api.getBilingualResult(api.getState()).status === 'yes', 'El cierre altera la comprobacion');
+                    const checkbox = app.document.getElementById('bilingual-enabled');
+                    checkbox.focus();
+                    checkbox.checked = false;
+                    checkbox.dispatchEvent(new app.Event('change', { bubbles: true }));
+                    assert(app.document.activeElement.id === 'bilingual-enabled', 'Pierde el foco de las casillas');
+                } finally {
+                    app.HTMLSelectElement.prototype.focus = nativeFocus;
+                }
+            });
             await test('Certificados bilingues y ACLES ordenados alfabeticamente sin cambiar sus valores', () => {
                 const collator = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
                 const assertOrdered = select => {
@@ -393,11 +428,151 @@
                 }));
                 app.switchTab(5);
                 const select = app.document.querySelector('[aria-label="Certificado ACLES reconocido"]');
-                assert(select.options[1].textContent.startsWith('Anglia'), 'Mantiene el orden antiguo de ACLES');
+                assert(select.options[1].textContent.startsWith('ACLES — CertAcles'), 'No ordena por la entidad y el nombre visibles');
                 assert(select.selectedOptions[0].textContent.includes('First Certificate'), 'La reordenacion cambia el certificado seleccionado');
                 api.updateIdioma(0, 'certificado', select.value);
                 assert(api.getState().idiomas[0].certificado === 'Cambridge First Certificate in English (FCE)', 'El indice ordenado selecciona otro certificado');
                 near(api.Calculators.calc55(api.getState()), 2);
+            });
+            await test('Catalogo ACLES de julio de 2025: columnas y puntuaciones corregidas', () => {
+                const cases = [
+                    ['Francés', 'Alliance Française — Diplôme de Langue Française (DLF)', 'B2', 2],
+                    ['Francés', 'Alliance Française — Diplôme Supérieur d’Études Françaises Modernes (DS)', 'C1', 3],
+                    ['Francés', 'Alliance Française — Diplôme de Hautes Études Françaises (DHEF)', 'C2', 4],
+                    ['Alemán', 'TestDaF TDN 3', 'B2', 2], ['Alemán', 'TestDaF TDN 5', 'C1', 3],
+                    ['Inglés', 'Pearson English International Certificate (PEIC) — ESOL Entry 3', 'B1', 1],
+                    ['Inglés', 'Pearson English International Certificate (PEIC) — ESOL Level 1', 'B2', 2],
+                    ['Inglés', 'Pearson English International Certificate (PEIC) — ESOL Level 2', 'C1', 3],
+                    ['Inglés', 'Pearson English International Certificate (PEIC) — ESOL Level 3', 'C2', 4],
+                    ['Inglés', 'Oxford Test of English 51–80', 'A2', 0],
+                    ['Inglés', 'Oxford Test of English 81–110', 'B1', 1],
+                    ['Inglés', 'Oxford Test of English 111–140', 'B2', 2],
+                    ['Inglés', 'Oxford Test of English Advanced C1', 'C1', 3],
+                    ['Inglés', 'Anglia Intermediate Business English', 'B1', 1],
+                    ['Inglés', 'Anglia Advanced / Advanced in Business English', 'B2', 2],
+                    ['Inglés', 'Anglia Accept Proficiency', 'C1', 3],
+                    ['Inglés', 'Anglia Masters Proficiency in Business English', 'C2', 4],
+                    ['Inglés', 'LRN ESOL Entry 3', 'B1', 1], ['Inglés', 'LRN ESOL Level 1', 'B2', 2],
+                    ['Inglés', 'LRN ESOL Level 2', 'C1', 3], ['Inglés', 'LRN ESOL Level 3', 'C2', 4],
+                    ['Italiano', 'CIC A', 'C1', 3], ['Italiano', 'ELE.IT', 'B1', 1], ['Italiano', 'IT', 'C2', 4],
+                    ['Chino', 'CertAcles C2', 'C2', 4], ['Inglés', 'UNICERT Level 2', 'B2', 2],
+                    ['Inglés', 'Examen Multinivel de Inglés UAB C1', 'C1', 3],
+                    ['Francés', 'Alliance Française — Certificat d’Études en Français Pratique 2 (CEFP 2)', 'B1', 1]
+                ];
+                for (const [idioma, certificado, nivel, points] of cases) {
+                    assert(api.ACLES_CERTIFICATES[idioma].some(([name, level]) => name === certificado && level === nivel), `Columna incorrecta: ${certificado}`);
+                    api.setState(fresh({ idiomas: [{ idioma, certificado, nivel, origen: 'ACLES' }] }));
+                    near(api.Calculators.calc55(api.getState()), points);
+                }
+                assert(!api.ACLES_CERTIFICATES.Inglés.some(([name]) => name === 'TOEIC (4 destrezas), nivel C2'), 'Ofrece TOEIC C2 no reconocido');
+                assert(!api.ACLES_CERTIFICATES.Inglés.some(([name]) => name === 'Examen Multinivel de Inglés UAB C2'), 'Extiende el examen UAB a la columna C2 vacia');
+            });
+            await test('DHEF, DS, DLF y Pearson conectan meritos y bilingues con el nivel correcto', () => {
+                for (const [language, id, name, level, points] of [
+                    ['Francés', 'dl', 'Alliance Française — Diplôme de Langue Française (DLF)', 'B2', 2],
+                    ['Francés', 'ds', 'Alliance Française — Diplôme Supérieur d’Études Françaises Modernes (DS)', 'C1', 3],
+                    ['Francés', 'dhef', 'Alliance Française — Diplôme de Hautes Études Françaises (DHEF)', 'C2', 4],
+                    ['Inglés', 'pearson-b2', 'Pearson English International Certificate (PEIC) — ESOL Level 1', 'B2', 2],
+                    ['Inglés', 'pearson-c1', 'Pearson English International Certificate (PEIC) — ESOL Level 2', 'C1', 3],
+                    ['Inglés', 'pearson-c2', 'Pearson English International Certificate (PEIC) — ESOL Level 3', 'C2', 4],
+                    ['Alemán', 'testdaf-c1', 'TestDaF TDN 5', 'C1', 3],
+                    ['Alemán', 'dsd-c1', 'Deutsches Sprachdiplom DSD II', 'C1', 3]
+                ]) {
+                    api.setState(fresh());
+                    app.switchTab(5);
+                    api.setBilingualAnswer('enabled', true);
+                    api.setBilingualAnswer('specialty', '590007');
+                    api.setBilingualAnswer('language', language);
+                    api.setBilingualAnswer('certificate', id);
+                    if (['testdaf-c1', 'dsd-c1'].includes(id)) {
+                        near(api.Calculators.calc55(api.getState()), 0);
+                        api.setBilingualAnswer('conditionsConfirmed', true);
+                    }
+                    assert(api.getState().idiomas.length === 1 && api.getState().idiomas[0].certificado === name, `No autocompleta ${id}`);
+                    assert(api.getState().idiomas[0].nivel === level, `Nivel autocompletado incorrecto: ${id}`);
+                    near(api.Calculators.calc55(api.getState()), points);
+                    assert(!app.document.querySelector('[data-bilingual-merit-warning]'), `Falso aviso de exclusion: ${id}`);
+                    api.setState(fresh({ idiomas: [{ idioma: language, origen: 'ACLES', nivel: level, certificado: name }] }));
+                    api.setBilingualAnswer('enabled', true);
+                    assert(api.getState().bilingual.language === language && api.getState().bilingual.certificate === id, `No reconoce el merito ${id}`);
+                    assert(api.getState().idiomas.length === 1, 'Duplica un merito manual');
+                }
+            });
+            await test('Migracion de niveles guardados, sin perder certificados ni adivinar Anglia', () => {
+                const key = app.eval('STORAGE_KEY');
+                const nativeGetItem = app.Storage.prototype.getItem;
+                let saved;
+                app.Storage.prototype.getItem = function (name) {
+                    return name === key ? JSON.stringify(saved) : nativeGetItem.call(this, name);
+                };
+                try {
+                    for (const [idioma, certificado, previousLevel, nivel, points] of [
+                        ['Francés', 'Alliance Française — Diplôme de Hautes Études Françaises (DHEF)', 'C1', 'C2', 4],
+                        ['Inglés', 'Pearson English International Certificate (PEIC) — ESOL Level 1', 'B1', 'B2', 2],
+                        ['Alemán', 'TestDaF TDN 5', 'C2', 'C1', 3],
+                        ['Italiano', 'CIC A', 'B2', 'C1', 3],
+                        ['Inglés', 'Oxford Test of English 51–80', 'B1', 'A2', 0]
+                    ]) {
+                        saved = fresh({ lang55Mode: 'other', idiomas: [{ idioma, origen: 'ACLES', certificado, nivel: previousLevel, nivelFiltro: previousLevel }] });
+                        api.loadState();
+                        const row = api.getState().idiomas[0];
+                        assert(row.certificado === certificado && row.nivel === nivel, `Pierde la seleccion guardada: ${certificado}`);
+                        assert(row.nivelFiltro === (nivel === 'A2' ? '' : nivel), 'Filtro guardado incoherente');
+                        near(api.Calculators.calc55(api.getState()), points);
+                        assert(parsed(api.renderSection5()).querySelector('[data-acles-revision]'), 'Corrige puntos sin avisar');
+                        assert(parsed(api.renderSummary()).querySelector('[data-acles-revision]'), 'Oculta la revision en resumen');
+                        saved = api.getState();
+                        api.loadState();
+                        near(api.Calculators.calc55(api.getState()), points);
+                    }
+                    saved = fresh({ idiomas: [{ idioma: 'Alemán', origen: 'ACLES', certificado: 'Deutsches Sprachdiplom DSD II', nivel: 'C1', nivelFiltro: 'C1' }] });
+                    api.loadState();
+                    assert(api.getState().idiomas[0].nivel === 'C1', 'Confunde DSD II C1 con la fila B2 homonima');
+                    near(api.Calculators.calc55(api.getState()), 3);
+                    for (const certificado of ['Anglia Accept Proficiency / Masters Proficiency in Business English', 'TOEIC (4 destrezas), nivel C2']) {
+                        saved = fresh({ lang55Mode: 'other', idiomas: [{ idioma: 'Inglés', origen: 'ACLES', certificado, nivel: 'C2', nivelFiltro: 'C2' }] });
+                        api.loadState();
+                        assert(api.getState().idiomas.length === 1 && !api.getState().idiomas[0].certificado, 'Elimina la fila o inventa un titulo');
+                        near(api.Calculators.calc55(api.getState()), 0);
+                        assert(parsed(api.renderSection5()).querySelector('[data-acles-revision]'), 'No pide revisar la seleccion antigua');
+                        api.updateIdioma(0, 'nivelFiltro', 'C1');
+                        assert(parsed(api.renderSection5()).querySelector('[data-acles-revision]'), 'Oculta el aviso antes de elegir un certificado');
+                        const index = api.ACLES_CERTIFICATES.Inglés.findIndex(([name]) => name === 'Cambridge Certificate in Advanced English (CAE)');
+                        api.updateIdioma(0, 'certificado', String(index));
+                        near(api.Calculators.calc55(api.getState()), 3);
+                        assert(!parsed(api.renderSection5()).querySelector('[data-acles-revision]'), 'Mantiene un aviso ya resuelto');
+                    }
+                } finally {
+                    app.Storage.prototype.getItem = nativeGetItem;
+                }
+            });
+            await test('Nombres uniformes en ACLES, bilingues y PDF sin duplicar niveles', () => {
+                const name = 'Alliance Française — Diplôme de Hautes Études Françaises (DHEF)';
+                api.setState(fresh({
+                    lang55Mode: 'other',
+                    idiomas: [{ idioma: 'Francés', origen: 'ACLES', nivel: 'C2', nivelFiltro: 'C2', certificado: name }],
+                    bilingual: { enabled: true, specialty: '590007', language: 'Francés', certificate: 'dhef' }
+                }));
+                app.switchTab(5);
+                const selected = app.document.querySelector('[aria-label="Certificado ACLES reconocido"]').selectedOptions[0];
+                assert(selected.textContent === `${name} — C2 (4 ptos.)`, 'Nombre, entidad, nivel o puntos incorrectos');
+                assert(parsed(api.renderSummary()).textContent.includes(`gracias al título o certificado de ${name} — C2!`), 'Resumen utiliza otra denominacion');
+                assert(parsed(api.renderBreakdown()).textContent.includes(`${name} — C2`), 'PDF mantiene la denominacion antigua');
+                api.setState(fresh({ lang55Mode: 'other', idiomas: [{ idioma: 'Inglés', origen: 'ACLES', nivelFiltro: 'B1', certificado: 'CertAcles B1', nivel: 'B1' }] }));
+                app.switchTab(5);
+                assert(app.document.querySelector('[aria-label="Certificado ACLES reconocido"]').selectedOptions[0].textContent === 'ACLES — CertAcles — B1 (1 pto.)', 'Duplica nivel o pluraliza un punto');
+                const previousWidth = frame.style.width;
+                try {
+                    api.setState(fresh({ lang55Mode: 'other', idiomas: [{ idioma: 'Inglés', origen: 'ACLES', nivelFiltro: 'C2', nivel: 'C2', certificado: 'Pearson English International Certificate (PEIC) — ESOL Level 3' }] }));
+                    for (const width of [320, 375, 430]) {
+                        frame.style.width = `${width}px`;
+                        app.switchTab(5);
+                        const row = app.document.querySelector('[aria-label="Certificado ACLES reconocido"]').closest('.grid');
+                        assert(row.scrollWidth <= row.clientWidth, `Nombre largo desborda a ${width}px`);
+                    }
+                } finally {
+                    frame.style.width = previousWidth;
+                }
             });
             await test('Bilingues: formulario y resultado caben en movil', () => {
                 const previousWidth = frame.style.width;
