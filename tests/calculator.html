@@ -31,6 +31,7 @@
                 renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
                 renderSeniorityWizardStep, applySeniorityWizard,
                 randomizeWavePhases,
+                getBilingualResult, setBilingualAnswer, loadState,
                 getState: () => state,
                 setState: value => { state = value; },
                 disableSaving: () => { saveState = () => {}; }
@@ -64,16 +65,366 @@
                 const root = app.document.documentElement;
                 const card = app.document.querySelector('#landing-page > .landing-card');
                 assert(app.getComputedStyle(root).overflowY === 'hidden', 'El fondo se desplaza');
+                assert(app.getComputedStyle(root).scrollbarWidth === 'none', 'La raiz muestra la barra durante la bienvenida');
+                assert(app.getComputedStyle(app.document.body).scrollbarWidth === 'none', 'El cuerpo muestra la barra durante la bienvenida');
+                assert(app.getComputedStyle(root, '::-webkit-scrollbar').width === '0px', 'La barra inicial conserva ancho en Chromium');
                 frame.style.height = '400px';
                 assert(card.getBoundingClientRect().top >= 0, 'Se corta el inicio de la tarjeta');
                 assert(card.getBoundingClientRect().bottom <= app.innerHeight, 'Se corta el final de la tarjeta');
                 assert(app.getComputedStyle(card).overflowY === 'auto', 'La tarjeta no permite desplazarse');
+                assert(app.getComputedStyle(card).scrollbarWidth === 'none', 'La bienvenida muestra la barra de desplazamiento');
+                assert(app.getComputedStyle(card, '::-webkit-scrollbar').display === 'none', 'La barra no se oculta en WebKit');
+                card.scrollTop = card.scrollHeight;
+                assert(card.scrollTop > 0, 'Ocultar la barra impide leer el final de la bienvenida');
+                card.scrollTop = 0;
                 app.closeLanding();
                 assert(!root.classList.contains('landing-open'), 'El bloqueo persiste al entrar');
                 assert(app.getComputedStyle(root).overflowY !== 'hidden', 'No se restaura el scroll');
+                assert(app.getComputedStyle(root).scrollbarWidth !== 'none', 'La barra de la calculadora sigue oculta tras entrar');
                 frame.style.height = '740px';
             });
             await test('Estado inicial sin puntos', () => near(api.Calculators.total(fresh()), 0));
+            await test('Bilingues: EOI y certificados concretos, nunca nivel ACLES generico', () => {
+                const bilingual = { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590001', language: 'Inglés' };
+                for (const [merit, expected] of [
+                    [{ idioma: 'Inglés', origen: 'EOI', nivel: 'B2' }, 'yes'],
+                    [{ idioma: 'Inglés', origen: 'EOI', nivel: 'B1' }, 'pending'],
+                    [{ idioma: 'Francés', origen: 'EOI', nivel: 'C2' }, 'pending'],
+                    [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', certificado: 'CertAcles B2' }, 'pending'],
+                    [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', certificado: 'Cambridge First Certificate in English (FCE)' }, 'yes'],
+                    [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'C2', certificado: 'Cambridge First Certificate in English (FCE)' }, 'pending'],
+                    [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', certificado: 'LanguageCert International ESOL Communicator (B2)' }, 'pending']
+                ]) {
+                    assert(api.getBilingualResult(fresh({ bilingual, idiomas: [merit] })).status === expected, `Resultado incorrecto para ${JSON.stringify(merit)}`);
+                }
+                assert(api.getBilingualResult(fresh({ bilingual: { ...bilingual, certificate: 'none' } })).status === 'no', 'Sin acreditacion debe explicar el no');
+            });
+            await test('Bilingues: especialidad, idioma y situacion de practicas', () => {
+                for (const [specialty, language, expected] of [
+                    ['590061', 'Francés', 'no'], ['590061', 'Inglés', 'yes'],
+                    ['597038', 'Alemán', 'yes'], ['598002', 'Alemán', 'no'],
+                    ['590001', '', 'pending'], ['', 'Inglés', 'pending'], ['other', 'Inglés', 'no']
+                ]) {
+                    const bilingual = { enabled: true, specialty, language, certificate: 'eoi-B2' };
+                    assert(api.getBilingualResult(fresh({ bilingual })).status === expected, `${specialty}/${language} incorrecto`);
+                }
+                assert(api.getBilingualResult(fresh({
+                    bilingual: { enabled: true, specialty: '590001', language: 'Inglés', certificate: 'fce' },
+                    seniorityWizard: { status: 'practice' }
+                })).status === 'no', 'No debe dar un si en practicas');
+            });
+            await test('Bilingues: fechas antiguas y requisitos de las certificaciones', () => {
+                const base = { enabled: true, specialty: '590001', language: 'Inglés' };
+                for (const [certificate, issuedDate, expected] of [
+                    ['aptis-old-b2', '', 'pending'], ['aptis-old-b2', '2024-08-31', 'yes'],
+                    ['aptis-old-b2', '2024-09-01', 'no'], ['aptis-old-c1', '2024-02-30', 'pending'],
+                    ['pearson-old-b2', '2023-03-31', 'yes'], ['pearson-old-c1', '2023-04-01', 'no']
+                ]) {
+                    assert(api.getBilingualResult(fresh({ bilingual: { ...base, certificate, issuedDate } })).status === expected, `Fecha ${certificate}/${issuedDate}`);
+                }
+                for (const certificate of ['aptis-esol-b2', 'languagecert-communicator', 'toeic-c1', 'degree']) {
+                    assert(api.getBilingualResult(fresh({ bilingual: { ...base, certificate } })).status === 'pending', `Falta confirmar ${certificate}`);
+                    const s = fresh({ bilingual: { ...base, certificate, conditionsConfirmed: true } });
+                    assert(api.getBilingualResult(s).status === 'yes', `No admite ${certificate}`);
+                    near(api.Calculators.total(s), 0);
+                }
+            });
+            await test('Bilingues: cajas sincronizadas, resultado en resumen y actualizacion de EOI', () => {
+                api.setState(fresh());
+                app.switchTab(3);
+                assert(!app.document.querySelector('[data-bilingual-result]'), 'Resultado sin activar');
+                api.setBilingualAnswer('enabled', true);
+                api.setBilingualAnswer('specialty', '590001');
+                api.setBilingualAnswer('language', 'Inglés');
+                api.addIdiomaForOrigin('EOI');
+                api.updateIdioma(0, 'idioma', 'Inglés');
+                api.updateIdioma(0, 'nivel', 'B2');
+                assert(app.document.querySelector('[data-bilingual-result="yes"]'), 'El nivel EOI no actualiza el resultado');
+                app.switchTab(5);
+                assert(app.document.querySelector('#bilingual-enabled').checked, '5.5 no comparte la casilla');
+                assert(app.document.querySelector('#bilingual-specialty').value === '590001', '5.5 no comparte la especialidad');
+                assert(parsed(api.renderSummary()).querySelector('[data-bilingual-result="yes"]'), 'Falta el resultado final');
+                api.updateIdioma(0, 'nivel', 'B1');
+                assert(app.document.querySelector('[data-bilingual-result="pending"]'), 'Resultado obsoleto al bajar el nivel');
+                api.setBilingualAnswer('certificate', 'aptis-esol-b2');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                assert(app.document.querySelector('[data-bilingual-result="yes"]'), 'Aptis confirmado no habilita');
+                api.setBilingualAnswer('language', 'Francés');
+                assert(!api.getState().bilingual.conditionsConfirmed && !api.getState().bilingual.certificate, 'Reutiliza acreditacion de otro idioma');
+                api.setBilingualAnswer('enabled', false);
+                assert(!parsed(api.renderSummary()).querySelector('[data-bilingual-result]'), 'Resultado persiste al desactivar');
+            });
+            await test('Bilingues: indicacion de presentacion enlazada con el titulo elegido', () => {
+                for (const [certificate, label] of [['fce', 'First Certificate in English'], ['cae', 'Certificate in Advanced English']]) {
+                    api.setState(fresh({ bilingual: { enabled: true, specialty: '590001', language: 'Inglés', certificate } }));
+                    for (const render of [api.renderSection3, api.renderSection5]) {
+                        const result = parsed(render()).querySelector('[data-bilingual-result="yes"]');
+                        const link = result.querySelector('a[href="https://educaweb.juntadeandalucia.es/public/?x=FA9EDDF6"]');
+                        assert(link && link.textContent === 'finalices tu instancia', 'Falta enlace de presentacion');
+                        assert(link.target === '_blank' && link.rel.includes('noopener') && link.rel.includes('noreferrer'), 'Enlace externo inseguro');
+                        assert(link.querySelector('svg[aria-hidden="true"]'), 'Falta flecha de enlace externo');
+                        assert(result.querySelector('strong').textContent.includes(label), 'No utiliza el titulo seleccionado');
+                        assert(result.textContent.includes('aún no consta tu acreditación'), 'Falta condicion de acreditacion registrada');
+                        assert(!result.textContent.includes('Esto no garantiza'), 'Mantiene el texto sustituido');
+                    }
+                    const summary = parsed(api.renderSummary()).querySelector('[data-bilingual-result="yes"]');
+                    assert(summary.textContent.includes(`puestos bilingües de inglés gracias al título o certificado de ${label}`), 'Resumen sin idioma o certificado dinamico');
+                    assert(!summary.textContent.includes('finalices tu instancia'), 'Resumen repite instrucciones de presentacion');
+                    assert(summary.textContent.includes('Comprobación orientativa'), 'Resumen pierde aviso orientativo');
+                }
+            });
+            await test('Bilingues: los meritos preseleccionan idioma y acortan las preguntas', () => {
+                api.setState(fresh({ idiomas: [{ idioma: 'Inglés', origen: 'EOI', nivel: 'B2' }] }));
+                app.switchTab(3);
+                api.setBilingualAnswer('enabled', true);
+                api.setBilingualAnswer('specialty', '590001');
+                assert(api.getState().bilingual.language === 'Inglés', 'No detecta el idioma EOI');
+                assert(api.getState().bilingual.certificate === 'eoi-B2', 'No detecta el nivel EOI');
+                assert(!app.document.querySelector('#bilingual-level'), 'Pregunta otra vez el nivel EOI');
+                api.updateIdioma(0, 'nivel', 'C1');
+                assert(api.getState().bilingual.certificate === 'eoi-C1', 'No actualiza al subir el nivel');
+                api.updateIdioma(0, 'nivel', 'B1');
+                assert(api.getBilingualResult(api.getState()).status === 'pending', 'Mantiene una habilitacion eliminada');
+                assert(app.document.querySelector('#bilingual-level'), 'No permite indicar otra acreditacion');
+
+                api.setState(fresh({ idiomas: [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', certificado: 'CertAcles B2' }] }));
+                api.setBilingualAnswer('enabled', true);
+                assert(!api.getState().bilingual.language, 'Acepta un certificado ACLES sin correspondencia bilingue');
+                const fce = api.ACLES_CERTIFICATES.Inglés.findIndex(([name]) => name === 'Cambridge First Certificate in English (FCE)');
+                api.updateIdioma(0, 'certificado', String(fce));
+                assert(api.getState().bilingual.language === 'Inglés' && api.getState().bilingual.certificate === 'fce', 'No detecta el certificado ACLES exacto');
+                assert(api.getState().idiomas.length === 1, 'Duplica un merito introducido');
+                app.removeIdioma(0);
+                assert(!api.getState().bilingual.certificate, 'Mantiene el certificado eliminado en 5.5');
+
+                api.setState(fresh({ idiomas: [
+                    { idioma: 'Inglés', origen: 'EOI', nivel: 'B2' },
+                    { idioma: 'Francés', origen: 'EOI', nivel: 'C1' }
+                ] }));
+                api.setBilingualAnswer('enabled', true);
+                assert(!api.getState().bilingual.language, 'Elige arbitrariamente entre varios idiomas');
+                api.setBilingualAnswer('language', 'Francés');
+                api.updateIdioma(0, 'nivel', 'C2');
+                assert(api.getState().bilingual.language === 'Francés', 'Cambia el idioma elegido al editar otro');
+            });
+            await test('Bilingues: autocompleta EOI sin sobrescribir filas manuales', () => {
+                const manual = { idioma: 'Francés', origen: 'EOI', nivel: 'B2' };
+                api.setState(fresh({
+                    idiomas: [manual],
+                    bilingual: { enabled: true, specialty: '590001', language: 'Inglés' }
+                }));
+                app.switchTab(5);
+                api.setBilingualAnswer('certificate', 'eoi-B2');
+                let s = api.getState();
+                assert(s.idiomas.length === 2 && s.idiomas[0] === manual, 'Modifica un merito manual');
+                assert(s.lang33Mode === 'eoi' && s.idiomas[1].fromBilingual, 'No activa y completa 3.3');
+                near(api.Calculators.calc33(s), 4);
+                assert(app.document.querySelector('[data-bilingual-autofill]'), 'Autocompleta sin avisar');
+                assert(app.document.querySelector('#bilingual-certificate'), 'La deteccion de su propia fila oculta los controles');
+                api.setBilingualAnswer('certificate', 'eoi-C1');
+                s = api.getState();
+                assert(s.idiomas.length === 2 && s.idiomas[1].nivel === 'C1', 'Duplica la fila automatica al corregir nivel');
+                near(api.Calculators.calc33(s), 5);
+                api.updateIdioma(1, 'nivel', 'B1');
+                assert(!s.idiomas[1].fromBilingual, 'No conserva como manual una fila corregida');
+                assert(api.getBilingualResult(s).status === 'pending', 'No sincroniza la correccion manual a B1');
+                api.setBilingualAnswer('certificate', 'eoi-C2');
+                assert(api.getState().idiomas.includes(manual) && api.getState().idiomas.some(item => item.nivel === 'B1'), 'Sobrescribe datos corregidos manualmente');
+                assert(api.getState().idiomas.filter(item => item.fromBilingual).length === 1, 'Crea varias filas automaticas');
+                app.removeIdioma(api.getState().idiomas.findIndex(item => item.fromBilingual));
+                assert(api.getBilingualResult(api.getState()).status === 'pending', 'Mantiene una acreditacion automatica borrada');
+            });
+            await test('Bilingues: ACLES solo se autocompleta por coincidencia exacta y tras confirmar', () => {
+                api.setState(fresh({ bilingual: { enabled: true, specialty: '590001', language: 'Inglés' } }));
+                app.switchTab(3);
+                api.addIdiomaForOrigin('ACLES');
+                api.setBilingualAnswer('certificate', 'fce');
+                assert(api.getState().idiomas.length === 1, 'No reutiliza una fila vacia');
+                assert(api.getState().idiomas[0].certificado === 'Cambridge First Certificate in English (FCE)', 'Certificado 5.5 incorrecto');
+                assert(api.getState().lang55Mode === 'other', 'No activa 5.5');
+                near(api.Calculators.calc55(api.getState()), 2);
+                api.setBilingualAnswer('certificateLevel', 'C1');
+                near(api.Calculators.calc55(api.getState()), 0);
+                api.setBilingualAnswer('certificate', 'cae');
+                near(api.Calculators.calc55(api.getState()), 3);
+                api.setBilingualAnswer('certificate', 'aptis-esol-c1');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                assert(api.getBilingualResult(api.getState()).status === 'yes', 'Aptis pierde la validez bilingue');
+                near(api.Calculators.calc55(api.getState()), 0);
+                api.setBilingualAnswer('certificate', 'languagecert-communicator');
+                near(api.Calculators.calc55(api.getState()), 0);
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                near(api.Calculators.calc55(api.getState()), 2);
+                api.setBilingualAnswer('certificate', 'toefl-c1');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                near(api.Calculators.calc55(api.getState()), 0);
+                assert(!api.getState().idiomas.length, 'Inventa un tramo ACLES para una equivalencia ambigua');
+                api.setBilingualAnswer('certificate', 'degree');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                near(api.Calculators.total(api.getState()), 0);
+            });
+            await test('Bilingues: certificados con condiciones se preseleccionan sin duplicar puntos', () => {
+                const manual = { idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', nivelFiltro: 'B2', certificado: 'Trinity ISE II (B2)' };
+                api.setState(fresh({ idiomas: [manual] }));
+                app.switchTab(5);
+                api.setBilingualAnswer('enabled', true);
+                api.setBilingualAnswer('specialty', '590001');
+                assert(api.getState().bilingual.certificate === 'ise-II', 'No preselecciona el certificado condicionado');
+                assert(app.document.querySelector('#bilingual-certificate').value === 'ise-II', 'No muestra la preseleccion');
+                assert(api.getBilingualResult(api.getState()).status === 'pending', 'Omite las condiciones de Trinity');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                assert(api.getBilingualResult(api.getState()).status === 'yes', 'No reconoce las condiciones confirmadas');
+                assert(api.getState().idiomas.length === 1 && api.getState().idiomas[0] === manual, 'Duplica o cambia un merito manual');
+                api.setBilingualAnswer('certificate', 'ise-II');
+                assert(api.getState().idiomas.length === 1 && !manual.fromBilingual, 'Convierte un merito manual en automatico');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                near(api.Calculators.calc55(api.getState()), 2);
+            });
+            await test('Bilingues: aviso rojo distingue acreditacion bilingue de merito ACLES', () => {
+                api.setState(fresh({ bilingual: { enabled: true, specialty: '590001', language: 'Inglés' } }));
+                app.switchTab(3);
+                api.setBilingualAnswer('certificate', 'aptis-esol-b2');
+                let warning = app.document.querySelector('[data-bilingual-merit-warning]');
+                assert(warning && warning.classList.contains('border-red-500') && warning.getAttribute('role') === 'alert', 'No muestra aviso rojo al seleccionar Aptis');
+                assert(warning.textContent.includes('no puntúa') && warning.textContent.includes('5.5'), 'No explica el alcance de la exclusion');
+                const link = warning.querySelector('a');
+                assert(link.textContent.includes('28/07/2025') && link.href.includes('Tablas_de_certificados_reconocidos_por_ACLES.pdf'), 'Fecha o tabla incorrecta');
+                assert(link.target === '_blank' && link.rel.includes('noopener') && link.querySelector('svg[aria-hidden="true"]'), 'Enlace sin proteccion o flecha');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                assert(api.getBilingualResult(api.getState()).status === 'yes' && app.document.querySelector('[data-bilingual-merit-warning]'), 'Confunde acceso bilingue con puntuacion');
+                near(api.Calculators.total(api.getState()), 0);
+                app.switchTab(5);
+                assert(app.document.querySelector('[data-bilingual-merit-warning]'), '5.5 no comparte el aviso');
+                for (const certificate of ['eoi-B2', 'fce', 'toefl-c1', 'pearson-b2']) {
+                    api.setBilingualAnswer('certificate', certificate);
+                    assert(!app.document.querySelector('[data-bilingual-merit-warning]'), `Declara no reconocido un certificado reconocido: ${certificate}`);
+                }
+                api.setBilingualAnswer('certificate', 'gese-8');
+                assert(app.document.querySelector('[data-bilingual-merit-warning]').textContent.includes('no puntúa'), 'No avisa sobre GESE');
+                api.setBilingualAnswer('certificate', 'degree');
+                warning = app.document.querySelector('[data-bilingual-merit-warning]');
+                assert(warning.textContent.includes('mérito académico') && !warning.textContent.includes('no puntúa como mérito de idiomas'), 'Excluye indebidamente otros meritos de una titulacion universitaria');
+                api.setBilingualAnswer('certificate', 'anglia-b2');
+                assert(app.document.querySelector('[data-bilingual-merit-warning]').textContent.includes('denominación exacta'), 'Trata una equivalencia pendiente como no reconocida');
+                api.setBilingualAnswer('language', 'Francés');
+                api.setBilingualAnswer('certificate', 'ds');
+                assert(!app.document.querySelector('[data-bilingual-merit-warning]'), 'Confunde diferencia de nivel con ausencia en ACLES');
+            });
+            await test('Bilingues: estado guardado y borrado sin modificar defaults', () => {
+                const key = app.eval('STORAGE_KEY');
+                const previous = app.localStorage.getItem(key);
+                try {
+                    api.setState(fresh());
+                    app.localStorage.setItem(key, JSON.stringify({ bilingual: { enabled: true, specialty: '597031', language: 'Francés', certificate: 'delf' } }));
+                    api.loadState();
+                    assert(api.getBilingualResult(api.getState()).status === 'yes', 'No recupera el resultado guardado');
+                    app.switchTab(3);
+                    assert(app.document.querySelector('#bilingual-level').value === 'B2', 'No recupera el nivel de un certificado guardado anteriormente');
+                    assert(api.getState().bilingual.conditionsConfirmed === false, 'No migra defaults');
+                    app.confirmResetAll();
+                    assert(!api.getState().bilingual.enabled && !api.INITIAL_STATE.bilingual.enabled, 'El borrado conserva respuestas');
+                    api.setBilingualAnswer('enabled', true);
+                    assert(!api.INITIAL_STATE.bilingual.enabled, 'Las respuestas mutan el estado inicial');
+                    app.confirmResetAll();
+                } finally {
+                    if (previous === null) app.localStorage.removeItem(key);
+                    else app.localStorage.setItem(key, previous);
+                }
+            });
+            await test('Bilingues: nivel intermedio filtra certificados y reinicia requisitos', () => {
+                api.setState(fresh());
+                app.switchTab(3);
+                api.setBilingualAnswer('enabled', true);
+                api.setBilingualAnswer('specialty', '590001');
+                api.setBilingualAnswer('language', 'Inglés');
+                assert(app.document.querySelector('#bilingual-level'), 'Falta el nivel intermedio');
+                assert(!app.document.querySelector('#bilingual-certificate'), 'Muestra titulos antes de elegir nivel');
+                for (const [language, level, included, excluded] of [
+                    ['Inglés', 'B2', 'fce', 'cae'],
+                    ['Inglés', 'C1', 'cae', 'cpe'],
+                    ['Inglés', 'C2', 'cpe', 'fce'],
+                    ['Francés', 'B2', 'delf', 'dalf-c1'],
+                    ['Francés', 'C1', 'dalf-c1', 'dalf-c2'],
+                    ['Alemán', 'C1', 'goethe-c1', 'goethe-b2']
+                ]) {
+                    api.setBilingualAnswer('language', language);
+                    api.setBilingualAnswer('certificateLevel', level);
+                    const select = app.document.querySelector('#bilingual-certificate');
+                    assert(select.querySelector(`option[value="${included}"]`), `Falta certificado de ${language}/${level}`);
+                    assert(!select.querySelector(`option[value="${excluded}"]`), `Ofrece otro nivel en ${language}/${level}`);
+                    api.setBilingualAnswer('certificate', included);
+                    assert(api.getBilingualResult(api.getState()).status === 'yes', 'Filtro altera la habilitacion');
+                }
+                api.setBilingualAnswer('language', 'Inglés');
+                api.setBilingualAnswer('certificateLevel', 'B2');
+                api.setBilingualAnswer('certificate', 'aptis-esol-b2');
+                api.setBilingualAnswer('conditionsConfirmed', true);
+                api.setBilingualAnswer('certificateLevel', 'C1');
+                assert(!api.getState().bilingual.certificate && !api.getState().bilingual.conditionsConfirmed, 'Mantiene la acreditacion del nivel anterior');
+                assert(api.getBilingualResult(api.getState()).status === 'pending', 'Mantiene el si del nivel anterior');
+                api.setBilingualAnswer('certificateLevel', 'other');
+                assert(app.document.querySelector('#bilingual-certificate option[value="degree"]'), 'Excluye titulaciones sin nivel MCER');
+                assert(!app.document.querySelector('#bilingual-certificate option[value="fce"]'), 'Mezcla certificados de nivel con titulaciones');
+                api.setBilingualAnswer('certificateLevel', 'none');
+                assert(api.getBilingualResult(api.getState()).status === 'no', 'B1 o ausencia no produce resultado negativo');
+                assert(!app.document.querySelector('#bilingual-certificate'), 'Ofrece titulos tras indicar que no tiene acreditacion');
+            });
+            await test('Certificados bilingues y ACLES ordenados alfabeticamente sin cambiar sus valores', () => {
+                const collator = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+                const assertOrdered = select => {
+                    const names = [...select.options].filter(option => option.value && option.value !== 'none').map(option => option.textContent);
+                    assert(names.every((name, index) => index === 0 || collator.compare(names[index - 1], name) <= 0), 'Certificados fuera de orden alfabetico');
+                };
+                for (const language of ['Inglés', 'Francés', 'Alemán']) {
+                    for (const level of ['B2', 'C1', 'C2']) {
+                        api.setState(fresh({
+                            lang55Mode: 'other',
+                            idiomas: [{ idioma: language, origen: 'ACLES', nivel: '', nivelFiltro: level, certificado: '' }],
+                            bilingual: { enabled: true, specialty: '590001', language, certificateLevel: level }
+                        }));
+                        app.switchTab(5);
+                        assertOrdered(app.document.querySelector('[aria-label="Certificado ACLES reconocido"]'));
+                        assertOrdered(app.document.querySelector('#bilingual-certificate'));
+                    }
+                }
+                api.setState(fresh({
+                    lang55Mode: 'other',
+                    idiomas: [{ idioma: 'Inglés', origen: 'ACLES', nivel: 'B2', nivelFiltro: 'B2', certificado: 'Cambridge First Certificate in English (FCE)' }]
+                }));
+                app.switchTab(5);
+                const select = app.document.querySelector('[aria-label="Certificado ACLES reconocido"]');
+                assert(select.options[1].textContent.startsWith('Anglia'), 'Mantiene el orden antiguo de ACLES');
+                assert(select.selectedOptions[0].textContent.includes('First Certificate'), 'La reordenacion cambia el certificado seleccionado');
+                api.updateIdioma(0, 'certificado', select.value);
+                assert(api.getState().idiomas[0].certificado === 'Cambridge First Certificate in English (FCE)', 'El indice ordenado selecciona otro certificado');
+                near(api.Calculators.calc55(api.getState()), 2);
+            });
+            await test('Bilingues: formulario y resultado caben en movil', () => {
+                const previousWidth = frame.style.width;
+                try {
+                    api.setState(fresh({ bilingual: { enabled: true, specialty: '590001', language: 'Inglés', certificate: 'degree', conditionsConfirmed: true } }));
+                    for (const width of [320, 375, 430]) {
+                        frame.style.width = `${width}px`;
+                        app.switchTab(3);
+                        const box = app.document.querySelector('#bilingual-checker');
+                        assert(box.scrollWidth <= box.clientWidth, `Formulario desborda a ${width}px`);
+                        app.switchTab(7);
+                        const result = app.document.querySelector('[data-bilingual-result]');
+                        assert(result.scrollWidth <= result.clientWidth, `Resultado desborda a ${width}px`);
+                    }
+                } finally {
+                    frame.style.width = previousWidth;
+                }
+            });
+            await test('Aviso de Religion distingue contrato laboral de servicios funcionariales', () => {
+                api.setState(fresh());
+                const section = parsed(api.renderSection1());
+                const notice = section.querySelector('[role="note"]');
+                assert(notice.textContent.includes('contrato laboral') && notice.textContent.includes('otros periodos'), 'Exclusion excesiva o no explicada');
+                assert(notice.querySelector('a[href*="BOE-A-2007-11450"]') && notice.querySelector('a[href$="#page=26"]'), 'Faltan fuentes oficiales');
+                assert(!section.textContent.includes('Matemáticas, Religión'), 'Mantiene el ejemplo incorrecto');
+                assert(app.document.querySelector('#wizard-body-start-text').closest('[data-wizard-step]').textContent.includes('contratos laborales'), 'Cuestionario contradictorio');
+            });
             await test('Fase de todas las olas vuelve a aleatorizarse entre cargas', () => {
                 api.setState(fresh());
                 app.switchTab(1);

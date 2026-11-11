@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html { scrollbar-gutter: stable; }
+        html.landing-open, html.landing-open body {
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+        html.landing-open, html.landing-open body, #landing-page > .landing-card {
+            scrollbar-width: none;
+        }
+        html.landing-open::-webkit-scrollbar,
+        html.landing-open body::-webkit-scrollbar,
+        #landing-page > .landing-card::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+    </style>
     <title>Calculadora Concurso Traslados 2026 Andalucía</title>
     <meta name="description" content="Calculadora Concurso Traslados 2026 Andalucía">
     <meta name="theme-color" content="#007849">
@@ -31,7 +48,6 @@
         }
     </script>
     <style>
-        html { scrollbar-gutter: stable; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -256,10 +272,6 @@
             position: relative;
             z-index: 1;
         }
-        html.landing-open, html.landing-open body {
-            overflow: hidden;
-            overscroll-behavior: none;
-        }
         #landing-page > .landing-card {
             max-height: calc(100% - 2rem);
             overflow-y: auto;
@@ -384,7 +396,7 @@
                 <path fill="#22c55e" d="M0 475 C180 420 340 520 520 470 S830 410 1010 475 S1280 530 1440 465 L1440 1200 L0 1200 Z"/>
             </svg>
         </div>
-        <div class="landing-card bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
+        <div class="landing-card scrollbar-hide bg-white dark:bg-gray-800 max-w-lg w-full rounded-2xl shadow-xl p-8 text-center border border-gray-100 dark:border-gray-700">
             <button onclick="toggleDarkMode()" title="Cambiar modo diurno/nocturno"
                     class="absolute top-3 right-3 rounded-xl border-2 border-gray-800 bg-gray-800 p-2 text-white shadow-sm transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 dark:focus:ring-offset-gray-800">
                 <svg class="hidden h-3.5 w-3.5 text-gray-900 dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -664,7 +676,7 @@
                 <div data-wizard-step="all" class="hidden">
                     <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-200">Antigüedad en el cuerpo</h3>
                     <label for="wizard-body-start-text" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Desde qué fecha acumulas servicios docentes en este mismo cuerpo?</label>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Incluye interinidad, prácticas y carrera. Si fuiste interino/a, pon tu primera fecha de alta.</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Incluye interinidad, prácticas y carrera en el cuerpo docente; no contratos laborales como profesor/a de Religión. Si fuiste interino/a, pon tu primera fecha de alta.</p>
                     
                     <label class="flex items-center gap-2 mt-3 cursor-pointer">
                         <input type="checkbox" id="wizard-no-interino" onchange="toggleNoInterino()" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary">
@@ -822,6 +834,103 @@
             Turco: [['telc Türkçe B1', 'B1'], ['telc Türkçe B2', 'B2']]
         };
         const IDIOMAS_ACLES = Object.keys(ACLES_CERTIFICATES);
+        const BILINGUAL_BOJA_URL = 'https://www.juntadeandalucia.es/boja/2026/210/BOJA26-210-00168-14181-01_00345411.pdf';
+        const BILINGUAL_LANGUAGES = ['Francés', 'Inglés', 'Alemán'];
+        const BILINGUAL_SPECIALTIES = [
+            ['590001', 'Filosofía', [0, 1, 2]], ['590005', 'Geografía e Historia', [0, 1, 2]],
+            ['590006', 'Matemáticas', [0, 1, 2]], ['590007', 'Física y Química', [0, 1, 2]],
+            ['590008', 'Biología y Geología', [0, 1, 2]], ['590009', 'Dibujo', [0, 1, 2]],
+            ['590016', 'Música', [0, 1, 2]], ['590017', 'Educación Física', [0, 1, 2]],
+            ['590019', 'Tecnología', [0, 1, 2]], ['590061', 'Economía', [1]],
+            ['590101', 'Administración de Empresas', [1]], ['590102', 'Análisis y Química Industrial', [1]],
+            ['590104', 'Construcciones Civiles y Edificación', [1]],
+            ['590105', 'Formación y Orientación Laboral', [0, 1]], ['590106', 'Hostelería y Turismo', [0, 1]],
+            ['590107', 'Informática', [1]], ['590108', 'Intervención Sociocomunitaria', [1]],
+            ['590110', 'Organización y Gestión Comercial', [0, 1]], ['590116', 'Procesos Industria Alimentaria', [1]],
+            ['590117', 'Procesos Diagnósticos Clínicos y Productos Ortoprotésicos', [1]],
+            ['590118', 'Procesos Sanitarios', [1]], ['590119', 'Procesos y Medios de Comunicación', [1]],
+            ['590120', 'Procesos y Producción Textil, Confección y Piel', [1]],
+            ['590124', 'Sistemas Electrónicos', [1]], ['590125', 'Sistemas Electrotécnicos y Automáticos', [1]],
+            ['590206', 'Instalaciones Electrotécnicas', [1]],
+            ['590214', 'Operaciones y Equipos de Elaboración de Productos Alimentarios', [1]],
+            ['590219', 'Procedimientos de Diagnóstico Clínico y Ortoprotésico', [1]],
+            ['590220', 'Procedimientos Sanitarios y Asistenciales', [1]], ['590221', 'Procesos Comerciales', [0, 1]],
+            ['590222', 'Procesos de Gestión Administrativa', [1]], ['590225', 'Servicios a la Comunidad', [1]],
+            ['590227', 'Sistemas y Aplicaciones Informáticas', [1]],
+            ['590229', 'Técnicas y Procedimientos de Imagen y Sonido', [1]], ['590231', 'Equipos Electrónicos', [1]],
+            ['598001', 'Cocina y Pastelería', [1]], ['598002', 'Estética', [1]],
+            ['598006', 'Patronaje y Confección', [1]], ['598009', 'Servicio de Restauración', [1]],
+            ['597031', 'Educación Infantil', [0, 1, 2]], ['597034', 'Educación Física', [0, 1, 2]],
+            ['597035', 'Música', [0, 1, 2]], ['597038', 'Educación Primaria', [0, 1, 2]]
+        ];
+        const BILINGUAL_CERTIFICATES = {
+            Francés: [
+                { id: 'dl', label: 'Diplôme de Langue Française (DL, Alliance Française)', level: 'B2', aclesNames: ['Alliance Française — Diplôme de Langue Française (DLF)'] },
+                { id: 'delf', label: 'DELF second degré o DELF B2', level: 'B2', aliases: ['DELF B2'] },
+                { id: 'ds', label: 'Diplôme Supérieur d’Études Françaises Modernes (DS)', level: 'C1', aclesNames: ['Alliance Française — Diplôme Supérieur d’Études Françaises Modernes (DS)'] },
+                { id: 'dalf', label: 'Diplôme Approfondi de Langue Française (DALF)', level: '', aclesReview: true },
+                { id: 'dalf-c1', label: 'DALF C1', level: 'C1', aliases: ['DALF C1'] },
+                { id: 'dalf-c2', label: 'DALF C2', level: 'C2', aliases: ['DALF C2'] },
+                { id: 'dhef', label: 'Diplôme de Hautes Études Françaises (DHEF)', level: 'C2', aclesNames: ['Alliance Française — Diplôme de Hautes Études Françaises (DHEF)'] }
+            ],
+            Inglés: [
+                { id: 'fce', label: 'First Certificate in English (FCE, Cambridge)', level: 'B2', aliases: ['Cambridge First Certificate in English (FCE)'] },
+                { id: 'cae', label: 'Certificate in Advanced English (CAE, Cambridge)', level: 'C1', aliases: ['Cambridge Certificate in Advanced English (CAE)'] },
+                { id: 'cpe', label: 'Certificate of Proficiency in English (CPE, Cambridge)', level: 'C2', aliases: ['Cambridge Certificate of Proficiency in English (CPE)'] },
+                ...[['II', 'B2'], ['III', 'C1'], ['IV', 'C2']].map(([grade, level]) => ({
+                    id: `ise-${grade}`, label: `Trinity ISE ${grade} (Reading & Writing y Speaking & Listening)`, level,
+                    aliases: [`Trinity ISE ${grade} (${level})`], condition: 'Tengo acreditados los módulos Reading & Writing y Speaking & Listening.'
+                })),
+                ...[['8', 'B2'], ['9', 'B2'], ['10', 'C1'], ['11', 'C1'], ['12', 'C2']].map(([grade, level]) => ({
+                    id: `gese-${grade}`, label: `Trinity GESE grade ${grade}`, level
+                })),
+                { id: 'aptis-old-b2', label: 'Aptis general / Aptis for teachers (anterior al 01/09/2024)', level: 'B2', before: '2024-09-01' },
+                { id: 'aptis-old-c1', label: 'Aptis C (anterior al 01/09/2024)', level: 'C1', before: '2024-09-01' },
+                { id: 'aptis-esol-b2', label: 'Aptis ESOL General / for teachers, Level 1 Certificate', level: 'B2', condition: 'Mi certificado es Aptis ESOL Level 1 y cumple Listening 40–44, Reading 38–45, Writing 40–47 y Speaking 41–47.' },
+                { id: 'aptis-esol-c1', label: 'Aptis ESOL General / for teachers, Level 2 Certificate', level: 'C1', condition: 'Mi certificado es Aptis ESOL Level 2 y cumple Listening ≥45, Reading ≥46, Writing ≥48 y Speaking ≥48.' },
+                { id: 'aptis-advanced-b2', label: 'Aptis ESOL Advanced', level: 'B2', condition: 'Cumplo Listening 24–37, Reading 28–39, Writing 37–43 y Speaking 37–43.' },
+                { id: 'aptis-advanced-c1', label: 'Aptis ESOL Advanced', level: 'C1', condition: 'Cumplo Listening 38–49, Reading 40–49, Writing 44–49 y Speaking 44–49.' },
+                { id: 'aptis-advanced-c2', label: 'Aptis ESOL Advanced', level: 'C2', condition: 'Cumplo al menos 50 en Listening, Reading, Writing y Speaking.' },
+                { id: 'pearson-old-b2', label: 'Pearson PTE General Level 3 (anterior al 01/04/2023)', level: 'B2', before: '2023-04-01', aclesReview: true },
+                { id: 'pearson-old-c1', label: 'Pearson PTE General Level 4 (anterior al 01/04/2023)', level: 'C1', before: '2023-04-01', aclesReview: true },
+                { id: 'pearson-b2', label: 'Pearson Edexcel Level 1 Certificate (CEFR B2, English International Certificate)', level: 'B2', aclesNames: ['Pearson English International Certificate (PEIC) — ESOL Level 1'] },
+                { id: 'pearson-c1', label: 'Pearson Edexcel Level 2 Certificate (CEFR C1, English International Certificate)', level: 'C1', aclesNames: ['Pearson English International Certificate (PEIC) — ESOL Level 2'] },
+                { id: 'pearson-c2', label: 'Pearson Edexcel Certificate in ESOL International Level 3', level: 'C2', aclesNames: ['Pearson English International Certificate (PEIC) — ESOL Level 3'] },
+                { id: 'anglia-b2', label: 'AIM Awards Level 1 in ESOL International (Anglia)', level: 'B2', aclesReview: true },
+                { id: 'anglia-c1', label: 'AIM Awards Level 2 in ESOL International (Anglia)', level: 'C1', aclesReview: true },
+                { id: 'anglia-c2', label: 'AIM Qualifications Level 3 Certificate (Anglia Mastery)', level: 'C2', aclesReview: true },
+                ...[['communicator', 'Communicator', 'B2'], ['expert', 'Expert', 'C1'], ['mastery', 'Mastery', 'C2']].map(([id, label, level]) => ({
+                    id: `languagecert-${id}`, label: `LanguageCert International ESOL ${label}`, level,
+                    aliases: [`LanguageCert International ESOL ${label} (${level})`],
+                    condition: 'Presento conjuntamente los certificados de Listening, Reading & Writing y de Speaking del mismo nivel.'
+                })),
+                { id: 'toefl-b2', label: 'TOEFL iBT (72–94)', level: 'B2', aliases: ['TOEFL iBT 72–94'], condition: 'Mi TOEFL es iBT y acredita una puntuación de 72 a 94.' },
+                { id: 'toefl-c1', label: 'TOEFL iBT (95–120)', level: 'C1', aliases: ['TOEFL iBT 95–113', 'TOEFL iBT 114–120'], condition: 'Mi TOEFL es iBT y acredita una puntuación de 95 a 120.' },
+                { id: 'toeic-b2', label: 'TOEIC Listening & Reading + Speaking & Writing', level: 'B2', aliases: ['TOEIC (4 destrezas), nivel B2'], condition: 'Presento ambos certificados: Listening & Reading 785–944, Speaking 160–179 y Writing 150–179.' },
+                { id: 'toeic-c1', label: 'TOEIC Listening & Reading + Speaking & Writing', level: 'C1', aliases: ['TOEIC (4 destrezas), nivel C1'], condition: 'Presento ambos certificados: Listening & Reading 945–990, Speaking 180–200 y Writing 180–200.' },
+                { id: 'ielts-b2', label: 'IELTS (5,5–6,5)', level: 'B2', aliases: ['IELTS 5.5–6.5'], condition: 'Mi IELTS acredita una puntuación de 5,5 a 6,5.' },
+                { id: 'ielts-c1', label: 'IELTS (7,0–8,0)', level: 'C1', aliases: ['IELTS 7.0–8.0'], condition: 'Mi IELTS acredita una puntuación de 7,0 a 8,0.' },
+                { id: 'ielts-c2', label: 'IELTS (8,5–9)', level: 'C2', aliases: ['IELTS 8.5 o superior'], condition: 'Mi IELTS acredita una puntuación de 8,5 a 9.' },
+                { id: 'linguaskill-b2', label: 'Linguaskill (160–179)', level: 'B2', aliases: ['Linguaskill B2'], condition: 'Mi certificado es Linguaskill y acredita 160–179 puntos.' },
+                { id: 'linguaskill-c1', label: 'Linguaskill (≥180)', level: 'C1', aliases: ['Linguaskill C1', 'Linguaskill C2'], condition: 'Mi certificado es Linguaskill y acredita al menos 180 puntos.' },
+                { id: 'oxford-b2', label: 'Oxford Test of English Advanced (111–140 en las cuatro destrezas)', level: 'B2', aliases: ['Oxford Test of English Advanced B2'], condition: 'Mi certificado es Oxford Test of English Advanced y acredita 111–140 en Speaking, Listening, Reading y Writing.' },
+                { id: 'oxford-c1', label: 'Oxford Test of English Advanced (141–170 en las cuatro destrezas)', level: 'C1', aliases: ['Oxford Test of English Advanced C1'], condition: 'Mi certificado es Oxford Test of English Advanced y acredita 141–170 en Speaking, Listening, Reading y Writing.' }
+            ],
+            Alemán: [
+                { id: 'goethe-b2', label: 'Goethe-Zertifikat B2', level: 'B2', aliases: ['Goethe-Zertifikat B2'] },
+                { id: 'zdfb', label: 'Zertifikat Deutsch für den Beruf (ZDfB)', level: 'B2', aliases: ['Zertifikat Deutsch für den Beruf (ZDfB)'] },
+                { id: 'pwd', label: 'Prüfung Wirtschaftsdeutsch International (PWD)', level: 'C1', aliases: ['Prüfung Wirtschaftsdeutsch International (PWD)'] },
+                { id: 'zmp', label: 'Zentrale Mittelstufenprüfung (ZMP)', level: 'C1' },
+                { id: 'zop', label: 'Zentrale Oberstufenprüfung (ZOP)', level: 'C2' },
+                { id: 'goethe-c1', label: 'Goethe-Zertifikat C1', level: 'C1', aliases: ['Goethe-Zertifikat C1'] },
+                { id: 'kds', label: 'Kleines Deutsches Sprachdiplom (KDS)', level: 'C2', aliases: ['Kleines Deutsches Sprachdiplom (KDS)'] },
+                { id: 'gds', label: 'Großes Deutsches Sprachdiplom (GDS)', level: 'C2', aliases: ['Großes Deutsches Sprachdiplom (GDS)'] },
+                { id: 'testdaf-b2', label: 'TestDaF TDN 3 o 4', level: 'B2', aliases: ['TestDaF TDN 4 (B2+)', 'TestDaF TDN 4 (C1)'], condition: 'Mi certificado TestDaF acredita TDN 3 o 4 conforme al anexo XVI.' },
+                { id: 'testdaf-c1', label: 'TestDaF TDN 5', level: 'C1', aliases: ['TestDaF TDN 5'], condition: 'Mi certificado TestDaF acredita TDN 5 conforme al anexo XVI.' },
+                { id: 'dsd-b2', label: 'DSD II (B2 en una destreza o más)', level: 'B2', aliases: ['Deutsches Sprachdiplom DSD II'], condition: 'Mi DSD II acredita B2 en al menos una destreza.' },
+                { id: 'dsd-c1', label: 'DSD II (C1 en todas las destrezas)', level: 'C1', condition: 'Mi DSD II acredita C1 en todas las destrezas.' }
+            ]
+        };
         const normalizeLanguageName = (name) => String(name || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         const CUTOFF_DATE = '2026-11-26';
         const isSpanishLanguage = (name) => {
@@ -859,6 +968,7 @@
             lang33Mode: '',
             lang55Mode: '',
             idiomas: [],
+            bilingual: { enabled: false, specialty: '', language: '', certificateLevel: '', certificate: '', certificateFromMerit: false, conditionsConfirmed: false, issuedDate: '' },
             s3_3_dlse: 'none',
             s3_3_titulo_arte: 0,
             s3_3_titulo_musica: 0,
@@ -912,7 +1022,7 @@
             s6_6_tutor_aspirantes: 0
         };
 
-        let state = { ...INITIAL_STATE };
+        let state = { ...INITIAL_STATE, bilingual: { ...INITIAL_STATE.bilingual } };
         let activeTabId = 1;
 
         function applyTheme() {
@@ -1458,6 +1568,7 @@
                     state = { ...INITIAL_STATE, ...parsed };
                     if (!Array.isArray(state.idiomas)) state.idiomas = [];
                     state.seniorityWizard = { ...INITIAL_STATE.seniorityWizard, ...(parsed.seniorityWizard || {}) };
+                    state.bilingual = { ...INITIAL_STATE.bilingual, ...(parsed.bilingual || {}) };
                     const hasSection43Breakdown = ['s4_3_jefatura_years', 's4_3_jefatura_months', 's4_3_coordinacion_years', 's4_3_coordinacion_months', 's4_3_tutoria_years', 's4_3_tutoria_months']
                         .some(name => Object.prototype.hasOwnProperty.call(parsed, name));
                     if (!hasSection43Breakdown) {
@@ -1480,6 +1591,8 @@
                         if (['rumano', 'turco'].includes(normalizedName) && language.origen === 'EOI') language.origen = 'ACLES';
                     });
                     state.idiomas = state.idiomas.filter(language => !isSpanishLanguage(language.idioma));
+                    syncBilingualFromMerits();
+                    syncMeritsFromBilingual();
                 }
             } catch(e) {}
         }
@@ -1497,7 +1610,7 @@
             dialog.classList.remove('flex');
         }
         function confirmResetAll() {
-            state = { ...INITIAL_STATE, idiomas: [] };
+            state = { ...INITIAL_STATE, idiomas: [], bilingual: { ...INITIAL_STATE.bilingual } };
             saveState();
             closeResetConfirmation();
             renderMainContent();
@@ -1866,6 +1979,241 @@
                 <span class="ml-2 text-sm text-gray-800 dark:text-gray-200">${label}</span>
             </label>`;
 
+        const compareCertificateNames = (left, right) => left.localeCompare(right, 'es', { sensitivity: 'base', numeric: true });
+        function getBilingualCertificates(language) {
+            if (!BILINGUAL_LANGUAGES.includes(language)) return [];
+            return [
+                ...['B2', 'C1', 'C2'].map(level => ({ id: `eoi-${level}`, label: 'Escuela Oficial de Idiomas: certificado de nivel', level })),
+                { id: 'eoi-aptitud', label: 'EOI: certificado de aptitud (cinco cursos)', level: 'B2' },
+                { id: 'degree', label: 'Licenciatura o grado en Filología, Filosofía y Letras (sección Filología), Traducción e Interpretación, Lenguas Modernas o equivalente, en el idioma solicitado', level: '', condition: 'Mi titulación corresponde al apartado a) del anexo XVI y acredita este idioma; si no lo indica expresamente, aportaré la certificación académica personal.' },
+                { id: 'diploma', label: 'Diplomatura en Traducción e Interpretación en el idioma solicitado', level: '', condition: 'Mi diplomatura corresponde al apartado b) del anexo XVI y acredita este idioma; si no lo indica expresamente, aportaré la certificación académica personal.' },
+                { id: 'homologation', label: 'Homologación de titulación universitaria cursada en un país cuyo idioma sea el solicitado', level: '', condition: 'Tengo la homologación de la titulación universitaria prevista en el apartado d) del anexo XVI para este idioma.' },
+                ...BILINGUAL_CERTIFICATES[language]
+            ];
+        }
+        function getBilingualCertificateForMerit(merit) {
+            if (!BILINGUAL_LANGUAGES.includes(merit.idioma) || !['B2', 'C1', 'C2'].includes(merit.nivel)) return null;
+            const certificates = getBilingualCertificates(merit.idioma);
+            if ((merit.origen || 'EOI') === 'EOI') return certificates.find(item => item.id === `eoi-${merit.nivel}`);
+            if (merit.origen !== 'ACLES') return null;
+            const valid = (ACLES_CERTIFICATES[merit.idioma] || [])
+                .some(([name, level]) => name === merit.certificado && level === merit.nivel);
+            return valid ? certificates.find(item => item.level === merit.nivel && item.aliases?.includes(merit.certificado) && !item.before) || null : null;
+        }
+        function getExistingBilingualCertificate(s, language) {
+            return (s.idiomas || []).filter(merit => !merit.fromBilingual && merit.idioma === language)
+                .map(getBilingualCertificateForMerit).filter(certificate => certificate && !certificate.condition)
+                .sort((a, b) => PTS_IDIOMA[b.level] - PTS_IDIOMA[a.level])[0] || null;
+        }
+        function syncBilingualFromMerits() {
+            const answer = state.bilingual;
+            if (!answer?.enabled) return;
+            const matches = (state.idiomas || []).filter(merit => !merit.fromBilingual)
+                .map(merit => ({ merit, certificate: getBilingualCertificateForMerit(merit) }))
+                .filter(match => match.certificate);
+            if (!answer.language) {
+                const languages = [...new Set(matches.map(match => match.merit.idioma))];
+                if (languages.length === 1) answer.language = languages[0];
+            }
+            const match = matches.filter(item => item.merit.idioma === answer.language)
+                .sort((a, b) => PTS_IDIOMA[b.merit.nivel] - PTS_IDIOMA[a.merit.nivel])[0];
+            if (!match) {
+                if (answer.certificateFromMerit) {
+                    answer.certificate = '';
+                    answer.certificateLevel = '';
+                    answer.certificateFromMerit = false;
+                    answer.conditionsConfirmed = false;
+                }
+                return;
+            }
+            if (answer.certificate !== match.certificate.id) {
+                answer.conditionsConfirmed = false;
+                answer.issuedDate = '';
+            }
+            answer.certificate = match.certificate.id;
+            answer.certificateLevel = match.certificate.level;
+            answer.certificateFromMerit = true;
+        }
+        function syncMeritsFromBilingual() {
+            const answer = state.bilingual;
+            if (answer.certificateFromMerit) return false;
+            const hadGenerated = (state.idiomas || []).some(merit => merit.fromBilingual);
+            state.idiomas = (state.idiomas || []).filter(merit => !merit.fromBilingual);
+            if (!answer.enabled) return hadGenerated;
+            const certificate = getBilingualCertificates(answer.language).find(item => item.id === answer.certificate);
+            if (!certificate || (certificate.condition && !answer.conditionsConfirmed)) return hadGenerated;
+            if (certificate.before && (!parseSeniorityDate(answer.issuedDate) || answer.issuedDate >= certificate.before)) return hadGenerated;
+            let merit;
+            if (['eoi-B2', 'eoi-C1', 'eoi-C2'].includes(certificate.id)) {
+                merit = { idioma: answer.language, origen: 'EOI', nivel: certificate.level, nivelFiltro: '', certificado: '' };
+            } else if (certificate.aliases?.length === 1) {
+                const match = (ACLES_CERTIFICATES[answer.language] || [])
+                    .find(([name, level]) => name === certificate.aliases[0] && level === certificate.level);
+                if (match) merit = { idioma: answer.language, origen: 'ACLES', nivel: match[1], nivelFiltro: match[1], certificado: match[0] };
+            }
+            if (!merit) return hadGenerated;
+            const duplicate = state.idiomas.some(item => item.idioma === merit.idioma && (item.origen || 'EOI') === merit.origen
+                && item.nivel === merit.nivel && (merit.origen === 'EOI' || item.certificado === merit.certificado));
+            if (!duplicate) {
+                merit.fromBilingual = true;
+                const emptyIndex = state.idiomas.findIndex(item => (item.origen || 'EOI') === merit.origen && !item.idioma && !item.nivel && !item.nivelFiltro && !item.certificado);
+                if (emptyIndex < 0) state.idiomas.push(merit);
+                else state.idiomas[emptyIndex] = merit;
+            }
+            const modeName = merit.origen === 'EOI' ? 'lang33Mode' : 'lang55Mode';
+            const mode = merit.origen === 'EOI' ? 'eoi' : 'other';
+            const modeChanged = state[modeName] !== mode;
+            state[modeName] = mode;
+            return hadGenerated || !duplicate || modeChanged;
+        }
+        function getBilingualResult(s) {
+            const answer = s.bilingual || INITIAL_STATE.bilingual;
+            const specialty = BILINGUAL_SPECIALTIES.find(([code]) => code === answer.specialty);
+            const languageIndex = BILINGUAL_LANGUAGES.indexOf(answer.language);
+            if (answer.specialty === 'other') return { status: 'no', message: 'No puedes solicitar los puestos bilingües de estas bases si no eres titular de una de las especialidades previstas. Comprueba tu especialidad en la convocatoria oficial.' };
+            if (!specialty || languageIndex < 0) return { status: 'pending', message: 'Selecciona tu especialidad y el idioma del puesto para comprobar los requisitos.' };
+            if (!specialty[2].includes(languageIndex)) return { status: 'no', message: 'No puedes solicitar puestos bilingües de ese idioma con esta especialidad en la convocatoria de 2026.' };
+            if (s.seniorityWizard?.status === 'practice') return { status: 'no', message: 'No puedes solicitar estos puestos bilingües como funcionario/a en prácticas: la convocatoria exige personal funcionario de carrera.' };
+            const existing = getExistingBilingualCertificate(s, answer.language);
+            const certificates = getBilingualCertificates(answer.language);
+            const certificate = existing || certificates.find(item => item.id === answer.certificate);
+            if (!certificate) {
+                return answer.certificate === 'none'
+                    ? { status: 'no', message: 'No puedes solicitar puestos bilingües con la acreditación indicada: necesitas una titulación o certificación del anexo XVI en el idioma del puesto.' }
+                    : { status: 'pending', message: 'Selecciona el nivel y el título o certificado que tienes. Un B1 o un certificado baremable en ACLES no acredita por sí solo el acceso a puestos bilingües.' };
+            }
+            if (certificate.before) {
+                if (!parseSeniorityDate(answer.issuedDate)) return { status: 'pending', message: 'Indica la fecha de expedición del certificado para comprobar su validez.' };
+                if (answer.issuedDate >= certificate.before) return { status: 'no', message: 'No puedes solicitar puestos bilingües con esta versión del certificado y esta fecha de expedición. Comprueba si tienes otra acreditación del anexo XVI.' };
+            }
+            if (certificate.condition && !answer.conditionsConfirmed) return { status: 'pending', message: 'Confirma los requisitos específicos del certificado o titulación antes de obtener el resultado.' };
+            return { status: 'yes', message: `¡Enhorabuena! Sí, puedes solicitar puestos bilingües de ${answer.language.toLowerCase()} de tu especialidad con la acreditación indicada.`, certificate, specialty };
+        }
+        function renderBilingualResult(s, compact = false) {
+            if (!s.bilingual?.enabled) return '';
+            const result = getBilingualResult(s);
+            const certificateLabel = result.certificate ? `${result.certificate.label}${result.certificate.level ? ` (${result.certificate.level})` : ''}` : '';
+            const message = compact && result.status === 'yes'
+                ? `¡Enhorabuena! Sí, puedes solicitar puestos bilingües de ${s.bilingual.language.toLowerCase()} gracias al título o certificado de ${certificateLabel}!`
+                : result.message;
+            const color = result.status === 'yes' ? 'bg-green-50 border-green-500 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+                : result.status === 'no' ? 'bg-red-50 border-red-500 text-red-800 dark:bg-red-900/30 dark:text-red-200'
+                : 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200';
+            const icon = result.status === 'yes' ? 'm5 12 4 4L19 6'
+                : result.status === 'no' ? 'M6 6l12 12M6 18 18 6' : 'M12 8v5m0 3h.01';
+            return `<div data-bilingual-result="${result.status}" class="mt-4 rounded-r border-l-4 p-4 text-sm ${color}" role="status" aria-live="polite">
+                <p class="flex items-start gap-2 font-semibold"><svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/></svg><span>${message}</span></p>
+                ${result.status === 'yes' && !compact ? `<p class="mt-2">Una vez <a href="https://educaweb.juntadeandalucia.es/public/?x=FA9EDDF6" target="_blank" rel="noopener noreferrer" class="font-semibold underline">finalices tu instancia<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>, si has seleccionado peticiones bilingües y aún no consta tu acreditación, al firmar y presentar telemáticamente el propio programa te pedirá que adjuntes documentación justificativa bilingüe: tu título o certificado de <strong>${certificateLabel}</strong>.</p>` : ''}
+                <p class="mt-2 text-xs">Comprobación orientativa, independiente de los puntos de 3.3 y 5.5. <a href="${BILINGUAL_BOJA_URL}#page=166" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Consulta el anexo XVI del BOJA</a> y las bases 4.1.4, 4.2.1 y 4.6.6.</p>
+            </div>`;
+        }
+        function renderBilingualMeritWarning(s) {
+            const answer = s.bilingual;
+            if (!answer?.enabled) return '';
+            const certificate = getExistingBilingualCertificate(s, answer.language)
+                || getBilingualCertificates(answer.language).find(item => item.id === answer.certificate);
+            if (!certificate || certificate.id.startsWith('eoi-')) return '';
+            const names = [...(certificate.aliases || []), ...(certificate.aclesNames || [])];
+            const recognized = (ACLES_CERTIFICATES[answer.language] || []).some(([name]) => names.includes(name));
+            if (recognized) return '';
+            const academic = ['degree', 'diploma', 'homologation'].includes(certificate.id);
+            const message = academic
+                ? 'Esta titulación puede acreditar el acceso a puestos bilingües, pero no se valora como certificado de idioma en 5.5. Su posible puntuación como mérito académico debe comprobarse en el apartado 3.'
+                : certificate.aclesReview
+                    ? 'Esta acreditación puede servir para puestos bilingües, pero necesita comprobar su denominación exacta y su nivel en la tabla ACLES antes de valorarla en 5.5. No se ha autocompletado como mérito.'
+                    : 'Este título puede acreditar el acceso a puestos bilingües, si cumple los requisitos del anexo XVI, pero no puntúa como mérito de idiomas en 5.5 porque no está reconocido en la tabla ACLES utilizada por la calculadora.';
+            return `<div data-bilingual-merit-warning class="mt-3 rounded-r border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-200" role="alert">
+                <strong>¡Atención!</strong> ${message}
+                Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.
+            </div>`;
+        }
+        function renderBilingualChecker() {
+            const answer = state.bilingual || INITIAL_STATE.bilingual;
+            const language = BILINGUAL_LANGUAGES.includes(answer.language) ? answer.language : '';
+            const classes = 'mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100';
+            const existing = getExistingBilingualCertificate(state, language);
+            const certificates = getBilingualCertificates(language);
+            const selected = existing || certificates.find(item => item.id === answer.certificate);
+            const certificateLevel = answer.certificateLevel || (selected ? selected.level || 'other' : answer.certificate === 'none' ? 'none' : '');
+            const filteredCertificates = certificates.filter(item => (item.level || 'other') === certificateLevel)
+                .sort((left, right) => compareCertificateNames(left.label, right.label));
+            const matchingMerit = (state.idiomas || []).find(merit => !merit.fromBilingual && merit.idioma === answer.language && ['B2', 'C1', 'C2'].includes(merit.nivel)
+                && certificates.some(item => item.aliases?.includes(merit.certificado)));
+            const generatedMerit = (state.idiomas || []).find(merit => merit.fromBilingual);
+            return `<div id="bilingual-checker" class="mt-4 mb-4 rounded-lg border border-primary/25 bg-white dark:bg-gray-800 p-4 shadow-sm no-print">
+                <label class="flex items-start gap-2 cursor-pointer text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    <input id="bilingual-enabled" type="checkbox" ${answer.enabled ? 'checked' : ''} onchange="setBilingualAnswer('enabled', this.checked)" class="mt-0.5 h-4 w-4 shrink-0 text-primary">
+                    <span>¿Quieres saber si puedes participar en destinos bilingües?</span>
+                </label>
+                ${answer.enabled ? `<div class="mt-4 space-y-3">
+                    <div><label for="bilingual-specialty" class="text-sm font-medium text-gray-700 dark:text-gray-300">Selecciona la especialidad de la que eres titular</label>
+                        <select id="bilingual-specialty" onchange="setBilingualAnswer('specialty', this.value)" class="${classes}">
+                            <option value="">Seleccionar especialidad...</option>
+                            ${BILINGUAL_SPECIALTIES.map(([code, label]) => `<option value="${code}" ${answer.specialty === code ? 'selected' : ''}>${code} · ${label}</option>`).join('')}
+                            <option value="other" ${answer.specialty === 'other' ? 'selected' : ''}>Mi especialidad no figura en este listado</option>
+                        </select>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Se muestran las especialidades previstas en la convocatoria de 2026, no un listado de vacantes. Secundaria: 590 (también catedráticos 511 y accesos del cuerpo 591 previstos en la base 4.1); FP singular: 598 (y accesos de la base 4.2); Maestros: 597.</p>
+                    </div>
+                    ${answer.specialty === 'other' ? '<p class="text-sm text-amber-700 dark:text-amber-200">No se ha identificado una especialidad con perfil bilingüe en este listado. Revisa las bases oficiales antes de solicitar puestos.</p>' : ''}
+                    <div><label for="bilingual-language" class="text-sm font-medium text-gray-700 dark:text-gray-300">Idioma del puesto bilingüe</label>
+                        <select id="bilingual-language" onchange="setBilingualAnswer('language', this.value)" class="${classes}">
+                            <option value="">Seleccionar idioma...</option>
+                            ${BILINGUAL_LANGUAGES.map(language => `<option ${answer.language === language ? 'selected' : ''}>${language}</option>`).join('')}
+                        </select>
+                    </div>
+                    ${language && !existing ? `<div>
+                        <label for="bilingual-level" class="text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué nivel de ${language.toLowerCase()} tienes?</label>
+                        <select id="bilingual-level" onchange="setBilingualAnswer('certificateLevel', this.value)" class="${classes}">
+                            <option value="">Seleccionar nivel...</option>
+                            ${['B2', 'C1', 'C2'].map(level => `<option value="${level}" ${certificateLevel === level ? 'selected' : ''}>${level}</option>`).join('')}
+                            <option value="other" ${certificateLevel === 'other' ? 'selected' : ''}>Otra titulación admitida sin nivel MCER indicado</option>
+                            <option value="none" ${certificateLevel === 'none' ? 'selected' : ''}>Solo tengo B1 / no tengo una acreditación de este anexo</option>
+                        </select>
+                        ${certificateLevel && certificateLevel !== 'none' ? `<label for="bilingual-certificate" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué título de ${language.toLowerCase()} tienes?</label>
+                        ${matchingMerit ? '<p class="mt-2 text-xs text-amber-700 dark:text-amber-200">Tu certificado de 5.5 necesita comprobar las condiciones específicas del anexo XVI. Selecciona aquí la versión exacta.</p>' : ''}
+                        <select id="bilingual-certificate" onchange="setBilingualAnswer('certificate', this.value)" class="${classes}">
+                            <option value="">Seleccionar título o certificado...</option>
+                            ${filteredCertificates.map(item => `<option value="${item.id}" ${answer.certificate === item.id ? 'selected' : ''}>${item.label}${item.level ? ` — ${item.level}` : ''}</option>`).join('')}
+                            <option value="none" ${answer.certificate === 'none' ? 'selected' : ''}>No tengo ninguno de estos títulos o certificados</option>
+                        </select>
+                        ${selected?.before ? `<label for="bilingual-issued-date" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de expedición (debe ser anterior al ${formatWizardDateText(selected.before)})</label><input id="bilingual-issued-date" type="date" value="${parseSeniorityDate(answer.issuedDate) ? answer.issuedDate : ''}" onchange="setBilingualAnswer('issuedDate', this.value)" class="${classes}">` : ''}
+                        ${selected?.condition ? `<label class="mt-3 flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><input id="bilingual-conditions" type="checkbox" ${answer.conditionsConfirmed ? 'checked' : ''} onchange="setBilingualAnswer('conditionsConfirmed', this.checked)" class="mt-0.5 h-4 w-4 shrink-0 text-primary"><span>${selected.condition}</span></label>` : ''}` : ''}
+                    </div>` : ''}
+                    ${existing ? '<p class="text-sm text-green-700 dark:text-green-200">Se ha encontrado una acreditación del idioma en 3.3 o 5.5 que figura en el anexo XVI.</p>' : ''}
+                    ${generatedMerit ? `<p class="text-sm text-green-700 dark:text-green-200" data-bilingual-autofill>Este título se ha añadido automáticamente a ${generatedMerit.origen === 'EOI' ? '3.3 (EOI)' : '5.5 (ACLES)'}. Puedes revisarlo y editarlo en ese apartado.</p>` : ''}
+                    ${renderBilingualMeritWarning(state)}
+                    ${renderBilingualResult(state)}
+                </div>` : ''}
+            </div>`;
+        }
+        function setBilingualAnswer(field, value) {
+            if (!state.bilingual) state.bilingual = { ...INITIAL_STATE.bilingual };
+            const focusedId = document.activeElement?.id;
+            state.bilingual[field] = value;
+            if (field === 'language') {
+                state.bilingual.certificateLevel = '';
+                state.bilingual.certificate = '';
+                state.bilingual.issuedDate = '';
+            }
+            if (field === 'certificateLevel') {
+                state.bilingual.certificate = value === 'none' ? 'none' : '';
+                state.bilingual.issuedDate = '';
+            }
+            if (['language', 'specialty', 'certificateLevel', 'certificate'].includes(field)) state.bilingual.conditionsConfirmed = false;
+            if (field === 'certificate') {
+                state.bilingual.issuedDate = '';
+                const certificate = getBilingualCertificates(state.bilingual.language).find(item => item.id === value);
+                if (certificate) state.bilingual.certificateLevel = certificate.level || 'other';
+            }
+            if (['language', 'certificateLevel', 'certificate'].includes(field)) state.bilingual.certificateFromMerit = false;
+            if (field === 'enabled' && value) syncBilingualFromMerits();
+            const meritsChanged = ['language', 'certificateLevel', 'certificate', 'conditionsConfirmed', 'issuedDate'].includes(field) && syncMeritsFromBilingual();
+            if (field === 'language') syncBilingualFromMerits();
+            saveState();
+            if (meritsChanged) renderMainContent();
+            updateCalculations();
+            if (meritsChanged && focusedId) document.getElementById(focusedId)?.focus({ preventScroll: true });
+        }
         function renderLanguageManagerForOrigin(origin) {
             const allowedLanguages = origin === 'EOI' ? IDIOMAS_EOI : IDIOMAS_ACLES;
             const filtered = (state.idiomas || []).map((l, i) => ({ ...l, _idx: i })).filter(l => (l.origen || 'EOI') === origin);
@@ -1875,7 +2223,8 @@
                 const availableAclesLevels = [...new Set(aclesCerts.map(([, level]) => level).filter(level => PTS_IDIOMA[level]))];
                 const filteredAclesCerts = aclesCerts
                     .map((item, index) => ({ item, index }))
-                    .filter(({ item }) => PTS_IDIOMA[item[1]] && item[1] === l.nivelFiltro);
+                    .filter(({ item }) => PTS_IDIOMA[item[1]] && item[1] === l.nivelFiltro)
+                    .sort((left, right) => compareCertificateNames(left.item[0], right.item[0]));
                 const selectedCertIndex = filteredAclesCerts.find(({ item }) => item[0] === l.certificado)?.index;
                 return `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-gray-50 dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600 mb-2">
@@ -1908,6 +2257,7 @@
             return `
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div>${rows || `<p class="text-sm text-gray-400 dark:text-gray-500 italic mb-2">No hay idiomas ${isEOI ? 'EOI' : 'ACLES'} añadidos.</p>`}</div>
+                    ${filtered.some(language => language.fromBilingual) ? '<p class="mb-2 text-xs text-green-700 dark:text-green-200" data-merit-autofill>Idioma autocompletado desde el comprobador de puestos bilingües. Puedes corregirlo aquí.</p>' : ''}
                     <button onclick="addIdiomaForOrigin('${origin}')" class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-[#00623b] bg-primary/5 hover:bg-primary/10 px-3 py-2 rounded transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Añadir idioma ${isEOI ? 'EOI' : 'ACLES'}
@@ -1924,6 +2274,7 @@
         }
         function setLanguageMode(section, mode) {
             if (!['eoi', 'other'].includes(mode)) return;
+            const generatedMerit = (state.idiomas || []).find(merit => merit.fromBilingual);
             if (section === '3.3') {
                 state.lang33Mode = state.lang33Mode === mode ? '' : mode;
                 if (state.lang33Mode === 'other') {
@@ -1937,6 +2288,8 @@
             } else {
                 return;
             }
+            if (generatedMerit && !state.idiomas.includes(generatedMerit)) state.bilingual.certificateFromMerit = true;
+            syncBilingualFromMerits();
             saveState();
             renderMainContent();
             updateCalculations();
@@ -1954,11 +2307,15 @@
                 </div>`;
         }
         function removeIdioma(idx) {
+            if (state.idiomas[idx].fromBilingual) state.bilingual.certificateFromMerit = true;
             state.idiomas.splice(idx, 1);
+            syncBilingualFromMerits();
             saveState(); renderMainContent(); updateCalculations();
         }
         function updateIdioma(idx, field, val) {
             const language = state.idiomas[idx];
+            const linked = language.fromBilingual || (state.bilingual?.certificateFromMerit && state.bilingual.language === language.idioma);
+            delete language.fromBilingual;
             if (field === 'idioma') {
                 language.idioma = val;
                 if (language.origen === 'ACLES') {
@@ -1977,6 +2334,12 @@
             } else {
                 language[field] = val;
             }
+            if (linked) {
+                state.bilingual.certificateFromMerit = true;
+                state.bilingual.conditionsConfirmed = false;
+                if (getBilingualCertificateForMerit(language)) state.bilingual.language = language.idioma;
+            }
+            syncBilingualFromMerits();
             saveState(); updateCalculations();
             if (field === 'origen' || field === 'idioma' || field === 'nivelFiltro' || field === 'certificado') { renderMainContent(); updateCalculations(); }
         }
@@ -2034,7 +2397,10 @@
                     ${InfoBox('En 1.1.1, 1.1.2 y 1.1.3 solo cuentan servicios como <strong>funcionario/a de carrera</strong>: no incluyas prácticas ni interinidad.')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
-                    ${InfoBox('En <strong>1.2.1</strong> se computan todos los servicios en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas, Religión...).')}
+                    ${InfoBox('En <strong>1.2.1</strong> se computan los servicios como funcionario/a de carrera, en prácticas o interino/a en el <strong>mismo cuerpo</strong>, con independencia de la especialidad (Filosofía, Matemáticas...).')}
+                    <div class="mb-4 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="note">
+                        <strong>¡Atención!</strong> Si trabajaste como profesor/a de Religión (católica, evangélica u otra confesión) con <strong>contrato laboral</strong>, esa experiencia no cuenta en 1.2.1. El baremo exige servicios como funcionario/a de carrera, en prácticas o interino/a en el cuerpo correspondiente: <a href="${BILINGUAL_BOJA_URL}#page=26" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Resolución de 23 de octubre de 2026, anexo II, 1.2.1</a>. La relación laboral de Religión se regula en el <a href="https://www.boe.es/buscar/act.php?id=BOE-A-2007-11450#a1" target="_blank" rel="noopener noreferrer" class="font-semibold underline">RD 696/2007, artículos 1 y 2</a>. Esto no excluye otros periodos que sí hayas prestado como funcionario/a en un cuerpo docente.
+                    </div>
                     ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
                     <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios como funcionario/a de carrera, sin superar 1.2.1. La provisionalidad anterior solo se acumula desde el primer destino definitivo obtenido por concurso con participación voluntaria, sin duplicar tiempo de 1.1.1. En 1.1.3 tampoco se puede superar el periodo correspondiente de 1.1.1 o 1.1.2. Los excesos no se suman.</p>
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
@@ -2087,6 +2453,7 @@
                     <div class="transition-opacity duration-300 ${state.lang33Mode !== 'eoi' ? 'opacity-40 pointer-events-none' : 'opacity-100'}">
                         ${renderLanguageManagerForOrigin('EOI')}
                     </div>
+                    ${renderBilingualChecker()}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4">
                         <label for="s3_3_dlse" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Diploma de Lengua de Signos Española (DLSE)</label>
                         <select id="s3_3_dlse" name="s3_3_dlse" onchange="handleInput(this)" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
@@ -2187,7 +2554,7 @@
                         { value: 'other', label: 'Tengo otro título oficial (Cambridge, Trinity...)' }
                     ])}
                     <div class="mb-4 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                        <strong>¡Atención!</strong> Ningún título de Aptis (Aptis ESOL General, Aptis Advanced, etc.) es reconocido como baremable para el concurso de traslados porque no aparece en ACLES. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.
+                        <strong>¡Atención!</strong> Los títulos de Aptis no suman puntos en <strong>5.5</strong> porque no aparecen en la tabla de ACLES utilizada para el baremo. Algunos sí pueden acreditar el requisito lingüístico de puestos bilingües conforme al anexo XVI: compruébalo en la caja inferior. Consulta la <a href="https://www.acles.es/uploads/archivos/Tablas_ACLES/Tablas_de_certificados_reconocidos_por_ACLES.pdf" target="_blank" rel="noopener noreferrer" class="font-semibold underline">tabla oficial de ACLES (rev. 28/07/2025)<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.
                     </div>
                     ${state.lang55Mode === 'eoi' ? `
                     <div class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
@@ -2197,6 +2564,7 @@
                     <div class="transition-opacity duration-300 ${state.lang55Mode !== 'other' ? 'opacity-40 pointer-events-none' : 'opacity-100'}">
                         ${renderLanguageManagerForOrigin('ACLES')}
                     </div>
+                    ${renderBilingualChecker()}
                 </div>`;
         }
 
@@ -2577,6 +2945,7 @@
                                     ${Row('6. Otros méritos', s6, '15,0000')}
                                 </tbody>
                             </table>
+                            ${renderBilingualResult(state, true)}
                             <div class="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
                                 <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <div>
@@ -2700,6 +3069,12 @@
             updateCalculations();
         }
         function updateCalculations() {
+            const bilingualChecker = document.getElementById('bilingual-checker');
+            if (bilingualChecker) {
+                const focusedId = bilingualChecker.contains(document.activeElement) ? document.activeElement.id : '';
+                bilingualChecker.outerHTML = renderBilingualChecker();
+                if (focusedId) document.getElementById(focusedId)?.focus({ preventScroll: true });
+            }
             updateServiceLimitWarnings();
             const catedraticosWarning = document.getElementById('catedraticos-eligibility-warning');
             if (catedraticosWarning) {
