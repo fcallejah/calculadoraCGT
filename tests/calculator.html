@@ -13,6 +13,9 @@
         const results = [];
         const assert = (condition, message) => { if (!condition) throw new Error(message); };
         const near = (actual, expected) => assert(Math.abs(actual - expected) < 0.000001, `${actual} != ${expected}`);
+        const renderResults = () => {
+            document.getElementById('results').textContent = results.map(r => `${r.passed ? 'PASS' : 'FAIL'} ${r.name}${r.error ? ': ' + r.error : ''}`).join('\n');
+        };
         const test = async (name, check) => {
             try {
                 await check();
@@ -20,6 +23,7 @@
             } catch (error) {
                 results.push({ name, passed: false, error: error.message });
             }
+            renderResults();
         };
         const frame = document.getElementById('calculator');
         frame.onload = async () => {
@@ -27,11 +31,11 @@
             const api = app.eval(`({
                 INITIAL_STATE, Calculators, SERVICE_PERIODS, SERVICE_COUNTS, ACLES_CERTIFICATES,
                 getLimitedMeritState, getServiceCountLimit, getIdiomasBreakdown, completeMonthsBetween,
-                renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderSummary, renderBreakdown,
+                renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderPositionsSection, renderSummary, renderBreakdown,
                 renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
                 renderSeniorityWizardStep, applySeniorityWizard,
                 randomizeWavePhases,
-                getBilingualResult, setBilingualAnswer, loadState,
+                getBilingualResult, setBilingualAnswer, setPuestoAnswer, setPuestoBilingualSpecialty, setPuestoAdditionalBilingualAnswer, renderPuestoFinalSummary, Tabs, loadState,
                 getState: () => state,
                 setState: value => { state = value; },
                 disableSaving: () => { saveState = () => {}; }
@@ -44,7 +48,7 @@
                 return element;
             };
             await test('Creditos enlazan Cuevas Bajas y los cuatro emojis en bienvenida y pie', () => {
-                for (const context of ['landing', 1, 7]) {
+                for (const context of ['landing', 1, 8]) {
                     if (context !== 'landing') app.switchTab(context);
                     const container = context === 'landing'
                         ? app.document.querySelector('#landing-page')
@@ -108,10 +112,15 @@
                     const bilingual = { enabled: true, specialty, language, certificate: 'eoi-B2' };
                     assert(api.getBilingualResult(fresh({ bilingual })).status === expected, `${specialty}/${language} incorrecto`);
                 }
-                assert(api.getBilingualResult(fresh({
+                const practice = fresh({
                     bilingual: { enabled: true, specialty: '590001', language: 'Inglés', certificate: 'fce' },
                     seniorityWizard: { status: 'practice' }
-                })).status === 'no', 'No debe dar un si en practicas');
+                });
+                assert(api.getBilingualResult(practice).status === 'yes', 'La convocatoria permite solicitar puestos bilingues durante practicas');
+                assert(api.getBilingualResult(practice).message.includes('supeditada a que superes la fase de prácticas'), 'No advierte que la adjudicacion depende de superar practicas');
+                api.setState(practice);
+                assert(parsed(api.renderSummary()).textContent.includes('supeditada a que superes la fase de prácticas'), 'El resumen omite la condicion de practicas');
+                api.setState(fresh());
             });
             await test('Bilingues: fechas antiguas y requisitos de las certificaciones', () => {
                 const base = { enabled: true, specialty: '590001', language: 'Inglés' };
@@ -128,6 +137,52 @@
                     assert(api.getBilingualResult(s).status === 'yes', `No admite ${certificate}`);
                     near(api.Calculators.total(s), 0);
                 }
+            });
+            await test('Fecha bilingue escrita y calendario sincronizados sin conservar una fecha obsoleta', () => {
+                api.setState(fresh());
+                app.switchTab(3);
+                api.setBilingualAnswer('enabled', true);
+                api.setBilingualAnswer('specialty', '590001');
+                api.setBilingualAnswer('language', 'Inglés');
+                api.setBilingualAnswer('certificateLevel', 'B2');
+                api.setBilingualAnswer('certificate', 'aptis-old-b2');
+                const inputDate = value => {
+                    const input = app.document.getElementById('bilingual-issued-date-text');
+                    input.focus();
+                    input.value = value;
+                    input.dispatchEvent(new app.Event('input', { bubbles: true }));
+                };
+                for (const [value, displayed, iso, status] of [
+                    ['310819', '31/08/19', '', 'pending'],
+                    ['3108199', '31/08/199', '', 'pending'],
+                    ['31081990', '31/08/1990', '1990-08-31', 'yes'],
+                    ['3108199', '31/08/199', '', 'pending'],
+                    ['31022024', '31/02/2024', '', 'pending'],
+                    ['01092024', '01/09/2024', '2024-09-01', 'no'],
+                    ['31082024', '31/08/2024', '2024-08-31', 'yes']
+                ]) {
+                    inputDate(value);
+                    const field = app.document.getElementById('bilingual-issued-date-text');
+                    assert(field.value === displayed && app.document.activeElement === field, `Pierde la fecha o el foco: ${value}`);
+                    assert(api.getState().bilingual.issuedDate === iso, `Fecha ISO incorrecta: ${value}`);
+                    assert(api.getBilingualResult(api.getState()).status === status, `Resultado incorrecto: ${value}`);
+                    assert(app.document.getElementById('bilingual-issued-date').value === iso, 'Calendario no sincronizado');
+                    assert(field.hasAttribute('aria-invalid') === Boolean(displayed && !iso), 'Validacion visual incorrecta');
+                }
+                app.switchTab(5);
+                assert(app.document.getElementById('bilingual-issued-date-text').value === '31/08/2024', 'No comparte fecha entre apartados');
+                const picker = app.document.getElementById('bilingual-issued-date');
+                picker.value = '2024-09-01';
+                picker.dispatchEvent(new app.Event('change', { bubbles: true }));
+                assert(app.document.getElementById('bilingual-issued-date-text').value === '01/09/2024', 'Calendario no actualiza texto');
+                assert(api.getBilingualResult(api.getState()).status === 'no', 'Calendario no actualiza resultado');
+                api.setBilingualAnswer('certificate', 'pearson-old-b2');
+                assert(!app.document.getElementById('bilingual-issued-date-text').value, 'Conserva fecha al cambiar titulo');
+                inputDate('01010001');
+                assert(api.getState().bilingual.issuedDate === '0001-01-01', 'No admite años validos anteriores a 100');
+                assert(api.getBilingualResult(api.getState()).status === 'yes', 'Rechaza año antiguo valido');
+                inputDate('');
+                assert(api.getBilingualResult(api.getState()).status === 'pending', 'No limpia la fecha');
             });
             await test('Bilingues: cajas sincronizadas, resultado en resumen y actualizacion de EOI', () => {
                 api.setState(fresh());
@@ -583,7 +638,7 @@
                         app.switchTab(3);
                         const box = app.document.querySelector('#bilingual-checker');
                         assert(box.scrollWidth <= box.clientWidth, `Formulario desborda a ${width}px`);
-                        app.switchTab(7);
+                        app.switchTab(8);
                         const result = app.document.querySelector('[data-bilingual-result]');
                         assert(result.scrollWidth <= result.clientWidth, `Resultado desborda a ${width}px`);
                     }
@@ -600,10 +655,156 @@
                 assert(!section.textContent.includes('Matemáticas, Religión'), 'Mantiene el ejemplo incorrecto');
                 assert(app.document.querySelector('#wizard-body-start-text').closest('[data-wizard-step]').textContent.includes('contratos laborales'), 'Cuestionario contradictorio');
             });
+            await test('Puestos: nueva pestaña antes del resumen, recomendaciones y sin afectar baremo', () => {
+                assert(api.Tabs.findIndex(tab => tab.id === 7 && tab.label === 'Puestos') < api.Tabs.findIndex(tab => tab.id === 8 && tab.label === 'Resumen'), 'Puestos no aparece antes del resumen');
+                const initialTotal = api.Calculators.total(fresh());
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['002', '007', '018'], eoeSecundaria: true } }));
+                app.switchTab(7);
+                const section = parsed(api.renderPositionsSection());
+                const text = section.textContent;
+                const bodies = [...section.querySelectorAll('#puestos-cuerpo option')].map(option => option.textContent.trim());
+                for (const label of [
+                    'Profesores/as de Enseñanza Secundaria y Catedráticos/as (590/511)',
+                    'Profesores/as de Escuelas Oficiales de Idiomas (EOI) y Catedráticos/as (592/512)',
+                    'Profesores/as de Música y Artes Escénicas y Catedráticos/as (594/593)',
+                    'Maestros/as de Taller, Profesores/as y Catedráticos/as de Artes Plásticas y Diseño (596/595/513)'
+                ]) assert(bodies.includes(label), `Falta o está desordenado el cuerpo: ${label}`);
+                assert(text.includes('Cultura Clásica (código 803)'), 'No identifica el acceso de Latín/Griego');
+                assert(text.includes('Apoyo al área de Lengua y Ciencias Sociales (código 058)'), 'No identifica apoyo 058');
+                assert(text.includes('Apoyo al área de Ciencias o Tecnología (código 059)'), 'No identifica apoyo 059');
+                assert(text.includes('Orientación Educativa en EOE') && text.includes('Has indicado que cumples la experiencia requerida'), 'No comprueba requisitos de EOE');
+                assert(text.includes('Colocación de efectivos') && text.includes('comisiones de servicio'), 'No separa otros procedimientos');
+                assert(text.includes('El comprobador de 3.3 y 5.5 se comparte aquí'), 'No explica la vinculación bilingüe');
+                near(api.Calculators.total(api.getState()), initialTotal);
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'maestros', especialidades: ['032', '037', '038'], maestrosEducacionPermanente: true, maestrosEoe: true } }));
+                const maestros = parsed(api.renderPositionsSection()).textContent;
+                assert(maestros.includes('Colegios Públicos Rurales (CPR)') && maestros.includes('Los puestos de Primaria no son itinerantes'), 'No explica CPR e itinerancia');
+                assert(maestros.includes('Puestos de Pedagogía Terapéutica en Educación Secundaria (060)') === false, 'Ofrece PT secundaria sin ser titular');
+                assert(maestros.includes('Puestos de Audición y Lenguaje en Educación Secundaria (061)'), 'No detecta AL secundaria');
+                assert(maestros.includes('Educación Permanente y centros penitenciarios') && maestros.includes('Equipos de Orientación Educativa (EOE)'), 'No detecta puestos con requisito de antiguedad');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'maestros', especialidades: ['036', '034'] } }));
+                assert(parsed(api.renderPositionsSection()).textContent.includes('Puestos de Pedagogía Terapéutica en Educación Secundaria (060)'), 'No detecta PT secundaria');
+                assert(!parsed(api.renderPositionsSection()).textContent.includes('Educación Permanente y centros penitenciarios'), 'Ofrece Educación Permanente sin Inglés ni Primaria');
+            });
+            await test('Puestos: una casilla bilingue por especialidad marcada, sin volver a elegirla', () => {
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['001', '002', '005'] } }));
+                app.switchTab(7);
+                assert(!app.document.querySelector('#bilingual-specialty'), 'Pregunta otra vez la especialidad');
+                assert(app.document.querySelector('#puestos-bilingual-590001') && app.document.querySelector('#puestos-bilingual-590005'), 'Faltan casillas para las especialidades bilingues seleccionadas');
+                assert(!app.document.querySelector('#puestos-bilingual-590002'), 'Muestra una casilla para una especialidad no bilingue');
+                assert(!app.document.querySelector('#bilingual-language'), 'Pregunta el idioma antes de activar bilingue');
+                app.document.querySelector('#puestos-bilingual-590001').click();
+                assert(api.getState().bilingual.enabled && api.getState().bilingual.specialty === '590001', 'La casilla no selecciona bilingue y la especialidad compartida');
+                assert(app.document.querySelector('#bilingual-language'), 'No pasa a la pregunta de idioma');
+                assert([...app.document.querySelector('#bilingual-language').options].slice(1).map(option => option.textContent).join(',') === 'Alemán,Francés,Inglés', 'Orden de idiomas incorrecto');
+                app.document.querySelector('#puestos-bilingual-590005').click();
+                assert(api.getState().bilingual.specialty === '590005', 'No cambia la especialidad compartida');
+                assert(app.document.querySelector('#puestos-bilingual-590005').checked && !app.document.querySelector('#puestos-bilingual-590001').checked, 'Se pueden seleccionar varias especialidades a la vez');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'sectores', especialidades: ['001', '002', '006', '009'] } }));
+                assert(parsed(api.renderPositionsSection()).textContent.includes('Especialidades de Sectores Singulares de FP'), 'No ofrece especialidades de sectores singulares');
+                assert(parsed(api.renderPositionsSection()).querySelector('#puestos-bilingual-598001'), 'No genera la casilla bilingue de FP singular');
+            });
+            await test('Puestos bilingues: segundo idioma disponible, con comprobacion independiente', () => {
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'] },
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590005', language: 'Inglés', certificateLevel: 'B2', certificate: 'eoi-B2' }
+                }));
+                app.switchTab(7);
+                assert(app.document.querySelector('#puestos-bilingual-additional'), 'No ofrece otro puesto cuando la especialidad permite más idiomas');
+                assert(app.document.querySelector('#bilingual-checker').textContent.includes('Tengo otro puesto bilingüe que añadir'), 'No muestra el texto genérico con varios idiomas alternativos');
+                app.document.querySelector('#puestos-bilingual-additional').click();
+                let languageSelect = app.document.querySelector('#puesto-additional-language');
+                const languageOptions = [...languageSelect.options].map(option => option.value);
+                assert(languageOptions.includes('Francés') && languageOptions.includes('Alemán') && !languageOptions.includes('Inglés'), 'No filtra el idioma principal de las alternativas');
+                languageSelect.value = 'Francés';
+                languageSelect.dispatchEvent(new app.Event('change', { bubbles: true }));
+                const additionalLevel = app.document.querySelector('#puesto-additional-level');
+                additionalLevel.value = 'B2';
+                additionalLevel.dispatchEvent(new app.Event('change', { bubbles: true }));
+                const additionalCertificate = app.document.querySelector('#puesto-additional-certificate');
+                additionalCertificate.value = 'eoi-B2';
+                additionalCertificate.dispatchEvent(new app.Event('change', { bubbles: true }));
+                const summary = app.document.querySelector('#puestos-final-summary').parentElement.textContent;
+                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código 11590005')
+                    && summary.includes('Geografía e Historia (Francés)') && summary.includes('código 10590005'), 'No comprueba ni incluye ambos puestos con sus códigos');
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['105'] },
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590105', language: 'Inglés', certificate: 'eoi-B2', certificateLevel: 'B2' }
+                }));
+                let section = parsed(api.renderPositionsSection());
+                assert(section.textContent.includes('Tengo otro puesto bilingüe: Francés'), 'No nombra la única lengua alternativa');
+                api.setPuestoAdditionalBilingualAnswer('enabled', true);
+                assert(api.getState().bilingual.additionalPost.language === 'Francés' && !parsed(api.renderPositionsSection()).querySelector('#puesto-additional-language'), 'No selecciona automáticamente la única lengua alternativa');
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['061'] },
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590061', language: 'Inglés', certificate: 'eoi-B2', certificateLevel: 'B2' }
+                }));
+                assert(!parsed(api.renderPositionsSection()).querySelector('#puestos-bilingual-additional'), 'Ofrece un segundo idioma cuando no existe otra opción');
+            });
+            await test('Puestos: resumen final separa concurso 2026-27 y colocacion 2025-26', () => {
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'] },
+                    bilingual: { enabled: true, specialty: '590005', language: 'Inglés', certificateLevel: 'B2', certificate: 'fce' }
+                }));
+                const summaryView = parsed(api.renderPuestoFinalSummary());
+                const summary = summaryView.textContent;
+                assert(summary.includes('¿Qué puedes pedir?') && summary.includes('Concurso de traslados 2026-27'), 'No identifica qué se puede pedir en el concurso actual');
+                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código 11590005') && summary.includes('especialidad 590005'), 'No muestra la denominación y los códigos técnicos de GEH bilingüe inglés');
+                assert(summary.includes('Apoyo al área sociolingüística') && summary.includes('(058)'), 'No recoge apoyo sociolingüístico');
+                assert(summary.includes('Competencia lectora para Secundaria (CL590PCT,'), 'No recoge competencia lectora');
+                assert(summary.includes('previsiblemente, se abrirá entre mayo y junio de 2027'), 'Falta la previsión de apertura de colocación de efectivos');
+                assert(summary.includes('Apoyo al ámbito socio-lingüístico en ZTS (ZT590058'), 'No recoge ZTS');
+                assert(summary.includes('30 h de tutoría virtual Moodle') && summary.includes('No es un curso conjunto de 100 h'), 'No refleja el requisito exacto de Geografía e Historia a distancia');
+                assert(summary.includes('Ver otros puestos del Anexo VII de 2025-26'), 'Falta la lista de referencia del Anexo VII');
+                assert(!summary.includes('Puestos de Música y Artes Escénicas que indicas cumplir') && !summary.includes('Todavía no has marcado ningún puesto.'), 'Muestra los puestos de Música en un cuerpo diferente');
+                const summarySection = summaryView.querySelector('#puestos-final-summary').parentElement;
+                const summaryChildren = [...summarySection.children];
+                const resultsIndex = summaryChildren.findIndex(child => child.querySelector('h4')?.textContent === 'Concurso de traslados 2026-27');
+                assert(resultsIndex > summaryChildren.findIndex(child => child.matches('details')), 'Los resultados aparecen antes de las referencias');
+                assert(summaryView.querySelector('li svg'), 'Los resultados positivos no muestran el check verde');
+                const distanceUi = parsed(api.renderPositionsSection());
+                const distanceFieldset = [...distanceUi.querySelectorAll('fieldset')].find(fieldset => fieldset.textContent.includes('Geografía e Historia a distancia'));
+                assert(distanceFieldset && distanceFieldset.querySelectorAll('input[type="checkbox"]').length === 3, 'No permite confirmar las vías y la formación Moodle');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'musica' } }));
+                const musicSummary = parsed(api.renderPuestoFinalSummary());
+                assert(musicSummary.textContent.includes('Todavía no has marcado ningún puesto.'), 'No explica que aún no se ha marcado ningún puesto de Música');
+                const musicSummarySection = musicSummary.querySelector('#puestos-final-summary').parentElement;
+                assert(musicSummarySection.lastElementChild.querySelector('h4')?.textContent.includes('Puestos de Música y Artes Escénicas que indicas cumplir'), 'La lista de acreditación de Música no queda al final');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'], gehDistanceExeLearning: true } }));
+                assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('30 h de tutoría virtual Moodle'), 'No mantiene pendiente la acreditación de 30 horas Moodle');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'], gehDistanceExeLearning: true, gehDistanceMoodle30h: true } }));
+                assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('Geografía e Historia a distancia (ED590005; has confirmado'), 'No reconoce la vía eXeLearning junto con las 30 horas Moodle');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'eoi', especialidades: ['002'] } }));
+                assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('Árabe en IES (PE590ARA'), 'No recoge Árabe en IES');
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'musica' } }));
+                const musicUi = parsed(api.renderPositionsSection());
+                const musicFieldset = [...musicUi.querySelectorAll('fieldset')].find(fieldset => fieldset.textContent.includes('Anexo III 2025-26'));
+                assert(musicFieldset && musicFieldset.querySelectorAll('input[type="checkbox"]').length === 18, 'No presenta los puestos específicos del Anexo III');
+                api.setPuestoAnswer('musicSpecificPost', 'CH593006');
+                assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('Canto Histórico (CH593006; confirmas'), 'No incorpora el puesto musical confirmado al resultado');
+                api.setPuestoAnswer('musicSpecificPost', 'CH593006');
+                assert(!parsed(api.renderPuestoFinalSummary()).textContent.includes('Canto Histórico (CH593006; confirmas'), 'No permite retirar una selección musical');
+            });
+            await test('El comprobador bilingue comparte sus respuestas entre 3.3, 5.5 y Puestos', () => {
+                const bilingual = { enabled: true, specialty: '590001', language: 'Inglés', certificateLevel: 'B2', certificate: 'fce' };
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['001'] }, bilingual }));
+                for (const tab of [7, 3, 5, 7]) {
+                    app.switchTab(tab);
+                    assert(app.document.querySelector('#bilingual-language').value === 'Inglés', `Pierde idioma al abrir ${tab}`);
+                    if (tab === 7) assert(app.document.querySelector('#puestos-bilingual-590001').checked, 'Pierde especialidad marcada en Puestos');
+                    else assert(app.document.querySelector('#bilingual-specialty').value === '590001', `Pierde especialidad al abrir ${tab}`);
+                    assert(app.document.querySelector('#bilingual-certificate').value === 'fce', `Pierde titulo al abrir ${tab}`);
+                    assert(app.document.querySelector('[data-bilingual-result="yes"]'), `Resultado diferente en ${tab}`);
+                }
+                assert(api.getState().bilingual === bilingual, 'Duplica o reemplaza el objeto compartido');
+                app.switchTab(7);
+                assert(app.document.querySelector('#tab-7').textContent.trim() === 'Puestos', 'La navegación no muestra Puestos');
+                assert(app.document.querySelector('#tab-8').textContent.trim() === 'Resumen', 'Resumen no permanece al final');
+            });
             await test('Fase de todas las olas vuelve a aleatorizarse entre cargas', () => {
                 api.setState(fresh());
                 app.switchTab(1);
-                app.switchTab(7);
+                app.switchTab(8);
                 const waves = [...app.document.querySelectorAll('.landing-wave, .summary-wave, .credits-wave')];
                 assert(waves.length >= 12, `Olas insuficientes: ${waves.length}`);
                 const originalRandom = app.Math.random;
@@ -1248,9 +1449,9 @@
             });
             window.testResults = results;
             document.body.dataset.testStatus = results.every(r => r.passed) ? 'passed' : 'failed';
-            document.getElementById('results').textContent = results.map(r => `${r.passed ? 'PASS' : 'FAIL'} ${r.name}${r.error ? ': ' + r.error : ''}`).join('\n');
+            renderResults();
         };
-        frame.src = '../index.html?calculator-tests';
+        frame.src = `../index.html?calculator-tests&revision=${Date.now()}`;
     </script>
 </body>
 </html>
