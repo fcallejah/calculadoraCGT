@@ -670,8 +670,12 @@
                     'Maestros/as de Taller, Profesores/as y Catedráticos/as de Artes Plásticas y Diseño (596/595/513)'
                 ]) assert(bodies.includes(label), `Falta o está desordenado el cuerpo: ${label}`);
                 assert(text.includes('Cultura Clásica (código 803)'), 'No identifica el acceso de Latín/Griego');
-                assert(text.includes('Apoyo al área de Lengua y Ciencias Sociales (código 058)'), 'No identifica apoyo 058');
-                assert(text.includes('Apoyo al área de Ciencias o Tecnología (código 059)'), 'No identifica apoyo 059');
+                const finalSummary = section.querySelector('#puestos-final-summary').parentElement;
+                assert(finalSummary.textContent.includes('Puestos ordinarios de tus especialidades:'), 'No conserva las especialidades en el resultado final');
+                assert(finalSummary.textContent.includes('Apoyo al área sociolingüística / de Lengua y Ciencias Sociales (058).'), 'No identifica apoyo 058 en el resultado final');
+                assert(finalSummary.textContent.includes('Apoyo al área científica o tecnológica (059).'), 'No identifica apoyo 059 en el resultado final');
+                assert(!text.includes('Puestos de las especialidades de las que eres titular.') && !text.includes('Por las especialidades habilitantes seleccionadas.'), 'Repite los resultados antes de las especialidades');
+                assert(!text.includes('Los puestos voluntarios deben solicitarse expresamente.'), 'Mantiene el aviso redundante de puestos voluntarios');
                 assert(text.includes('Orientación Educativa en EOE') && text.includes('Has indicado que cumples la experiencia requerida'), 'No comprueba requisitos de EOE');
                 assert(text.includes('Colocación de efectivos') && text.includes('comisiones de servicio'), 'No separa otros procedimientos');
                 assert(text.includes('El comprobador de 3.3 y 5.5 se comparte aquí'), 'No explica la vinculación bilingüe');
@@ -741,6 +745,43 @@
                 }));
                 assert(!parsed(api.renderPositionsSection()).querySelector('#puestos-bilingual-additional'), 'Ofrece un segundo idioma cuando no existe otra opción');
             });
+            await test('Puestos bilingues: tercer idioma solo si la especialidad tiene tres', () => {
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'] },
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590005', language: 'Inglés', certificateLevel: 'B2', certificate: 'eoi-B2' }
+                }));
+                app.switchTab(7);
+                assert(!app.document.querySelector('#puestos-bilingual-third'), 'Ofrece el tercer puesto antes de elegir el segundo');
+                api.setPuestoAdditionalBilingualAnswer('enabled', true);
+                assert(api.getState().bilingual.additionalPost.enabled && !api.getState().bilingual.additionalPost.language, 'Activar el segundo puesto con varios idiomas no debe resetearlo');
+                api.setPuestoAdditionalBilingualAnswer('language', 'Francés');
+                api.setPuestoAdditionalBilingualAnswer('certificateLevel', 'B2');
+                api.setPuestoAdditionalBilingualAnswer('certificate', 'eoi-B2');
+                assert(app.document.querySelector('#bilingual-checker').textContent.includes('Tengo un tercer puesto bilingüe: Alemán'), 'No ofrece el tercer idioma restante');
+                app.document.querySelector('#puestos-bilingual-third').click();
+                assert(api.getState().bilingual.thirdPost.language === 'Alemán', 'No selecciona automáticamente el tercer idioma');
+                const thirdLevel = app.document.querySelector('#puesto-third-level');
+                thirdLevel.value = 'B2';
+                thirdLevel.dispatchEvent(new app.Event('change', { bubbles: true }));
+                const thirdCertificate = app.document.querySelector('#puesto-third-certificate');
+                thirdCertificate.value = 'eoi-B2';
+                thirdCertificate.dispatchEvent(new app.Event('change', { bubbles: true }));
+                const summary = app.document.querySelector('#puestos-final-summary').parentElement.textContent;
+                assert(summary.includes('código 11590005') && summary.includes('código 10590005') && summary.includes('código 12590005'), 'No incluye los tres puestos bilingües');
+                assert(!api.INITIAL_STATE.bilingual.thirdPost.enabled, 'Muta el estado inicial del tercer puesto');
+                api.setPuestoAdditionalBilingualAnswer('language', 'Alemán');
+                assert(!api.getState().bilingual.thirdPost.enabled, 'No limpia el tercer puesto si el segundo pasa a usar su idioma');
+                api.setPuestoAdditionalBilingualAnswer('language', 'Francés');
+                api.setPuestoAdditionalBilingualAnswer('enabled', true, 'thirdPost');
+                api.setPuestoAdditionalBilingualAnswer('enabled', false);
+                assert(!api.getState().bilingual.thirdPost.enabled, 'No limpia el tercer puesto al quitar el segundo');
+                api.setState(fresh({
+                    puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['105'] },
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590105', language: 'Inglés', certificate: 'eoi-B2', certificateLevel: 'B2' }
+                }));
+                api.setPuestoAdditionalBilingualAnswer('enabled', true);
+                assert(!parsed(api.renderPositionsSection()).querySelector('#puestos-bilingual-third'), 'Ofrece un tercer puesto en una especialidad con solo dos idiomas');
+            });
             await test('Puestos: resumen final separa concurso 2026-27 y colocacion 2025-26', () => {
                 api.setState(fresh({
                     puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'] },
@@ -763,6 +804,7 @@
                 assert(resultsIndex > summaryChildren.findIndex(child => child.matches('details')), 'Los resultados aparecen antes de las referencias');
                 assert(summaryView.querySelector('li svg'), 'Los resultados positivos no muestran el check verde');
                 const distanceUi = parsed(api.renderPositionsSection());
+                assert(!distanceUi.querySelector('[aria-labelledby="puestos-results-title"] > ul'), 'Mantiene una lista inicial redundante o vacía para GEH');
                 const distanceFieldset = [...distanceUi.querySelectorAll('fieldset')].find(fieldset => fieldset.textContent.includes('Geografía e Historia a distancia'));
                 assert(distanceFieldset && distanceFieldset.querySelectorAll('input[type="checkbox"]').length === 3, 'No permite confirmar las vías y la formación Moodle');
                 api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'musica' } }));
@@ -772,8 +814,13 @@
                 assert(musicSummarySection.lastElementChild.querySelector('h4')?.textContent.includes('Puestos de Música y Artes Escénicas que indicas cumplir'), 'La lista de acreditación de Música no queda al final');
                 api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'], gehDistanceExeLearning: true } }));
                 assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('30 h de tutoría virtual Moodle'), 'No mantiene pendiente la acreditación de 30 horas Moodle');
-                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'], gehDistanceExeLearning: true, gehDistanceMoodle30h: true } }));
-                assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('Geografía e Historia a distancia (ED590005; has confirmado'), 'No reconoce la vía eXeLearning junto con las 30 horas Moodle');
+                for (const pathway of ['gehDistanceExeLearning', 'gehDistanceTeachingYear']) {
+                    api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['005'], [pathway]: true, gehDistanceMoodle30h: true } }));
+                    const confirmedSummary = parsed(api.renderPuestoFinalSummary());
+                    assert([...confirmedSummary.querySelectorAll('li')].some(item => item.textContent.trim() === 'Geografía e Historia a distancia (ED590005).'), 'No muestra el puesto confirmado solo con su nombre y código');
+                    assert(!confirmedSummary.textContent.includes('has confirmado un curso académico'), 'Repite los requisitos ya confirmados en el resultado');
+                    assert(!confirmedSummary.textContent.includes('Requisitos por confirmar'), 'Mantiene pendiente el puesto a distancia pese a cumplir los requisitos');
+                }
                 api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'eoi', especialidades: ['002'] } }));
                 assert(parsed(api.renderPuestoFinalSummary()).textContent.includes('Árabe en IES (PE590ARA'), 'No recoge Árabe en IES');
                 api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'musica' } }));
@@ -836,10 +883,54 @@
                     const section2 = parsed(app.renderSection2());
                     const warning = section2.querySelector('#catedraticos-eligibility-warning');
                     assert(warning.classList.contains('hidden') !== shouldWarn, 'Aviso no coincide con los años de carrera');
+                    assert(warning.classList.contains('bg-red-50') && warning.classList.contains('border-red-500'), 'El aviso debe ser rojo');
+                    assert(api.Calculators.section2(api.getState()) === (shouldWarn ? 0 : 5), 'Sin 8 años de carrera debe puntuar 0; con 8 o más, 5');
+                    const bar = section2.querySelector('#progress-bar-score-s2');
+                    assert(bar.classList.contains('progress-bar-blocked') === shouldWarn && bar.style.width === '100%', 'Barra discontinua incorrecta');
+                    assert(section2.querySelector('#progress-score-s2').getAttribute('aria-valuenow') === (shouldWarn ? '0' : '5'), 'Progreso accesible incorrecto');
+                    assert(section2.querySelector('#progress-badge-score-s2').classList.contains('invisible') === shouldWarn, 'Máximo alcanzado incorrecto');
                     if (shouldWarn) assert(section2.querySelector('#catedraticos-eligibility-warning a').href.includes('/acceso-a-catedras-2026-procedimiento'), 'Falta enlace oficial');
                 }
                 api.setState(fresh({ s2_catedratico: true, s1_2_1_years: 20, seniorityWizard: { status: 'practice' } }));
                 assert(parsed(app.renderSection2()).querySelector('#catedraticos-eligibility-warning'), 'No advierte en prácticas');
+                assert(api.Calculators.section2(api.getState()) === 0, 'En prácticas no puntúa como catedrático/a');
+                api.setState(fresh({ s2_catedratico: false, seniorityWizard: { status: 'practice' } }));
+                const unchecked = parsed(app.renderSection2());
+                assert(unchecked.querySelector('#catedraticos-eligibility-warning').classList.contains('hidden'), 'El aviso rojo solo debe salir al marcar la casilla');
+                assert(!unchecked.querySelector('#progress-bar-score-s2').classList.contains('progress-bar-blocked') && unchecked.querySelector('#progress-bar-score-s2').style.width === '0%', 'Sin marcar, la barra debe estar vacía');
+            });
+            await test('Catedraticos: estima participacion a los 8 anos y baremo lleno a los 18', () => {
+                const timelineFor = (overrides) => {
+                    api.setState(fresh(overrides));
+                    return parsed(app.renderSection2()).querySelector('#catedraticos-timeline');
+                };
+                const assertOrderLink = (timeline) => {
+                    const link = timeline.querySelector('#catedraticos-order-link');
+                    assert(link, 'Falta el enlace a la Orden de Catedráticos');
+                    assert(link.getAttribute('href') === 'https://www.juntadeandalucia.es/boja/2026/183/c01/BOJA26-218301-00030-12327-01_00343557.pdf', 'Enlace al BOJA incorrecto');
+                    assert(link.target === '_blank' && link.rel.includes('noopener'), 'El enlace debe abrirse en otra pestaña de forma segura');
+                    assert(link.textContent.includes('Orden de 18 de septiembre de 2026') && link.textContent.includes('Catedráticos') && link.textContent.includes('↗'), 'Texto del enlace incorrecto');
+                    assert(timeline.lastElementChild.contains(link), 'El enlace debe ir al final del cuadro');
+                };
+                let timeline = timelineFor({ s1_2_1_years: 6, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } });
+                assert(!timeline.classList.contains('hidden') && timeline.classList.contains('bg-yellow-50'), 'La estimación amarilla no se muestra');
+                assertOrderLink(timeline);
+                assert(timeline.querySelector('#catedraticos-access-date').textContent.includes('Podrás participar en el acceso a Catedráticos a partir del 1 de septiembre de 2028'), 'Fecha de participación incorrecta');
+                assert(timeline.querySelector('#catedraticos-max-seniority-date').textContent.includes('Podrás llenar el baremo de antigüedad (4 puntos) el 1 de septiembre de 2038'), 'Fecha de baremo lleno incorrecta');
+
+                timeline = timelineFor({ s1_2_1_years: 30, seniorityWizard: { status: 'provisional', careerStartDate: '1996-02-29' } });
+                assert(timeline.querySelector('#catedraticos-access-date').textContent.includes('Ya puedes participar') && timeline.textContent.includes('29 de febrero de 2004'), 'Participación pasada incorrecta');
+                assert(timeline.querySelector('#catedraticos-max-seniority-date').textContent.includes('Ya llenas el baremo de antigüedad') && timeline.textContent.includes('1 de marzo de 2014'), 'Baremo lleno pasado incorrecto');
+
+                timeline = timelineFor({ seniorityWizard: { status: '', careerStartDate: '' } });
+                assert(timeline.querySelector('button[onclick="openSeniorityWizard()"]') && !timeline.querySelector('#catedraticos-access-date'), 'Sin fecha de carrera debe pedir el cuestionario');
+                assertOrderLink(timeline);
+                timeline = timelineFor({ seniorityWizard: { status: 'practice', careerStartDate: '2026-09-01' } });
+                assert(timeline.querySelector('#catedraticos-access-date').textContent.includes('8 años después de tu nombramiento') && !timeline.textContent.includes('2034'), 'En prácticas no debe estimar con una fecha de carrera');
+                assertOrderLink(timeline);
+                assert(!timelineFor({ s2_catedratico: true, s1_2_1_years: 6, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } }).classList.contains('hidden'), 'Marcada sin 8 años debe seguir mostrando las fechas junto al aviso rojo');
+                assert(timelineFor({ s2_catedratico: true, s1_2_1_years: 20, seniorityWizard: { status: 'definitive', careerStartDate: '2006-09-01' } }).classList.contains('hidden'), 'Debe ocultarse si ya es catedrático/a');
+                assert(!timelineFor({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'maestros' }, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } }), 'Maestros no accede a Catedráticos');
             });
             await test('Preguntas de tutoria adaptadas a las fechas y a la condicion de carrera', () => {
                 for (const [bodyStartDate, careerStartDate, ask4, ask6] of [
@@ -1184,6 +1275,34 @@
                     assert(title.includes(status === 'definitive' ? 'último destino definitivo' : status === 'provisional' ? 'provisionalidad' : 'prácticas'), title);
                     assert(app.document.getElementById('wizard-hardship-years').disabled === (status === 'practice'), 'Estado incorrecto del campo');
                 }
+            });
+            await test('Practicas aplazadas: casilla solo en practicas y aviso de adjudicacion por puntuacion', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.setWizardDateValue('wizard-practice-start', '2023-09-01');
+                app.setWizardDateValue('wizard-career-start', '2024-09-01');
+                app.setWizardDateValue('wizard-practice-only-start', '2025-09-01');
+                app.setWizardDateValue('wizard-body-start', '2023-09-01');
+                for (const status of ['definitive', 'provisional', 'practice']) {
+                    app.document.getElementById('wizard-status').value = status;
+                    api.renderSeniorityWizardStep();
+                    assert(app.document.getElementById('wizard-postponed-practice-field').classList.contains('hidden') === (status !== 'practice'), `Visibilidad incorrecta en ${status}`);
+                }
+                app.document.getElementById('wizard-postponed-practice').checked = true;
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(s.seniorityWizard.practicePostponed === true, 'No guarda las practicas aplazadas');
+                near(api.Calculators.calc11({ ...s, s1_1_1_years: 9 }), 0);
+                const section = api.renderSection1();
+                assert(section.includes('se adjudica según tu puntuación') && !section.includes('Puntuación real: 0'), 'Aviso de practicas aplazadas incorrecto');
+                assert(app.document.getElementById('header-total-note').classList.contains('hidden'), 'Muestra puntuacion real 0 con practicas aplazadas');
+                app.openSeniorityWizard();
+                assert(app.document.getElementById('wizard-postponed-practice').checked, 'No restaura la casilla');
+                app.document.getElementById('wizard-status').value = 'provisional';
+                app.applySeniorityWizard();
+                assert(api.getState().seniorityWizard.practicePostponed === false, 'Mantiene el aplazamiento fuera de practicas');
+                api.setState(fresh({ seniorityWizard: { status: 'practice' } }));
+                assert(api.renderSection1().includes('la puntuación real considerada en el concurso es 0'), 'Pierde el aviso ordinario de practicas');
             });
             await test('Paso de compensatoria provisional destaca solo el contexto y actualiza la fecha', () => {
                 app.document.getElementById('wizard-status').value = 'provisional';

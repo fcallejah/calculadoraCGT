@@ -364,6 +364,12 @@
         @media (prefers-reduced-motion: reduce) {
             .landing-wave, .credits-wave { animation: none; }
         }
+        .progress-bar-blocked {
+            background-image: repeating-linear-gradient(-45deg, rgba(75, 85, 99, 0.38) 0 4px, transparent 4px 12px);
+        }
+        .dark .progress-bar-blocked {
+            background-image: repeating-linear-gradient(-45deg, rgba(209, 213, 219, 0.3) 0 4px, transparent 4px 12px);
+        }
         @media (max-width: 640px) {
             .tab-scroll-control { display: flex; }
             #tabs-scroll-wrapper {
@@ -701,6 +707,13 @@
                 <div data-wizard-step="all" class="hidden">
                     <h3 id="wizard-hardship-title" class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad</h3>
                     <p id="wizard-hardship-definitive-hint" class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica solo los servicios en especial dificultad como funcionario/a de carrera durante el periodo que corresponda a tu situación. No incluyas funcionario/a en prácticas ni interinidad.</p>
+                    <div id="wizard-postponed-practice-field" class="mb-3 hidden rounded-lg border border-primary/25 bg-primary/5 p-3 dark:bg-primary/10">
+                        <label class="flex items-start gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
+                            <input id="wizard-postponed-practice" type="checkbox" aria-describedby="wizard-postponed-practice-note" class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary">
+                            <span>He pospuesto las prácticas y las estoy realizando ahora</span>
+                        </label>
+                        <p id="wizard-postponed-practice-note" class="mt-1 pl-6 text-xs text-gray-600 dark:text-gray-300">Solo si el aplazamiento fue por permisos de conciliación (art. 49 TREBEP) o incapacidad temporal, o no pudiste ser evaluado/a por esos motivos. Entonces se adjudica según tu puntuación. Por otros motivos, o si no superaste las prácticas, se sigue el orden de nombramiento.</p>
+                    </div>
                     <div id="wizard-hardship-definitive-note" class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
                         <span>Si participas desde un destino definitivo, solo cuenta la especial dificultad <span class="underline decoration-2 underline-offset-2">desde tu último destino definitivo</span>. No sumes aquí periodos de destinos anteriores ni la provisionalidad anterior a tu primer destino definitivo.</span>
                     </div>
@@ -967,6 +980,7 @@
                 practiceStartDate: '', 
                 careerStartDate: '', 
                 isStabilized: false,
+                practicePostponed: false,
                 practiceOnlyStartDate: '', 
                 bodyStartDate: '', 
                 bodyGapMonths: 0 
@@ -982,7 +996,7 @@
             lang33Mode: '',
             lang55Mode: '',
             idiomas: [],
-            bilingual: { enabled: false, specialty: '', language: '', certificateLevel: '', certificate: '', certificateFromMerit: false, conditionsConfirmed: false, issuedDate: '', additionalPost: { enabled: false, language: '', certificateLevel: '', certificate: '', conditionsConfirmed: false, issuedDate: '' } },
+            bilingual: { enabled: false, specialty: '', language: '', certificateLevel: '', certificate: '', certificateFromMerit: false, conditionsConfirmed: false, issuedDate: '', additionalPost: { enabled: false, language: '', certificateLevel: '', certificate: '', conditionsConfirmed: false, issuedDate: '' }, thirdPost: { enabled: false, language: '', certificateLevel: '', certificate: '', conditionsConfirmed: false, issuedDate: '' } },
             puestos: { cuerpo: '', especialidades: [], musicSpecificPosts: [], eoeSecundaria: false, maestrosEso: false, maestrosEducacionPermanente: false, maestrosEoe: false, gehDistanceTeachingYear: false, gehDistanceExeLearning: false, gehDistanceMoodle30h: false },
             s3_3_dlse: 'none',
             s3_3_titulo_arte: 0,
@@ -1127,6 +1141,7 @@
             setWizardDateValue('wizard-practice-start', wizard.practiceStartDate || defaultDate);
             setWizardDateValue('wizard-career-start', wizard.careerStartDate || defaultDate);
             document.getElementById('wizard-is-stabilized').checked = Boolean(wizard.isStabilized);
+            document.getElementById('wizard-postponed-practice').checked = Boolean(wizard.practicePostponed);
             setWizardDateValue('wizard-practice-only-start', wizard.practiceOnlyStartDate || defaultDate);
             setWizardDateValue('wizard-body-start', wizard.bodyStartDate || defaultDate);
             document.getElementById('wizard-body-gap-months').value = wizard.bodyGapMonths || 0;
@@ -1430,6 +1445,7 @@
                 ? 'Si eres funcionario/a en prácticas, todo el apartado 1.1 queda a cero. Tus servicios se recogen en 1.2.1.'
                 : `Indica solo los servicios en especial dificultad ${status === 'provisional' ? 'durante la provisionalidad' : 'desde tu último destino definitivo'}, como funcionario/a de carrera. No incluyas funcionario/a en prácticas ni interinidad.`;
             document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', status !== 'definitive');
+            document.getElementById('wizard-postponed-practice-field').classList.toggle('hidden', status !== 'practice');
             ['wizard-hardship-years', 'wizard-hardship-months'].forEach(id => {
                 const input = document.getElementById(id);
                 input.disabled = status === 'practice';
@@ -1576,7 +1592,9 @@
             
             state.seniorityWizard = { 
                 status, definitiveStartDate: defDate, firstDefinitiveParticipation, practiceStartDate: pracStart,
-                careerStartDate: carrStart, isStabilized, practiceOnlyStartDate: pracOnlyStart,
+                careerStartDate: carrStart, isStabilized,
+                practicePostponed: status === 'practice' && document.getElementById('wizard-postponed-practice').checked,
+                practiceOnlyStartDate: pracOnlyStart,
                 bodyStartDate: bodyStart, bodyGapMonths: Number(document.getElementById('wizard-body-gap-months').value) || 0
             };
             
@@ -1686,11 +1704,32 @@
             s6_6_tutor_master_grado: '6.6 Cursos de tutorización de máster/grado',
             s6_6_tutor_aspirantes: '6.6 Cursos de tutorización de funcionario/a en prácticas'
         };
+        const hasZeroPracticeScore = (s) => s.seniorityWizard?.status === 'practice' && !s.seniorityWizard.practicePostponed;
         const getCareerServiceMonths = (s) => {
             if (s.seniorityWizard?.status === 'practice') return 0;
             const bodyMonths = getDurationMonths(s, 's1_2_1');
             const careerMonths = completeMonthsSince(s.seniorityWizard?.careerStartDate);
             return Math.min(bodyMonths, careerMonths === null ? bodyMonths : careerMonths);
+        };
+        const CATEDRATICOS_ACCESS_YEARS = 8;
+        const CATEDRATICOS_MAX_SENIORITY_YEARS = 18;
+        const CATEDRATICOS_ORDER_URL = 'https://www.juntadeandalucia.es/boja/2026/183/c01/BOJA26-218301-00030-12327-01_00343557.pdf';
+        const hasCatedraticosAccessYears = (s) => getCareerServiceMonths(s) >= CATEDRATICOS_ACCESS_YEARS * 12;
+        const showCatedraticosWarning = (s) => !!s.s2_catedratico && !hasCatedraticosAccessYears(s);
+        // Ticked with 8+ career years: already in the Catedráticos body, so no access estimate.
+        const showCatedraticosTimeline = (s) => !s.s2_catedratico || !hasCatedraticosAccessYears(s);
+        const SPANISH_MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const toIsoDate = (date) => `${String(date.getFullYear()).padStart(4, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const formatSpanishLongDate = (value) => {
+            const date = parseSeniorityDate(value);
+            return date ? `${date.getDate()} de ${SPANISH_MONTH_NAMES[date.getMonth()]} de ${date.getFullYear()}` : '';
+        };
+        // Same-day anniversaries match completeMonthsBetween; 29 Feb rolls to 1 Mar in non-leap years.
+        const addYearsToSeniorityDate = (value, years) => {
+            const date = parseSeniorityDate(value);
+            if (!date) return '';
+            date.setFullYear(date.getFullYear() + years, date.getMonth(), date.getDate());
+            return toIsoDate(date);
         };
         const canAccumulateHistoricalProvisionality = (s) => s.seniorityWizard?.status === 'definitive'
             && s.seniorityWizard.firstDefinitiveParticipation === 'yes';
@@ -1797,7 +1836,7 @@
                            calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250) +
                            calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625),
             section1: (s) => parseFloat((Calculators.calc11(s) + Calculators.calc12(s)).toFixed(4)),
-            section2: (s) => s.s2_catedratico ? 5.0000 : 0,
+            section2: (s) => s.s2_catedratico && hasCatedraticosAccessYears(s) ? 5.0000 : 0,
             calc31: (s) => {
                 let pts = 0;
                 pts += s.s3_1_1_doctor * 6.0;
@@ -1899,43 +1938,46 @@
 
         const Icons = { help: `<svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>` };
 
-        const ProgressBar = (title, ptsId, maxPoints, currentPoints = 0) => {
+        const ProgressBar = (title, ptsId, maxPoints, currentPoints = 0, blocked = false) => {
             const progressId = `progress-${ptsId}`;
             const barId = `progress-bar-${ptsId}`;
             const badgeId = `progress-badge-${ptsId}`;
-            const reachedMax = currentPoints >= maxPoints;
-            const boundedPoints = Math.min(Math.max(currentPoints, 0), maxPoints);
-            const width = (boundedPoints / maxPoints) * 100;
+            const reachedMax = !blocked && currentPoints >= maxPoints;
+            const boundedPoints = blocked ? 0 : Math.min(Math.max(currentPoints, 0), maxPoints);
+            const width = blocked ? 100 : (boundedPoints / maxPoints) * 100;
+            const barColor = blocked ? 'progress-bar-blocked' : reachedMax ? 'bg-green-600 dark:bg-green-500' : 'bg-primary';
             return `
                 <div class="mt-2 mb-3 flex items-center gap-2">
                     <div id="${progressId}" class="h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700" role="progressbar" aria-label="Progreso de ${title}" aria-valuemin="0" aria-valuemax="${maxPoints}" aria-valuenow="${boundedPoints}">
-                        <div id="${barId}" class="h-full rounded-full transition-all duration-300 ${reachedMax ? 'bg-green-600 dark:bg-green-500' : 'bg-primary'}" style="width: ${width}%"></div>
+                        <div id="${barId}" class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${width}%"></div>
                     </div>
                     <span id="${badgeId}" class="${reachedMax ? '' : 'invisible'} shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/50 dark:text-green-200">Máximo alcanzado</span>
                 </div>`;
         };
 
-        const SectionTitle = (title, ptsId, maxPoints = null, currentPoints = 0) => `
+        const SectionTitle = (title, ptsId, maxPoints = null, currentPoints = 0, blocked = false) => `
             <div class="mb-4">
                 <div class="flex flex-wrap gap-2 justify-between items-center">
                     <h2 class="text-xl font-bold text-primary dark:text-emerald-400 border-b-2 border-primary/20 pb-2">${title}</h2>
                     <span class="text-2xl font-bold text-primary dark:text-emerald-400 score-value" id="${ptsId}">0,0000 ptos.</span>
                 </div>
-                ${maxPoints !== null ? ProgressBar(title, ptsId, maxPoints, currentPoints) : ''}
+                ${maxPoints !== null ? ProgressBar(title, ptsId, maxPoints, currentPoints, blocked) : ''}
             </div>`;
 
-        function updateProgress(ptsId, currentPoints, maxPoints) {
+        // blocked: the merit is ticked but a requirement is missing, so the bar is drawn full but dashed grey and scores 0.
+        function updateProgress(ptsId, currentPoints, maxPoints, blocked = false) {
             const progress = document.getElementById(`progress-${ptsId}`);
             const bar = document.getElementById(`progress-bar-${ptsId}`);
             const badge = document.getElementById(`progress-badge-${ptsId}`);
             if (!progress || !bar || !badge) return;
-            const reachedMax = currentPoints >= maxPoints;
-            const boundedPoints = Math.min(Math.max(currentPoints, 0), maxPoints);
+            const reachedMax = !blocked && currentPoints >= maxPoints;
+            const boundedPoints = blocked ? 0 : Math.min(Math.max(currentPoints, 0), maxPoints);
             progress.setAttribute('aria-valuenow', String(boundedPoints));
-            bar.style.width = `${(boundedPoints / maxPoints) * 100}%`;
+            bar.style.width = blocked ? '100%' : `${(boundedPoints / maxPoints) * 100}%`;
+            bar.classList.toggle('progress-bar-blocked', blocked);
             bar.classList.toggle('bg-green-600', reachedMax);
             bar.classList.toggle('dark:bg-green-500', reachedMax);
-            bar.classList.toggle('bg-primary', !reachedMax);
+            bar.classList.toggle('bg-primary', !blocked && !reachedMax);
             badge.classList.toggle('invisible', !reachedMax);
         }
 
@@ -2345,11 +2387,16 @@
                 </div>` : ''}
             </div>`;
         }
-        function renderPuestoAdditionalBilingualChecker(specialty) {
+        function renderPuestoAdditionalBilingualChecker(specialty, slot = 'additionalPost') {
             const answer = state.bilingual || INITIAL_STATE.bilingual;
-            const additional = answer.additionalPost || INITIAL_STATE.bilingual.additionalPost;
-            const availableLanguages = getPuestoBilingualAdditionalLanguages(specialty, answer.language);
+            const isThird = slot === 'thirdPost';
+            const secondPost = answer.additionalPost || INITIAL_STATE.bilingual.additionalPost;
+            if (isThird && (!secondPost.enabled || !secondPost.language)) return '';
+            const additional = answer[slot] || INITIAL_STATE.bilingual[slot];
+            const availableLanguages = getPuestoBilingualAdditionalLanguages(specialty, answer.language, isThird ? [secondPost.language] : []);
             if (!availableLanguages.length) return '';
+            const idPrefix = isThird ? 'puesto-third' : 'puesto-additional';
+            const slotArg = isThird ? ", 'thirdPost'" : '';
             const language = availableLanguages.includes(additional.language) ? additional.language : '';
             const additionalAnswer = { ...additional, enabled: true, language, specialty: answer.specialty };
             const resultState = { ...state, bilingual: additionalAnswer };
@@ -2360,29 +2407,29 @@
             const filteredCertificates = certificates.filter(item => (item.level || 'other') === certificateLevel)
                 .sort((left, right) => compareCertificateNames(getBilingualCertificateName(left), getBilingualCertificateName(right)));
             return `<div class="mt-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-                <label for="puestos-bilingual-additional" class="flex items-start gap-2 cursor-pointer text-sm text-gray-800 dark:text-gray-200">
-                    <input id="puestos-bilingual-additional" type="checkbox" ${additional.enabled ? 'checked' : ''} onchange="setPuestoAdditionalBilingualAnswer('enabled', this.checked)" class="mt-0.5 h-4 w-4 shrink-0 text-primary">
-                    <span>${availableLanguages.length === 1 ? `Tengo otro puesto bilingüe: ${availableLanguages[0]}` : 'Tengo otro puesto bilingüe que añadir'}</span>
+                <label for="puestos-bilingual-${isThird ? 'third' : 'additional'}" class="flex items-start gap-2 cursor-pointer text-sm text-gray-800 dark:text-gray-200">
+                    <input id="puestos-bilingual-${isThird ? 'third' : 'additional'}" type="checkbox" ${additional.enabled ? 'checked' : ''} onchange="setPuestoAdditionalBilingualAnswer('enabled', this.checked${slotArg})" class="mt-0.5 h-4 w-4 shrink-0 text-primary">
+                    <span>${availableLanguages.length === 1 ? `Tengo ${isThird ? 'un tercer' : 'otro'} puesto bilingüe: ${availableLanguages[0]}` : 'Tengo otro puesto bilingüe que añadir'}</span>
                 </label>
                 ${additional.enabled && availableLanguages.length > 1 ? `<div class="mt-3">
-                    <label for="puesto-additional-language" class="text-sm font-medium text-gray-700 dark:text-gray-300">Idioma del otro puesto bilingüe</label>
-                    <select id="puesto-additional-language" onchange="setPuestoAdditionalBilingualAnswer('language', this.value)" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <label for="${idPrefix}-language" class="text-sm font-medium text-gray-700 dark:text-gray-300">Idioma del otro puesto bilingüe</label>
+                    <select id="${idPrefix}-language" onchange="setPuestoAdditionalBilingualAnswer('language', this.value${slotArg})" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         <option value="">Seleccionar idioma...</option>
                         ${availableLanguages.map(item => `<option value="${item}" ${language === item ? 'selected' : ''}>${item}</option>`).join('')}
                     </select>
                 </div>` : ''}
                 ${additional.enabled && language ? `<div class="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-                    <p class="mb-3 text-xs text-gray-600 dark:text-gray-300">Comprueba este idioma por separado: la acreditación del primer puesto no se comparte.</p>
+                    <p class="mb-3 text-xs text-gray-600 dark:text-gray-300">Comprueba este idioma por separado: la acreditación de los otros puestos no se comparte.</p>
                     ${existing ? '<p class="text-sm text-green-700 dark:text-green-200">Se ha encontrado una acreditación de este idioma en 3.3 o 5.5 que figura en el anexo XVI.</p>' : `<div>
-                        <label for="puesto-additional-level" class="text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué nivel de ${language.toLowerCase()} tienes?</label>
-                        <select id="puesto-additional-level" onchange="setPuestoAdditionalBilingualAnswer('certificateLevel', this.value)" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label for="${idPrefix}-level" class="text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué nivel de ${language.toLowerCase()} tienes?</label>
+                        <select id="${idPrefix}-level" onchange="setPuestoAdditionalBilingualAnswer('certificateLevel', this.value${slotArg})" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="">Seleccionar nivel...</option>
                             ${['B2', 'C1', 'C2'].map(level => `<option value="${level}" ${certificateLevel === level ? 'selected' : ''}>${level}</option>`).join('')}
                             <option value="other" ${certificateLevel === 'other' ? 'selected' : ''}>Otra titulación admitida sin nivel MCER indicado</option>
                             <option value="none" ${certificateLevel === 'none' ? 'selected' : ''}>Solo tengo B1 / no tengo una acreditación de este anexo</option>
                         </select>
-                        ${certificateLevel && certificateLevel !== 'none' ? `<label for="puesto-additional-certificate" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué título de ${language.toLowerCase()} tienes?</label>
-                        <select id="puesto-additional-certificate" onchange="setPuestoAdditionalBilingualAnswer('certificate', this.value)" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        ${certificateLevel && certificateLevel !== 'none' ? `<label for="${idPrefix}-certificate" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">¿Qué título de ${language.toLowerCase()} tienes?</label>
+                        <select id="${idPrefix}-certificate" onchange="setPuestoAdditionalBilingualAnswer('certificate', this.value${slotArg})" class="mt-2 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <option value="">Seleccionar título o certificado...</option>
                             ${filteredCertificates.map(item => `<option value="${item.id}" ${additional.certificate === item.id ? 'selected' : ''}>${getBilingualCertificateName(item)}${item.level ? ` — ${item.level}` : ''}</option>`).join('')}
                             <option value="none" ${additional.certificate === 'none' ? 'selected' : ''}>No tengo ninguno de estos títulos o certificados</option>
@@ -2390,21 +2437,21 @@
                         ${selected?.before ? (() => {
                             const text = formatDateInput(additional.issuedDateText ?? formatWizardDateText(additional.issuedDate));
                             const invalid = text && !parseWizardDateText(text);
-                            return `<label for="puesto-additional-issued-date-text" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de expedición (debe ser anterior al ${formatWizardDateText(selected.before)})</label>
+                            return `<label for="${idPrefix}-issued-date-text" class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de expedición (debe ser anterior al ${formatWizardDateText(selected.before)})</label>
                             <div class="mt-1 flex gap-2">
-                                <input id="puesto-additional-issued-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" value="${text}" oninput="setPuestoAdditionalBilingualDateText(this)" ${invalid ? 'aria-invalid="true"' : ''} class="min-w-0 flex-1 rounded-l-md border ${invalid ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
+                                <input id="${idPrefix}-issued-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" value="${text}" oninput="setPuestoAdditionalBilingualDateText(this${slotArg})" ${invalid ? 'aria-invalid="true"' : ''} class="min-w-0 flex-1 rounded-l-md border ${invalid ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100">
                                 <span class="relative inline-flex shrink-0">
-                                    <button type="button" onclick="openWizardDatePicker('puesto-additional-issued-date')" aria-label="Abrir calendario de fecha de expedición del otro puesto" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
-                                    <input id="puesto-additional-issued-date" type="date" value="${parseSeniorityDate(additional.issuedDate) ? additional.issuedDate : ''}" aria-hidden="true" tabindex="-1" onchange="setPuestoAdditionalBilingualDatePicker(this)" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
+                                    <button type="button" onclick="openWizardDatePicker('${idPrefix}-issued-date')" aria-label="Abrir calendario de fecha de expedición del otro puesto" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></button>
+                                    <input id="${idPrefix}-issued-date" type="date" value="${parseSeniorityDate(additional.issuedDate) ? additional.issuedDate : ''}" aria-hidden="true" tabindex="-1" onchange="setPuestoAdditionalBilingualDatePicker(this${slotArg})" class="pointer-events-none absolute inset-0 h-full w-full opacity-0">
                                 </span>
                             </div>`;
                         })() : ''}
-                        ${selected?.condition ? `<label class="mt-3 flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><input id="puesto-additional-conditions" type="checkbox" ${additional.conditionsConfirmed ? 'checked' : ''} onchange="setPuestoAdditionalBilingualAnswer('conditionsConfirmed', this.checked)" class="mt-0.5 h-4 w-4 shrink-0 text-primary"><span>${selected.condition}</span></label>` : ''}` : ''}
+                        ${selected?.condition ? `<label class="mt-3 flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><input id="${idPrefix}-conditions" type="checkbox" ${additional.conditionsConfirmed ? 'checked' : ''} onchange="setPuestoAdditionalBilingualAnswer('conditionsConfirmed', this.checked${slotArg})" class="mt-0.5 h-4 w-4 shrink-0 text-primary"><span>${selected.condition}</span></label>` : ''}` : ''}
                     </div>`}
                     ${renderBilingualMeritWarning(resultState)}
                     ${renderBilingualResult(resultState, true)}
                 </div>` : ''}
-            </div>`;
+            </div>${isThird ? '' : renderPuestoAdditionalBilingualChecker(specialty, 'thirdPost')}`;
         }
         function setBilingualDateText(input) {
             const cursor = input.selectionStart ?? input.value.length;
@@ -2428,6 +2475,7 @@
             state.bilingual[field] = value;
             if (field === 'specialty' || (field === 'enabled' && !value)) {
                 state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
+                state.bilingual.thirdPost = { ...INITIAL_STATE.bilingual.thirdPost };
             }
             if (field === 'language') {
                 state.bilingual.certificateLevel = '';
@@ -2451,13 +2499,7 @@
             if (field === 'enabled' && value) syncBilingualFromMerits();
             const meritsChanged = ['language', 'certificateLevel', 'certificate', 'conditionsConfirmed', 'issuedDate'].includes(field) && syncMeritsFromBilingual();
             if (field === 'language') syncBilingualFromMerits();
-            const additionalPost = state.bilingual.additionalPost;
-            if (additionalPost?.enabled) {
-                const specialty = BILINGUAL_SPECIALTIES.find(([code]) => code === state.bilingual.specialty);
-                if (!getPuestoBilingualAdditionalLanguages(specialty, state.bilingual.language).includes(additionalPost.language)) {
-                    state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
-                }
-            }
+            syncPuestoExtraBilingualPosts();
             saveState();
             if (meritsChanged) renderMainContent();
             updateCalculations();
@@ -2602,15 +2644,25 @@
             if (field === 'origen' || field === 'idioma' || field === 'nivelFiltro' || field === 'certificado') { renderMainContent(); updateCalculations(); }
         }
 
+        function renderPracticeScoreNotice() {
+            if (state.seniorityWizard.status !== 'practice') return '';
+            const icon = '<svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            if (state.seniorityWizard.practicePostponed) return `
+                <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
+                    ${icon}
+                    <span>Prácticas aplazadas por conciliación o incapacidad temporal: se adjudica según tu puntuación. El apartado 1.1 sigue a cero y la adjudicación queda supeditada a que superes las prácticas.</span>
+                </div>`;
+            return `
+                <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
+                    ${icon}
+                    <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
+                </div>`;
+        }
         function renderSection1() {
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('1. Antigüedad', 'score-s1')}
-                    ${state.seniorityWizard.status === 'practice' ? `
-                    <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
-                        <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
-                    </div>` : ''}
+                    ${renderPracticeScoreNotice()}
                     <div class="mb-5 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4">
                         <p class="text-sm text-gray-700 dark:text-gray-200">Responde unas preguntas para calcular automáticamente el tiempo hasta el <strong>26 de noviembre de 2026</strong>. Después, podrás revisar o corregir cada campo manualmente.</p>
                         <button type="button" onclick="openSeniorityWizard()" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-[#00623b] px-4 py-2.5 font-semibold text-white shadow-sm transition">
@@ -2666,16 +2718,51 @@
                 </div>`;
         }
 
+        function renderCatedraticosTimeline() {
+            if (['maestros', 'sectores'].includes(state.puestos?.cuerpo)) return '';
+            const wizard = state.seniorityWizard || {};
+            const careerStartDate = wizard.careerStartDate;
+            let content;
+            if (wizard.status === 'practice') {
+                content = `
+                    <p id="catedraticos-access-date">Podrás participar en el acceso a Catedráticos ${CATEDRATICOS_ACCESS_YEARS} años después de tu nombramiento como funcionario/a de carrera.</p>
+                    <p id="catedraticos-max-seniority-date" class="mt-1">Podrás llenar el baremo de antigüedad (4 puntos) ${CATEDRATICOS_MAX_SENIORITY_YEARS} años después de ese nombramiento.</p>`;
+            } else if (!['definitive', 'provisional'].includes(wizard.status) || !parseSeniorityDate(careerStartDate)) {
+                content = `<p>Para saber cuándo podrás participar en el acceso a Catedráticos y llenar el baremo de antigüedad, <button type="button" onclick="openSeniorityWizard()" class="font-semibold underline underline-offset-2 hover:text-yellow-900 dark:hover:text-yellow-100">completa el cuestionario de antigüedad</button>.</p>`;
+            } else {
+                const today = toIsoDate(new Date());
+                const accessDate = addYearsToSeniorityDate(careerStartDate, CATEDRATICOS_ACCESS_YEARS);
+                const maxDate = addYearsToSeniorityDate(careerStartDate, CATEDRATICOS_MAX_SENIORITY_YEARS);
+                const accessText = accessDate <= today
+                    ? `Ya puedes participar en el acceso a Catedráticos desde el <strong>${formatSpanishLongDate(accessDate)}</strong>.`
+                    : `Podrás participar en el acceso a Catedráticos a partir del <strong>${formatSpanishLongDate(accessDate)}</strong>.`;
+                const maxText = maxDate <= today
+                    ? `Ya llenas el baremo de antigüedad (4 puntos) desde el <strong>${formatSpanishLongDate(maxDate)}</strong>.`
+                    : `Podrás llenar el baremo de antigüedad (4 puntos) el <strong>${formatSpanishLongDate(maxDate)}</strong>.`;
+                content = `
+                    <p id="catedraticos-access-date">${accessText}</p>
+                    <p id="catedraticos-max-seniority-date" class="mt-1">${maxText}</p>`;
+            }
+            return `
+                <div id="catedraticos-timeline" class="${showCatedraticosTimeline(state) ? '' : 'hidden'} mt-3 rounded-r border-l-4 border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
+                    ${content}
+                    <p class="mt-2">
+                        <a id="catedraticos-order-link" href="${CATEDRATICOS_ORDER_URL}" target="_blank" rel="noopener noreferrer" class="font-semibold underline underline-offset-2 hover:text-yellow-900 dark:hover:text-yellow-100" title="Orden de 18 de septiembre de 2026 de acceso a Catedráticos, BOJA n.º 183 (PDF, se abre en nueva pestaña)">Orden de 18 de septiembre de 2026 de acceso a Catedráticos (BOJA n.º 183)<span aria-hidden="true" class="ml-1 inline-block no-underline">↗</span></a>
+                    </p>
+                </div>`;
+        }
+
         function renderSection2() {
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2', 5, Calculators.section2(state))}
+                    ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2', 5, Calculators.section2(state), showCatedraticosWarning(state))}
                     ${InfoBox('Pertenencia a los Cuerpos de Catedráticos de Enseñanza Secundaria, Música y Artes Escénicas, EOI y Artes Plásticas y Diseño.')}
                     ${Checkbox('Soy funcionario/a de carrera del Cuerpo de Catedráticos (5 ptos.)', 's2_catedratico')}
-                    <div id="catedraticos-eligibility-warning" class="${state.s2_catedratico && getCareerServiceMonths(state) < 96 ? '' : 'hidden'} mt-3 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
+                    <div id="catedraticos-eligibility-warning" class="${showCatedraticosWarning(state) ? '' : 'hidden'} mt-3 flex items-start gap-2 rounded-r border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-200" role="alert">
                         <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>El acceso al Cuerpo de Catedráticos exige al menos <strong>8 años de antigüedad como funcionario/a de carrera</strong>. Es un procedimiento independiente del concurso de traslados y la convocatoria de 2026 finalizó el <strong>13 de octubre de 2026</strong>. <a href="https://www.juntadeandalucia.es/educacion/portales/web/educacion/w/acceso-a-catedras-2026-procedimiento" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Consulta la información oficial del procedimiento<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.</span>
+                        <span>El acceso al Cuerpo de Catedráticos exige al menos <strong>8 años de antigüedad como funcionario/a de carrera</strong>; sin ellos, este apartado cuenta <strong>0 puntos</strong>. Es un procedimiento independiente del concurso de traslados y la convocatoria de 2026 finalizó el <strong>13 de octubre de 2026</strong>. <a href="https://www.juntadeandalucia.es/educacion/portales/web/educacion/w/acceso-a-catedras-2026-procedimiento" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Consulta la información oficial del procedimiento<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.</span>
                     </div>
+                    ${renderCatedraticosTimeline()}
                 </div>`;
         }
 
@@ -3019,9 +3106,7 @@
             addBlock('1. Antigüedad', b1, null, Calculators.section1(s));
 
             const b2 = [];
-            if (s.s2_catedratico) {
-                push(b2, '2. Pertenencia al Cuerpo de Catedráticos', 5.0);
-            }
+            push(b2, '2. Pertenencia al Cuerpo de Catedráticos', Calculators.section2(s));
             addBlock('2. Cuerpos de Catedráticos', b2, 5.0, Calculators.section2(s));
 
             const b3 = [];
@@ -3176,16 +3261,12 @@
                             </div>
                             <div class="summary-score shrink-0 text-right pb-1">
                                 <p class="text-sm opacity-80 print-summary-total-label">Puntuación total</p>
-                                <p class="whitespace-nowrap text-3xl sm:text-4xl leading-tight pb-1 ${state.seniorityWizard.status === 'practice' ? 'text-amber-200' : ''} print-summary-points summary-mono-score total-score-value">${total}</p>
-                                ${state.seniorityWizard.status === 'practice' ? '<p class="text-xs font-semibold text-amber-100"><svg class="inline-block h-3 w-3 shrink-0 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Puntuación real: 0 (en prácticas)</p>' : ''}
+                                <p class="whitespace-nowrap text-3xl sm:text-4xl leading-tight pb-1 ${hasZeroPracticeScore(state) ? 'text-amber-200' : ''} print-summary-points summary-mono-score total-score-value">${total}</p>
+                                ${hasZeroPracticeScore(state) ? '<p class="text-xs font-semibold text-amber-100"><svg class="inline-block h-3 w-3 shrink-0 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Puntuación real: 0 (en prácticas)</p>' : ''}
                             </div>
                         </div>
                         <div class="p-6">
-                            ${state.seniorityWizard.status === 'practice' ? `
-                            <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
-                                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
-                            </div>` : ''}
+                            ${renderPracticeScoreNotice()}
                             <table class="w-full text-left border-collapse print-summary-table">
                                 <thead>
                                     <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider print-summary-table-heading">
@@ -3414,21 +3495,37 @@
             const selected = new Set(answer.especialidades || []);
             return BILINGUAL_SPECIALTIES.filter(([code]) => code.startsWith(prefix) && selected.has(code.slice(3)));
         }
-        function getPuestoBilingualAdditionalLanguages(specialty, primaryLanguage) {
+        function getPuestoBilingualAdditionalLanguages(specialty, primaryLanguage, excludedLanguages = []) {
             if (!specialty) return [];
             const allowedLanguages = new Set(specialty[2].map(index => BILINGUAL_LANGUAGES[index]));
             if (!allowedLanguages.has(primaryLanguage)) return [];
-            return PUESTOS_BILINGUAL_LANGUAGES.filter(language => allowedLanguages.has(language) && language !== primaryLanguage);
+            return PUESTOS_BILINGUAL_LANGUAGES.filter(language => allowedLanguages.has(language) && language !== primaryLanguage && !excludedLanguages.includes(language));
         }
-        function setPuestoAdditionalBilingualAnswer(field, value) {
+        function syncPuestoExtraBilingualPosts() {
+            const bilingual = state.bilingual;
+            const specialty = BILINGUAL_SPECIALTIES.find(([code]) => code === bilingual.specialty);
+            const secondPost = bilingual.additionalPost;
+            if (secondPost?.enabled && secondPost.language && !getPuestoBilingualAdditionalLanguages(specialty, bilingual.language).includes(secondPost.language)) {
+                bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
+            }
+            const thirdPost = bilingual.thirdPost;
+            const validSecondLanguage = bilingual.additionalPost?.enabled ? bilingual.additionalPost.language : '';
+            if (thirdPost?.enabled && (!validSecondLanguage || (thirdPost.language
+                && !getPuestoBilingualAdditionalLanguages(specialty, bilingual.language, [validSecondLanguage]).includes(thirdPost.language)))) {
+                bilingual.thirdPost = { ...INITIAL_STATE.bilingual.thirdPost };
+            }
+        }
+        function setPuestoAdditionalBilingualAnswer(field, value, slot = 'additionalPost') {
             if (!state.bilingual) state.bilingual = { ...INITIAL_STATE.bilingual };
-            if (!state.bilingual.additionalPost) state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
-            const additionalPost = state.bilingual.additionalPost;
+            state.bilingual[slot] = { ...INITIAL_STATE.bilingual[slot], ...(state.bilingual[slot] || {}) };
+            const additionalPost = state.bilingual[slot];
             const specialty = BILINGUAL_SPECIALTIES.find(([code]) => code === state.bilingual.specialty);
-            const availableLanguages = getPuestoBilingualAdditionalLanguages(specialty, state.bilingual.language);
+            const excludedLanguages = slot === 'thirdPost' ? [state.bilingual.additionalPost?.language].filter(Boolean) : [];
+            const availableLanguages = getPuestoBilingualAdditionalLanguages(specialty, state.bilingual.language, excludedLanguages);
             if (field === 'enabled') {
                 if (!value) {
-                    state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
+                    state.bilingual[slot] = { ...INITIAL_STATE.bilingual[slot] };
+                    if (slot === 'additionalPost') state.bilingual.thirdPost = { ...INITIAL_STATE.bilingual.thirdPost };
                     saveState();
                     updateCalculations();
                     return;
@@ -3463,28 +3560,27 @@
                 additionalPost[field] = Boolean(value);
             }
             additionalPost.enabled = true;
+            syncPuestoExtraBilingualPosts();
             saveState();
             updateCalculations();
         }
-        function setPuestoAdditionalBilingualDateText(input) {
+        function setPuestoAdditionalBilingualDateText(input, slot = 'additionalPost') {
             const cursor = input.selectionStart ?? input.value.length;
             const beforeCursor = formatDateInput(input.value.slice(0, cursor));
             const text = formatDateInput(input.value);
             if (!state.bilingual) state.bilingual = { ...INITIAL_STATE.bilingual };
-            if (!state.bilingual.additionalPost) state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
-            state.bilingual.additionalPost.issuedDateText = text;
-            setPuestoAdditionalBilingualAnswer('issuedDate', parseWizardDateText(text));
-            const restored = document.getElementById('puesto-additional-issued-date-text');
+            state.bilingual[slot] = { ...INITIAL_STATE.bilingual[slot], ...(state.bilingual[slot] || {}), issuedDateText: text };
+            setPuestoAdditionalBilingualAnswer('issuedDate', parseWizardDateText(text), slot);
+            const restored = document.getElementById(input.id);
             if (restored) {
                 restored.focus({ preventScroll: true });
                 restored.setSelectionRange(beforeCursor.length, beforeCursor.length);
             }
         }
-        function setPuestoAdditionalBilingualDatePicker(input) {
+        function setPuestoAdditionalBilingualDatePicker(input, slot = 'additionalPost') {
             if (!state.bilingual) state.bilingual = { ...INITIAL_STATE.bilingual };
-            if (!state.bilingual.additionalPost) state.bilingual.additionalPost = { ...INITIAL_STATE.bilingual.additionalPost };
-            state.bilingual.additionalPost.issuedDateText = formatWizardDateText(input.value);
-            setPuestoAdditionalBilingualAnswer('issuedDate', input.value);
+            state.bilingual[slot] = { ...INITIAL_STATE.bilingual[slot], ...(state.bilingual[slot] || {}), issuedDateText: formatWizardDateText(input.value) };
+            setPuestoAdditionalBilingualAnswer('issuedDate', input.value, slot);
         }
         function renderPuestoCheckbox(field, value, label, checked) {
             return `<label class="flex items-start gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 text-sm text-gray-800 dark:text-gray-200">
@@ -3540,7 +3636,7 @@
                 }
                 if (body === 'secundaria' && selected.has('005')) {
                     if ((answer.gehDistanceTeachingYear || answer.gehDistanceExeLearning) && answer.gehDistanceMoodle30h) {
-                        placement.push('Geografía e Historia a distancia (ED590005; has confirmado un curso académico a distancia/semipresencial o formación acreditada en eXeLearning/REA, además de 30 h de tutoría virtual Moodle).');
+                        placement.push('Geografía e Historia a distancia (ED590005).');
                     } else {
                         pending.push('Geografía e Historia a distancia (ED590005): un curso académico a distancia/semipresencial o formación acreditada en eXeLearning/REA, más 30 h de tutoría virtual Moodle. No es un curso conjunto de 100 h.');
                     }
@@ -3562,20 +3658,21 @@
                     concurso.push(`${bilingualSpecialty[1]} (${state.bilingual.language}) — código ${bilingualPostCode}; especialidad ${bilingualSpecialty[0]}.`);
                 }
                 else pending.push(`${bilingualSpecialty[1]} bilingüe: ${result.message}`);
-                const additionalPost = state.bilingual.additionalPost;
-                if (additionalPost?.enabled) {
+                ['additionalPost', 'thirdPost'].forEach(slot => {
+                    const additionalPost = state.bilingual[slot];
+                    if (!additionalPost?.enabled) return;
                     if (!additionalPost.language) {
                         pending.push(`${bilingualSpecialty[1]}: selecciona el idioma del otro puesto y acredita ese idioma por separado.`);
-                    } else {
-                        const additionalResult = getBilingualResult({ ...state, bilingual: { ...additionalPost, enabled: true, specialty: bilingualSpecialty[0] } });
-                        if (additionalResult.status === 'yes') {
-                            const additionalCode = `${BILINGUAL_POST_CODE_PREFIX[additionalPost.language]}${bilingualSpecialty[0]}`;
-                            concurso.push(`${bilingualSpecialty[1]} (${additionalPost.language}) — código ${additionalCode}; especialidad ${bilingualSpecialty[0]}.`);
-                        } else {
-                            pending.push(`${bilingualSpecialty[1]} (${additionalPost.language}) bilingüe: ${additionalResult.message}`);
-                        }
+                        return;
                     }
-                }
+                    const additionalResult = getBilingualResult({ ...state, bilingual: { ...additionalPost, enabled: true, specialty: bilingualSpecialty[0] } });
+                    if (additionalResult.status === 'yes') {
+                        const additionalCode = `${BILINGUAL_POST_CODE_PREFIX[additionalPost.language]}${bilingualSpecialty[0]}`;
+                        concurso.push(`${bilingualSpecialty[1]} (${additionalPost.language}) — código ${additionalCode}; especialidad ${bilingualSpecialty[0]}.`);
+                    } else {
+                        pending.push(`${bilingualSpecialty[1]} (${additionalPost.language}) bilingüe: ${additionalResult.message}`);
+                    }
+                });
             }
             return `<section aria-labelledby="puestos-final-summary" class="rounded-xl border border-primary/30 bg-white p-4 shadow-sm dark:bg-gray-800">
                 <h3 id="puestos-final-summary" class="text-lg font-bold text-gray-900 dark:text-gray-100">¿Qué puedes pedir?</h3>
@@ -3614,13 +3711,9 @@
             const canApplySecondarySupport = body === 'secundaria' || body === 'ptfp';
             const isMaestros = body === 'maestros';
             const bilingualSpecialties = getPuestoBilingualSpecialties(answer);
-            const recommendations = ['<li class="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-100"><strong>Puestos de las especialidades de las que eres titular.</strong><span class="mt-1 block text-xs">Comprueba los códigos de especialidad y los centros incluidos en los anexos de la convocatoria.</span></li>'];
-            const areas058 = ['001', '002', '003', '004', '005', '010', '011', '012', '013', '016'];
-            const areas059 = ['006', '007', '008', '019', '107'];
+            const recommendations = [];
             if (canApplySecondarySupport) {
                 if (specialties.has('002') || specialties.has('003')) recommendations.push(renderPuestoAvailability('Cultura Clásica (código 803)', 'Solo para titulares de Griego o Latín. En el puesto se imparten ambas materias.'));
-                if ([...specialties].some(code => areas058.includes(code))) recommendations.push(renderPuestoAvailability('Apoyo al área de Lengua y Ciencias Sociales (código 058)', 'Por las especialidades habilitantes seleccionadas.'));
-                if ([...specialties].some(code => areas059.includes(code))) recommendations.push(renderPuestoAvailability('Apoyo al área de Ciencias o Tecnología (código 059)', 'Por las especialidades habilitantes seleccionadas.'));
                 if (specialties.has('018')) recommendations.push(answer.eoeSecundaria
                     ? renderPuestoAvailability('Orientación Educativa en EOE', 'Has indicado que cumples la experiencia requerida: 2 años en el cuerpo y especialidad o 2 años de experiencia en EOE.')
                     : '<li class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-100"><strong>Orientación Educativa en EOE</strong><span class="mt-1 block text-xs">La especialidad 018 requiere 2 años en el cuerpo y especialidad o 2 años de experiencia en EOE. Confirma si cumples el requisito.</span></li>');
@@ -3659,7 +3752,7 @@
                 </select>
                 ${body ? `<section aria-labelledby="puestos-results-title" class="space-y-4">
                     <h3 id="puestos-results-title" class="font-semibold text-gray-900 dark:text-gray-100">Puestos de tu cuerpo</h3>
-                    <ul class="space-y-2">${recommendations.join('')}</ul>
+                    ${recommendations.length ? `<ul class="space-y-2">${recommendations.join('')}</ul>` : ''}
                     ${canApplySecondarySupport ? `<div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                         <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Especialidades relevantes para puestos específicos</h4>
                         <p class="mb-3 mt-1 text-xs text-gray-600 dark:text-gray-300">Marca tus especialidades de titularidad.</p>
@@ -3700,9 +3793,6 @@
                         <p class="mb-3 mt-1 text-xs text-gray-600 dark:text-gray-300">El comprobador de 3.3 y 5.5 se comparte aquí. Usa las especialidades marcadas arriba y elige idioma y acreditación.</p>
                         ${renderBilingualChecker(bilingualSpecialties)}
                     </div>
-                    <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-100">
-                        <strong>Los puestos voluntarios deben solicitarse expresamente.</strong> Revisa los requisitos y centros; algunos pueden implicar itinerancia o docencia en varios centros.
-                    </div>
                     ${renderPuestoFinalSummary()}
                 </section>` : ''}
             </div>`;
@@ -3720,12 +3810,10 @@
                 if (summary) summary.outerHTML = renderPuestoFinalSummary();
             }
             updateServiceLimitWarnings();
-            const catedraticosWarning = document.getElementById('catedraticos-eligibility-warning');
-            if (catedraticosWarning) {
-                catedraticosWarning.classList.toggle('hidden', !state.s2_catedratico || getCareerServiceMonths(state) >= 96);
-            }
+            document.getElementById('catedraticos-eligibility-warning')?.classList.toggle('hidden', !showCatedraticosWarning(state));
+            document.getElementById('catedraticos-timeline')?.classList.toggle('hidden', !showCatedraticosTimeline(state));
             const h = document.getElementById('header-total-score');
-            const isPractice = state.seniorityWizard.status === 'practice';
+            const isPractice = hasZeroPracticeScore(state);
             const headerNote = document.getElementById('header-total-note');
             if (h) {
                 h.textContent = formatPoints(Calculators.total(state));
@@ -3744,7 +3832,7 @@
             } else if (activeTabId === 2) {
                 const points = Calculators.section2(state);
                 updateText('score-s2', points);
-                updateProgress('score-s2', points, 5);
+                updateProgress('score-s2', points, 5, showCatedraticosWarning(state));
             } else if (activeTabId === 3) {
                 const points = Calculators.section3(state);
                 updateText('score-s3', points);
