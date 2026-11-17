@@ -2006,7 +2006,7 @@
             const suffix = (pts === 1) ? 'pto.' : 'ptos.';
             return `
             <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-100 dark:border-gray-600">
-                <div class="text-xs text-gray-600 dark:text-gray-300 font-medium mb-1 h-8 flex items-end">${label}</div>
+                <div class="merit-card-label text-xs text-gray-600 dark:text-gray-300 font-medium mb-1 min-h-8 break-words flex items-end">${label}</div>
                 <div class="flex items-center gap-2">
                     <input type="${fractional ? 'text' : 'number'}" name="${name}" ${fractional ? 'inputmode="decimal" autocomplete="off"' : 'min="0" step="1"'} value="${state[name] || 0}" class="w-full p-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" oninput="handleInput(this)">
                     <span class="text-xs text-primary font-bold whitespace-nowrap">${formatDecimal(pts)} ${suffix}</span>
