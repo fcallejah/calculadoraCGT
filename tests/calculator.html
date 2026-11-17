@@ -1080,6 +1080,16 @@
                 const categories = [...new Set(labels.map(label => label.match(/^6\.1 ([abc])\)/)?.[1]).filter(Boolean))];
                 assert(JSON.stringify(categories) === JSON.stringify(['a', 'b', 'c']), `Orden incorrecto en el desglose: ${categories.join(', ')}`);
             });
+            await test('La etiqueta larga de espectáculos crece sin recortar el texto en móvil', () => {
+                frame.style.width = '320px';
+                api.setState(fresh());
+                app.closeLanding();
+                app.switchTab(6);
+                const card = app.document.querySelector('[name="s6_3_espectaculos_gran"]')?.closest('.bg-gray-50');
+                const label = card?.querySelector('.merit-card-label');
+                assert(label, 'No encuentra la etiqueta de gran formato');
+                assert(label.scrollHeight <= label.clientHeight + 1, `La etiqueta sobresale de su caja: ${label.scrollHeight}px de contenido en ${label.clientHeight}px`);
+            });
             await test('Investigacion en 6.2 a) actualiza la puntuacion y aparece en el desglose y PDF', () => {
                 api.setState(fresh());
                 app.switchTab(6);
