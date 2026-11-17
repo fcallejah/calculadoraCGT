@@ -1042,22 +1042,45 @@
                 const s = fresh({ s6_2_intl_1: 1, s6_2_investigacion_projects: 2 });
                 near(api.Calculators.calc62(s), 1.9);
             });
-            await test('Formulario 6.2.a agrupa premios e investigacion y 6.2.b agrupa planes educativos', () => {
+            await test('Formulario 6.2 a) agrupa premios e investigacion y 6.2 b) agrupa planes educativos', () => {
                 api.setState(fresh({ s6_2_investigacion_projects: 2 }));
                 const section = parsed(api.renderSection6());
                 const headings = [...section.querySelectorAll('h4')];
-                const groupA = headings.find(heading => heading.textContent.startsWith('6.2.a '))?.parentElement;
-                const groupB = headings.find(heading => heading.textContent.startsWith('6.2.b '))?.parentElement;
+                const groupAHeading = headings.find(heading => heading.textContent.startsWith('6.2 a) - '));
+                const groupBHeading = headings.find(heading => heading.textContent.startsWith('6.2 b) - '));
+                const groupA = groupAHeading?.parentElement;
+                const groupB = groupBHeading?.parentElement;
                 assert(groupA && groupB, 'Faltan los dos subapartados oficiales');
+                assert(groupBHeading.textContent.startsWith('6.2 b) - Coordinación'), 'El título no conserva la caja del desglose oficial');
+                assert(headings.every(heading => !heading.classList.contains('uppercase')), 'Los títulos no deben forzarse a mayúsculas');
                 const research = groupA.querySelector('[name="s6_2_investigacion_projects"]');
                 assert(research && research.value === '2', 'No muestra la participacion en investigacion guardada');
-                assert(!research.disabled && !groupB.contains(research), 'La investigacion no corresponde al 6.2.a');
-                assert(groupA.querySelector('[name="s6_2_intl_1"]'), 'Premios fuera del 6.2.a');
+                assert(!research.disabled && !groupB.contains(research), 'La investigacion no corresponde al 6.2 a)');
+                assert(groupA.querySelector('[name="s6_2_intl_1"]'), 'Premios fuera del 6.2 a)');
                 for (const name of ['s6_2_coord_plan_igualdad_years', 's6_2_coord_proyectos_years', 's6_2_part_proyectos_years']) {
-                    assert(groupB.querySelector(`[name="${name}"]`), `${name} fuera del 6.2.b`);
+                    assert(groupB.querySelector(`[name="${name}"]`), `${name} fuera del 6.2 b)`);
                 }
             });
-            await test('Investigacion en 6.2.a actualiza la puntuacion y aparece en el desglose y PDF', () => {
+            await test('Publicaciones 6.1 muestra y desglosa los subapartados en orden a, b, c', () => {
+                const section = parsed(api.renderSection6());
+                const headings = [...section.querySelectorAll('h4')].slice(0, 3).map(heading => heading.textContent);
+                assert(JSON.stringify(headings) === JSON.stringify([
+                    '6.1 a) Libros didácticos / científicos',
+                    '6.1 b) Revistas',
+                    '6.1 c) Obras literarias'
+                ]), `Orden incorrecto en el formulario: ${headings.join(' | ')}`);
+                api.setState(fresh({
+                    s6_1_libros_autor: 1,
+                    s6_1_revistas_autor: 1,
+                    s6_1_obras_literarias_autor: 1
+                }));
+                const labels = [...parsed(api.renderBreakdown()).querySelectorAll('.print-breakdown-label')]
+                    .map(label => label.textContent)
+                    .filter(label => label.startsWith('6.1 '));
+                const categories = [...new Set(labels.map(label => label.match(/^6\.1 ([abc])\)/)?.[1]).filter(Boolean))];
+                assert(JSON.stringify(categories) === JSON.stringify(['a', 'b', 'c']), `Orden incorrecto en el desglose: ${categories.join(', ')}`);
+            });
+            await test('Investigacion en 6.2 a) actualiza la puntuacion y aparece en el desglose y PDF', () => {
                 api.setState(fresh());
                 app.switchTab(6);
                 const input = app.document.querySelector('[name="s6_2_investigacion_projects"]');
@@ -1066,11 +1089,14 @@
                 near(api.Calculators.calc62(api.getState()), 0.4);
                 assert(app.document.getElementById('score-s62').textContent.includes('0,4000'), 'Puntuacion de 6.2 desactualizada');
                 const breakdown = parsed(api.renderBreakdown()).textContent;
-                assert(breakdown.includes('6.2.a Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el desglose');
+                assert(breakdown.includes('6.2 a) - Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el desglose');
                 assert(breakdown.includes('0,4000'), 'Valor incorrecto en el desglose');
-                assert(parsed(api.renderSummary()).textContent.includes('6.2.a Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el informe imprimible');
+                const summary = parsed(api.renderSummary());
+                assert(summary.textContent.includes('6.2 a) - Participación en proyectos de investigación o innovación educativa (2 proyectos)'), 'Falta la investigacion en el informe imprimible');
+                assert([...summary.querySelectorAll('.print-breakdown-section-title')].every(title => !title.classList.contains('uppercase')), 'El desglose no debe forzar los títulos a mayúsculas');
+                assert([...summary.querySelectorAll('.print-summary-table-heading')].every(title => !title.classList.contains('uppercase')), 'La cabecera de la tabla no debe forzarse a mayúsculas');
             });
-            await test('6.2.a y 6.2.b comparten el tope sin cambiar las puntuaciones existentes', () => {
+            await test('6.2 a) y 6.2 b) comparten el tope sin cambiar las puntuaciones existentes', () => {
                 const s = fresh({
                     s1_2_1_years: 5, s6_2_auto_1: 1, s6_2_investigacion_projects: 2,
                     s6_2_coord_proyectos_years: 1, s6_2_part_proyectos_years: 2
@@ -1078,7 +1104,7 @@
                 near(api.Calculators.calc62(s), 1.8);
                 api.setState(s);
                 const breakdown = parsed(api.renderBreakdown()).textContent;
-                for (const label of ['6.2.a Premio', '6.2.b Coordinación de otros proyectos', '6.2.b Participación en proyectos']) {
+                for (const label of ['6.2 a) - Premio', '6.2 b) - Coordinación de otros proyectos', '6.2 b) - Participación en proyectos']) {
                     assert(breakdown.includes(label), `Falta ${label}`);
                 }
                 s.s6_2_coord_plan_igualdad_years = 1;
