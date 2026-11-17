@@ -1697,9 +1697,9 @@
             s4_3_tutoria: '4.3 Tutoría'
         };
         const SERVICE_COUNTS = {
-            s6_2_coord_plan_igualdad_years: '6.2.b Coordinación del Plan de Igualdad',
-            s6_2_coord_proyectos_years: '6.2.b Coordinación de proyectos',
-            s6_2_part_proyectos_years: '6.2.b Participación en proyectos',
+            s6_2_coord_plan_igualdad_years: '6.2 b) - Coordinación del Plan de Igualdad',
+            s6_2_coord_proyectos_years: '6.2 b) - Coordinación de proyectos',
+            s6_2_part_proyectos_years: '6.2 b) - Participación en proyectos',
             s6_5_tribunales: '6.5 Convocatorias de tribunales',
             s6_6_tutor_master_grado: '6.6 Cursos de tutorización de máster/grado',
             s6_6_tutor_aspirantes: '6.6 Cursos de tutorización de funcionario/a en prácticas'
@@ -2926,7 +2926,7 @@
                     ${SectionTitle('6. Otros méritos (máx. 15)', 'score-s6', 15, Calculators.section6(state))}
                     ${SubTitle('6.1 Publicaciones (máx. 8)', 'score-s61', 'Libros con ISBN, revistas con ISSN, obras literarias. La autoría de obras literarias sigue la misma tabla que los libros, más ilustraciones a 0,2.', 8, Calculators.calc61(state))}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1">6.1 a) Libros didácticos / científicos</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1">6.1 a) Libros didácticos / científicos</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_libros_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_libros_coautor', 0.5)}
@@ -2935,25 +2935,25 @@
                             ${GridInput('5 autores', 's6_1_libros_5autores', 0.2)}
                             ${GridInput('Más de 5', 's6_1_libros_mas5autores', 0.1)}
                         </div>
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 c) Obras literarias</h4>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 b) Revistas</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            ${GridInput('Autor único', 's6_1_revistas_autor', 0.2)}
+                            ${GridInput('Coautor', 's6_1_revistas_coautor', 0.1)}
+                            ${GridInput('3 o más autores', 's6_1_revistas_3mas', 0.05)}
+                        </div>
+                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 c) Obras literarias</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_obras_literarias_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_obras_literarias_coautor', 0.5)}
                             ${GridInput('3+ autores', 's6_1_obras_literarias_3autores', 0.4)}
                             ${GridInput('Ilustrador/a', 's6_1_obras_literarias_ilustrador', 0.2)}
                         </div>
-                        <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 pt-2">6.1 b) Revistas</h4>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            ${GridInput('Autor único', 's6_1_revistas_autor', 0.2)}
-                            ${GridInput('Coautor', 's6_1_revistas_coautor', 0.1)}
-                            ${GridInput('3 o más autores', 's6_1_revistas_3mas', 0.05)}
-                        </div>
                     </div>
 
                     ${SubTitle('6.2 Premios y proyectos (máx. 2,5)', 'score-s62', 'Los premios se dividen por n.º de participantes. Si no se relacionan los participantes, se divide por el n.º de profesores del centro (mín. 0,05).', 2.5, Calculators.calc62(state))}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2 uppercase tracking-wide">6.2.a Premios convocados por una Administración educativa y participación en proyectos de investigación o innovación educativa</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2">6.2 a) - Premios convocados por una Administración educativa y participación en proyectos de investigación o innovación educativa</h4>
                             <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-center bg-gray-50 dark:bg-gray-700 rounded-t py-2">
                                 <div class="text-left pl-2">Ámbito</div>
                                 <div>1.º premio</div>
@@ -2983,7 +2983,7 @@
                             </div>
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase tracking-wide">6.2.b Coordinación y participación en planes y proyectos educativos aprobados por la Consejería de Educación</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200">6.2 b) - Coordinación y participación en planes y proyectos educativos aprobados por la Consejería de Educación</h4>
                             ${NumInput('Cursos coordinando Plan de Igualdad (1,0 pto./año)', 's6_2_coord_plan_igualdad_years')}
                             ${NumInput('Cursos coordinando otros proyectos/planes (0,5 ptos./año)', 's6_2_coord_proyectos_years')}
                             ${NumInput('Cursos participando en proyectos/planes (0,2 ptos./año)', 's6_2_part_proyectos_years')}
@@ -2994,7 +2994,7 @@
                     ${InfoBox('Estructura completa del BOJA (DC Quinta.5). Los premios se dividen por n.º de participantes.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Premios en exposiciones, concursos o certámenes</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Premios en exposiciones, concursos o certámenes</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 ${GridInput('Internacionales', 's6_3_premios_intl', 1.5, true)}
                                 ${GridInput('Nacionales', 's6_3_premios_nat', 1.0, true)}
@@ -3002,7 +3002,7 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Espectáculos, composiciones y grabaciones</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Espectáculos, composiciones y grabaciones</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 ${GridInput('Gran formato (coro, orquesta, banda, ópera, zarzuela, circo, coreografía de danza)', 's6_3_espectaculos_gran', 1.0, true)}
                                 ${GridInput('Cámara / pequeños grupos (≤15 músicos, ≤6 bailarines)', 's6_3_espectaculos_peq', 0.5, true)}
@@ -3010,14 +3010,14 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Actuaciones y conciertos</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Actuaciones y conciertos</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 ${GridInput('Destacadas (dirección, solista, protagonista)', 's6_3_actuaciones_destacadas', 0.5, true)}
                                 ${GridInput('Secundarias (miembro, cuerpo de baile, secundario, dirección de escena/iluminación)', 's6_3_actuaciones_secundarias', 0.2, true)}
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Exposiciones y conservación</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Exposiciones y conservación</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 ${GridInput('Exposiciones (individuales o colectivas)', 's6_3_exposiciones', 0.5, true)}
                                 ${GridInput('Conservador-restaurador director', 's6_3_conservador_dir', 0.5, true)}
@@ -3025,7 +3025,7 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 uppercase border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Deportista</h4>
+                            <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Deportista</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 ${GridInput('Deportista de alto nivel', 's6_3_deportista_nivel', 1.0)}
                                 ${GridInput('Deportista de alto rendimiento', 's6_3_deportista_rendimiento', 0.5)}
@@ -3160,23 +3160,23 @@
             push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_4autores, 'Libro de 4 autores', 'Libros de 4 autores')}`, s.s6_1_libros_4autores * 0.3);
             push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_5autores, 'Libro de 5 autores', 'Libros de 5 autores')}`, s.s6_1_libros_5autores * 0.2);
             push(b6, `6.1 a) ${formatMeritQuantity(s.s6_1_libros_mas5autores, 'Libro de más de 5 autores', 'Libros de más de 5 autores')}`, s.s6_1_libros_mas5autores * 0.1);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_autor, 'Artículo de revista de autor único', 'Artículos de revista de autor único')}`, s.s6_1_revistas_autor * 0.2);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_coautor, 'Artículo de revista en coautoría', 'Artículos de revista en coautoría')}`, s.s6_1_revistas_coautor * 0.1);
+            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_3mas, 'Artículo de revista de 3 o más autores', 'Artículos de revista de 3 o más autores')}`, s.s6_1_revistas_3mas * 0.05);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_autor, 'Obra literaria de autor único', 'Obras literarias de autor único')}`, s.s6_1_obras_literarias_autor * 1.0);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_coautor, 'Obra literaria en coautoría', 'Obras literarias en coautoría')}`, s.s6_1_obras_literarias_coautor * 0.5);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_3autores, 'Obra literaria de 3 o más autores', 'Obras literarias de 3 o más autores')}`, s.s6_1_obras_literarias_3autores * 0.4);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_ilustrador, 'Obra literaria ilustrada', 'Obras literarias ilustradas')}`, s.s6_1_obras_literarias_ilustrador * 0.2);
-            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_autor, 'Artículo de revista de autor único', 'Artículos de revista de autor único')}`, s.s6_1_revistas_autor * 0.2);
-            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_coautor, 'Artículo de revista en coautoría', 'Artículos de revista en coautoría')}`, s.s6_1_revistas_coautor * 0.1);
-            push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_3mas, 'Artículo de revista de 3 o más autores', 'Artículos de revista de 3 o más autores')}`, s.s6_1_revistas_3mas * 0.05);
             push(b6, '6.1 Total aplicado (Tope: 8,0000 ptos.)', Calculators.calc61(s));
             const premios_pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
                                 (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
                                 (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1);
             const premios_count = s.s6_2_intl_1 + s.s6_2_intl_2 + s.s6_2_intl_3 + s.s6_2_nat_1 + s.s6_2_nat_2 + s.s6_2_nat_3 + s.s6_2_auto_1 + s.s6_2_auto_2 + s.s6_2_auto_3;
-            push(b6, `6.2.a ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
-            push(b6, `6.2.a Participación en proyectos de investigación o innovación educativa (${formatQuantity(s.s6_2_investigacion_projects, 'proyecto', 'proyectos')})`, s.s6_2_investigacion_projects * 0.2);
-            push(b6, `6.2.b Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
-            push(b6, `6.2.b Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
-            push(b6, `6.2.b Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
+            push(b6, `6.2 a) - ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
+            push(b6, `6.2 a) - Participación en proyectos de investigación o innovación educativa (${formatQuantity(s.s6_2_investigacion_projects, 'proyecto', 'proyectos')})`, s.s6_2_investigacion_projects * 0.2);
+            push(b6, `6.2 b) - Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
+            push(b6, `6.2 b) - Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
+            push(b6, `6.2 b) - Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
             push(b6, '6.2 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc62(s));
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_intl, 'Premio internacional', 'Premios internacionales')}`, s.s6_3_premios_intl * 1.5);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_nat, 'Premio nacional', 'Premios nacionales')}`, s.s6_3_premios_nat * 1.0);
@@ -3207,14 +3207,14 @@
                     <div class="p-4 sm:p-6 space-y-4 print-breakdown-grid">
                         ${blocks.map(b => `
                             <div class="print-breakdown-section">
-                                <h4 class="text-sm font-bold text-primary dark:text-emerald-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-1 mb-2 print-breakdown-section-title">${b.title}</h4>
+                                <h4 class="text-sm font-bold text-primary dark:text-emerald-400 border-b border-gray-200 dark:border-gray-700 pb-1 mb-2 print-breakdown-section-title">${b.title}</h4>
                                 <ul class="space-y-1">
                                     ${b.rows.map(r => `
                                         <li class="flex justify-between items-baseline gap-2 text-sm text-gray-700 dark:text-gray-200 print-breakdown-row">
                                             <span class="print-breakdown-label">${(() => {
-                                                const match = r.label.match(/^(\d+(?:\.\d+)*(?:\s+[a-z]\))?)(?:\s+)(.*)$/i);
+                                                const match = r.label.match(/^(\d+(?:\.\d+)*(?:\.[a-z])?(?:\s+[a-z]\))?)(\s+-\s+|\s+)(.*)$/i);
                                                 return match
-                                                    ? `<span class="print-breakdown-number">${match[1]}</span><span class="print-breakdown-description">${match[2]}</span>`
+                                                    ? `<span class="print-breakdown-number">${match[1]}</span>${match[2]}<span class="print-breakdown-description">${match[3]}</span>`
                                                     : `<span class="print-breakdown-number" aria-hidden="true"></span><span class="print-breakdown-description">${r.label}</span>`;
                                             })()}</span>
                                             <span class="font-mono font-semibold text-primary dark:text-emerald-400 whitespace-nowrap print-summary-points summary-mono-score">${formatPoints(r.pts)} ptos.</span>
@@ -3269,7 +3269,7 @@
                             ${renderPracticeScoreNotice()}
                             <table class="w-full text-left border-collapse print-summary-table">
                                 <thead>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider print-summary-table-heading">
+                                    <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wider print-summary-table-heading">
                                         <th class="py-3">Apartado</th>
                                         <th class="py-3 px-2 text-right print-summary-table-heading">Ptos.</th>
                                         <th class="py-3 px-2 text-right text-xs print-summary-max">Máximo</th>
