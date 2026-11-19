@@ -705,7 +705,7 @@
                 </div>
 
                 <div data-wizard-step="all" class="hidden">
-                    <h3 id="wizard-hardship-title" class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria y especial dificultad</h3>
+                    <h3 id="wizard-hardship-title" class="mb-2 font-semibold text-gray-800 dark:text-gray-200">Apartado 1.1.3 · Compensatoria–ZTS y difícil desempeño</h3>
                     <p id="wizard-hardship-definitive-hint" class="mb-3 text-sm text-gray-600 dark:text-gray-300">Indica solo los servicios en especial dificultad como funcionario/a de carrera durante el periodo que corresponda a tu situación. No incluyas funcionario/a en prácticas ni interinidad.</p>
                     <div id="wizard-postponed-practice-field" class="mb-3 hidden rounded-lg border border-primary/25 bg-primary/5 p-3 dark:bg-primary/10">
                         <label class="flex items-start gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -714,12 +714,41 @@
                         </label>
                         <p id="wizard-postponed-practice-note" class="mt-1 pl-6 text-xs text-gray-600 dark:text-gray-300">Solo si el aplazamiento fue por permisos de conciliación (art. 49 TREBEP) o incapacidad temporal, o no pudiste ser evaluado/a por esos motivos. Entonces se adjudica según tu puntuación. Por otros motivos, o si no superaste las prácticas, se sigue el orden de nombramiento.</p>
                     </div>
-                    <div id="wizard-hardship-definitive-note" class="mb-3 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
-                        <span>Si participas desde un destino definitivo, solo cuenta la especial dificultad <span class="underline decoration-2 underline-offset-2">desde tu último destino definitivo</span>. No sumes aquí periodos de destinos anteriores ni la provisionalidad anterior a tu primer destino definitivo.</span>
+                    <p id="wizard-hardship-question" class="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">¿Tienes servicios computables en compensatoria–ZTS o difícil desempeño?</p>
+                    <div id="wizard-hardship-answer" data-value="" role="group" aria-labelledby="wizard-hardship-question" aria-describedby="wizard-hardship-eligibility-note" class="mb-3 grid grid-cols-2 gap-2">
+                        <button type="button" data-hardship-answer="yes" aria-pressed="false" onclick="setWizardHardshipAnswer('yes')" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">Sí</button>
+                        <button type="button" data-hardship-answer="no" aria-pressed="false" onclick="setWizardHardshipAnswer('no')" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">No</button>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" aria-label="Años de compensatoria y especial dificultad" placeholder="Años" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                        <input id="wizard-hardship-months" type="number" min="0" max="11" step="1" value="0" aria-label="Meses de compensatoria y especial dificultad" placeholder="Meses" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <div id="wizard-hardship-fields" class="mb-3 rounded-lg border border-gray-200 bg-gray-100 p-3 opacity-60 dark:border-gray-700 dark:bg-gray-800">
+                        <fieldset aria-describedby="wizard-hardship-types-note">
+                            <legend class="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">Tipo de centro o puesto</legend>
+                            <div class="grid gap-2 sm:grid-cols-2">
+                                <label class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                                    <input id="wizard-hardship-compensatoria-zts" type="checkbox" disabled class="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed">
+                                    <span>Compensatoria–ZTS</span>
+                                </label>
+                                <label class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                                    <input id="wizard-hardship-dificil-desempeno" type="checkbox" disabled class="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed">
+                                    <span>Difícil desempeño</span>
+                                </label>
+                            </div>
+                            <p id="wizard-hardship-types-note" class="mt-2 text-xs text-gray-600 dark:text-gray-300">Puedes marcar ambas. «Difícil desempeño» recoge los demás supuestos de especial dificultad reconocidos en el BOJA, como los CPR. Indica un único total sin contar dos veces el mismo periodo.</p>
+                        </fieldset>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <label class="text-sm text-gray-700 dark:text-gray-200">Años completos
+                                <input id="wizard-hardship-years" type="number" min="0" max="99" step="1" value="0" disabled aria-label="Años de compensatoria, ZTS y especial dificultad" placeholder="Años" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800">
+                            </label>
+                            <label class="text-sm text-gray-700 dark:text-gray-200">Meses completos
+                                <input id="wizard-hardship-months" type="number" min="0" max="11" step="1" value="0" disabled aria-label="Meses de compensatoria, ZTS y especial dificultad" placeholder="Meses" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800">
+                            </label>
+                        </div>
+                    </div>
+                    <div id="wizard-hardship-eligibility-note" class="mb-3 rounded-r border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="note">
+                        <strong>Solo servicios efectivos como funcionario/a de carrera.</strong> No cuentan interinidad ni prácticas. La plaza, puesto o centro debía tener reconocida oficialmente la especial dificultad cuando prestaste los servicios. Cuenta el servicio efectivo en comisión, aunque tu plaza definitiva no sea de especial dificultad.
+                        <a href="https://www.juntadeandalucia.es/boja/2026/210/BOJA26-210-00168-14181-01_00345411.pdf#page=25" target="_blank" rel="noopener noreferrer" class="font-semibold underline">BOJA, 1.1.3</a>.
+                    </div>
+                    <div id="wizard-hardship-definitive-note" class="mb-3 rounded-r border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="note">
+                        Si participas desde un destino definitivo, solo cuenta la especial dificultad <span class="underline decoration-2 underline-offset-2">desde tu último destino definitivo</span>, incluido el servicio efectivo en comisión en un centro reconocido. No sumes aquí periodos de destinos anteriores ni la provisionalidad anterior a tu primer destino definitivo.
                     </div>
                 </div>
 
@@ -981,6 +1010,8 @@
                 careerStartDate: '', 
                 isStabilized: false,
                 practicePostponed: false,
+                hardshipAnswer: '',
+                hardshipTypes: [],
                 practiceOnlyStartDate: '', 
                 bodyStartDate: '', 
                 bodyGapMonths: 0 
@@ -1149,6 +1180,11 @@
             
             document.getElementById('wizard-hardship-years').value = state.s1_1_3_years;
             document.getElementById('wizard-hardship-months').value = state.s1_1_3_months;
+            document.getElementById('wizard-hardship-answer').dataset.value = getDurationMonths(state, 's1_1_3') > 0
+                ? 'yes' : ['yes', 'no'].includes(wizard.hardshipAnswer) ? wizard.hardshipAnswer : '';
+            ['compensatoria-zts', 'dificil-desempeno'].forEach(type => {
+                document.getElementById(`wizard-hardship-${type}`).checked = Array.isArray(wizard.hardshipTypes) && wizard.hardshipTypes.includes(type);
+            });
             document.getElementById('wizard-other-equal-years').value = state.s1_2_2_years;
             document.getElementById('wizard-other-equal-months').value = state.s1_2_2_months;
             document.getElementById('wizard-other-lower-years').value = state.s1_2_3_years;
@@ -1421,6 +1457,31 @@
             });
             document.getElementById('seniority-wizard-error').classList.add('hidden');
         }
+        function setWizardHardshipAnswer(answer) {
+            if (!['yes', 'no'].includes(answer)) return;
+            document.getElementById('wizard-hardship-answer').dataset.value = answer;
+            toggleWizardHardshipFields();
+            document.getElementById('seniority-wizard-error').classList.add('hidden');
+        }
+        function toggleWizardHardshipFields() {
+            const isPractice = document.getElementById('wizard-status').value === 'practice';
+            const group = document.getElementById('wizard-hardship-answer');
+            const enabled = !isPractice && group.dataset.value === 'yes';
+            group.querySelectorAll('button').forEach(button => {
+                const selected = button.dataset.hardshipAnswer === group.dataset.value;
+                button.disabled = isPractice;
+                button.setAttribute('aria-pressed', String(selected));
+                button.className = `rounded-lg px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${selected
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300'}`;
+            });
+            const fields = document.getElementById('wizard-hardship-fields');
+            fields.className = `mb-3 rounded-lg border p-3 transition ${enabled
+                ? 'border-primary/40 bg-primary/5 dark:bg-primary/10'
+                : 'border-gray-200 bg-gray-100 opacity-60 dark:border-gray-700 dark:bg-gray-800'}`;
+            fields.setAttribute('aria-disabled', String(!enabled));
+            fields.querySelectorAll('input').forEach(input => { input.disabled = !enabled; });
+        }
         function renderSeniorityWizardStep() {
             const dialog = document.getElementById('seniority-wizard');
             const steps = getSeniorityWizardSteps();
@@ -1435,7 +1496,7 @@
             const hardshipTitle = document.getElementById('wizard-hardship-title');
             hardshipTitle.classList.toggle('font-semibold', status !== 'provisional');
             hardshipTitle.classList.toggle('font-normal', status === 'provisional');
-            hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria y especial dificultad${status === 'provisional' ? ' ' : ` · ${hardshipContext}`}`;
+            hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria–ZTS y difícil desempeño${status === 'provisional' ? ' ' : ` · ${hardshipContext}`}`;
             if (status === 'provisional') {
                 const context = document.createElement('strong');
                 context.textContent = `solo durante tu actual provisionalidad${startDate ? ` desde ${startDate}` : ' (indica la fecha de nombramiento en el paso 2)'}`;
@@ -1443,14 +1504,12 @@
             }
             document.getElementById('wizard-hardship-definitive-hint').textContent = status === 'practice'
                 ? 'Si eres funcionario/a en prácticas, todo el apartado 1.1 queda a cero. Tus servicios se recogen en 1.2.1.'
-                : `Indica solo los servicios en especial dificultad ${status === 'provisional' ? 'durante la provisionalidad' : 'desde tu último destino definitivo'}, como funcionario/a de carrera. No incluyas funcionario/a en prácticas ni interinidad.`;
+                : status === 'provisional'
+                    ? 'Sí pueden contar los servicios en especial dificultad durante tu actual provisionalidad como funcionario/a de carrera. No incluyas prácticas ni interinidad.'
+                    : 'Indica solo los servicios en especial dificultad desde tu último destino definitivo, como funcionario/a de carrera, también si los prestaste en comisión en otro centro reconocido.';
             document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', status !== 'definitive');
             document.getElementById('wizard-postponed-practice-field').classList.toggle('hidden', status !== 'practice');
-            ['wizard-hardship-years', 'wizard-hardship-months'].forEach(id => {
-                const input = document.getElementById(id);
-                input.disabled = status === 'practice';
-                input.classList.toggle('opacity-50', input.disabled);
-            });
+            toggleWizardHardshipFields();
             dialog.dataset.stepIndex = String(stepIndex);
             steps.forEach((step, index) => step.classList.toggle('hidden', index !== stepIndex));
             document.getElementById('wizard-progress').textContent = `Paso ${stepIndex + 1} de ${steps.length}`;
@@ -1483,6 +1542,22 @@
                     const definitiveStart = document.getElementById('wizard-definitive-start').value;
                     if (careerStart && definitiveStart && careerStart > definitiveStart) {
                         return 'El primer destino definitivo no puede ser anterior al nombramiento como funcionario/a de carrera. Revisa las fechas.';
+                    }
+                }
+            }
+            if (step.querySelector('#wizard-hardship-answer') && status !== 'practice') {
+                const answer = document.getElementById('wizard-hardship-answer').dataset.value;
+                if (!['yes', 'no'].includes(answer)) {
+                    return 'Indica si tienes servicios computables en compensatoria–ZTS o difícil desempeño.';
+                }
+                if (answer === 'yes') {
+                    const hasType = ['compensatoria-zts', 'dificil-desempeno']
+                        .some(type => document.getElementById(`wizard-hardship-${type}`).checked);
+                    if (!hasType) return 'Marca compensatoria–ZTS, difícil desempeño o ambas.';
+                    const years = document.getElementById('wizard-hardship-years');
+                    const months = document.getElementById('wizard-hardship-months');
+                    if (!years.checkValidity() || !months.checkValidity()) {
+                        return 'Introduce años completos entre 0 y 99 y meses completos entre 0 y 11 para la especial dificultad.';
                     }
                 }
             }
@@ -1540,6 +1615,10 @@
             const pracStart = isStabilized ? carrStart : document.getElementById('wizard-practice-start').value;
             const pracOnlyStart = document.getElementById('wizard-practice-only-start').value;
             const bodyStart = document.getElementById('wizard-body-start').value;
+            const hardshipAnswer = status === 'practice' ? '' : document.getElementById('wizard-hardship-answer').dataset.value;
+            const hasHardship = hardshipAnswer === 'yes';
+            const hardshipTypes = hasHardship ? ['compensatoria-zts', 'dificil-desempeno']
+                .filter(type => document.getElementById(`wizard-hardship-${type}`).checked) : [];
 
             const error = document.getElementById('seniority-wizard-error');
             if (!status) {
@@ -1586,7 +1665,7 @@
                 setYearMonthFields('s1_2_1', Math.max(0, (completeMonthsSince(bodyStart) || 0) - bodyGapMonths));
             }
             
-            setYearMonthFields('s1_1_3', status === 'practice' ? 0 : Math.max(0, Number(document.getElementById('wizard-hardship-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-hardship-months').value) || 0)));
+            setYearMonthFields('s1_1_3', hasHardship ? Number(document.getElementById('wizard-hardship-years').value) * 12 + Number(document.getElementById('wizard-hardship-months').value) : 0);
             setYearMonthFields('s1_2_2', Math.max(0, Number(document.getElementById('wizard-other-equal-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-equal-months').value) || 0)));
             setYearMonthFields('s1_2_3', Math.max(0, Number(document.getElementById('wizard-other-lower-years').value) || 0) * 12 + Math.min(11, Math.max(0, Number(document.getElementById('wizard-other-lower-months').value) || 0)));
             
@@ -1594,6 +1673,7 @@
                 status, definitiveStartDate: defDate, firstDefinitiveParticipation, practiceStartDate: pracStart,
                 careerStartDate: carrStart, isStabilized,
                 practicePostponed: status === 'practice' && document.getElementById('wizard-postponed-practice').checked,
+                hardshipAnswer, hardshipTypes,
                 practiceOnlyStartDate: pracOnlyStart,
                 bodyStartDate: bodyStart, bodyGapMonths: Number(document.getElementById('wizard-body-gap-months').value) || 0
             };
@@ -1689,7 +1769,7 @@
         const SERVICE_PERIODS = {
             s1_1_1: '1.1.1 Permanencia en destino definitivo',
             s1_1_2: '1.1.2 Provisionalidad',
-            s1_1_3: '1.1.3 Compensatoria y especial dificultad',
+            s1_1_3: '1.1.3 Compensatoria, ZTS y especial dificultad',
             s4_1_director: '4.1 Dirección',
             s4_2_vicedir: '4.2 Vicedirección / jefatura / secretaría',
             s4_3_jefatura: '4.3 Jefatura de departamento',
@@ -2703,7 +2783,7 @@
                         <p id="first-definitive-participation-note" class="mt-2 text-xs text-gray-600 dark:text-gray-300">Solo en este supuesto se habilita 1.1.2 para sumar la provisionalidad anterior como funcionario/a de carrera. Una vez obtenido otro destino definitivo, deja de acumularse.</p>
                     </div>` : ''}
                     ${YMInput(canAccumulateHistoricalProvisionality(state) ? '1.1.2 Provisionalidad anterior al primer destino definitivo (solo funcionario/a de carrera)' : '1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', state.seniorityWizard.status === 'practice' || (state.seniorityWizard.status === 'definitive' && !canAccumulateHistoricalProvisionality(state)))}
-                    ${YMInput(`1.1.3 Compensatoria y especial dificultad (${state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
+                    ${YMInput(`1.1.3 Compensatoria, ZTS y especial dificultad (${state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
                     ${InfoBox('En 1.1.1, 1.1.2 y 1.1.3 solo cuentan servicios como <strong>funcionario/a de carrera</strong>: no incluyas prácticas ni interinidad.')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}

@@ -1219,6 +1219,7 @@
                 app.document.getElementById('wizard-provisional-years').value = '1';
                 app.document.getElementById('wizard-provisional-months').value = '0';
                 assert(!app.validateSeniorityWizardStep(history), 'Rechaza respuestas validas');
+                app.setWizardHardshipAnswer('no');
                 app.applySeniorityWizard();
                 const s = api.getState();
                 assert(s.seniorityWizard.firstDefinitiveParticipation === 'yes', 'No guarda la confirmacion');
@@ -1303,9 +1304,106 @@
                 const input = parsed(api.renderSection1()).querySelector('[name="s1_1_3_years"]');
                 assert(input.disabled, 'Compensatoria en practicas habilitada');
             });
+            await test('Especial dificultad: Si/No habilita tipos y duracion y valida las respuestas', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'provisional';
+                api.renderSeniorityWizardStep();
+                const step = app.getSeniorityWizardSteps().find(item => item.querySelector('#wizard-hardship-answer'));
+                const fields = app.document.getElementById('wizard-hardship-fields');
+                const controls = [...fields.querySelectorAll('input')];
+                const years = app.document.getElementById('wizard-hardship-years');
+                const months = app.document.getElementById('wizard-hardship-months');
+                assert(controls.every(input => input.disabled) && fields.classList.contains('opacity-60'), 'Los campos no empiezan grises y desactivados');
+                assert(app.validateSeniorityWizardStep(step).includes('Indica si'), 'Permite omitir Si/No');
+                app.document.querySelector('[data-hardship-answer="yes"]').click();
+                assert(controls.every(input => !input.disabled) && !fields.classList.contains('opacity-60'), 'Si no ilumina y habilita los campos');
+                assert(app.document.querySelector('[data-hardship-answer="yes"]').getAttribute('aria-pressed') === 'true', 'No comunica la seleccion');
+                assert(app.validateSeniorityWizardStep(step).includes('Marca'), 'Permite omitir el tipo');
+                app.document.getElementById('wizard-hardship-compensatoria-zts').checked = true;
+                years.value = '1';
+                for (const value of ['12', '-1', '1.5']) {
+                    months.value = value;
+                    assert(app.validateSeniorityWizardStep(step).includes('meses completos'), 'Acepta meses invalidos');
+                }
+                months.value = '2';
+                years.value = '1.5';
+                assert(app.validateSeniorityWizardStep(step).includes('años completos'), 'Acepta años fraccionarios');
+                years.value = '1';
+                assert(!app.validateSeniorityWizardStep(step), 'Rechaza un periodo valido');
+                app.document.querySelector('[data-hardship-answer="no"]').click();
+                assert(controls.every(input => input.disabled) && fields.classList.contains('opacity-60'), 'No mantiene campos activos');
+                assert(!app.validateSeniorityWizardStep(step), 'No exige responder tipos con No');
+                app.setWizardHardshipAnswer('yes');
+                assert(years.value === '1' && months.value === '2', 'Pierde el borrador al alternar Si/No');
+                assert(app.document.getElementById('wizard-hardship-compensatoria-zts').checked, 'Pierde el tipo al alternar Si/No');
+                const warning = app.document.getElementById('wizard-hardship-eligibility-note');
+                assert(warning.classList.contains('bg-amber-50') && warning.textContent.includes('No cuentan interinidad ni prácticas'), 'Falta el aviso amarillo');
+                assert(app.document.getElementById('wizard-hardship-definitive-hint').textContent.includes('Sí pueden contar'), 'Excluye la provisionalidad admisible');
+                app.document.getElementById('wizard-status').value = 'practice';
+                api.renderSeniorityWizardStep();
+                assert(controls.every(input => input.disabled), 'Habilita tipos o duracion en practicas');
+                assert([...app.document.querySelectorAll('[data-hardship-answer]')].every(button => button.disabled), 'Permite responder Si en practicas');
+                app.closeSeniorityWizard();
+            });
+            await test('Especial dificultad recupera datos antiguos y suma ambas categorias una sola vez', () => {
+                api.setState(fresh({
+                    s1_1_3_years: 1, s1_1_3_months: 2,
+                    seniorityWizard: {
+                        status: 'definitive', definitiveStartDate: '2025-09-01', firstDefinitiveParticipation: 'no',
+                        practiceStartDate: '2023-09-01', careerStartDate: '2024-09-01', bodyStartDate: '2023-09-01'
+                    }
+                }));
+                app.openSeniorityWizard();
+                const step = app.getSeniorityWizardSteps().find(item => item.querySelector('#wizard-hardship-answer'));
+                assert(app.document.getElementById('wizard-hardship-answer').dataset.value === 'yes', 'No recupera el Si a partir del periodo antiguo');
+                assert(app.document.getElementById('wizard-hardship-years').value === '1' && app.document.getElementById('wizard-hardship-months').value === '2', 'Altera el periodo antiguo');
+                assert(app.validateSeniorityWizardStep(step).includes('Marca'), 'Inventa un tipo para datos antiguos');
+                for (const type of ['compensatoria-zts', 'dificil-desempeno']) {
+                    app.document.getElementById(`wizard-hardship-${type}`).checked = true;
+                }
+                assert(!app.validateSeniorityWizardStep(step), 'Rechaza marcar ambas categorias');
+                const definitiveNote = app.document.getElementById('wizard-hardship-definitive-note');
+                assert(!definitiveNote.classList.contains('hidden') && definitiveNote.textContent.includes('comisión'), 'No explica la comision desde destino definitivo');
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(app.document.getElementById('seniority-wizard').classList.contains('hidden'), 'No aplica las respuestas validas');
+                assert(s.seniorityWizard.hardshipAnswer === 'yes' && s.seniorityWizard.hardshipTypes.length === 2, 'No guarda respuesta y tipos');
+                assert(s.s1_1_3_years === 1 && s.s1_1_3_months === 2, 'Duplica o pierde la duracion al marcar ambas categorias');
+                near(api.Calculators.calc11(s), 9.3332);
+                app.openSeniorityWizard();
+                assert(['compensatoria-zts', 'dificil-desempeno'].every(type => app.document.getElementById(`wizard-hardship-${type}`).checked), 'No restaura ambas categorias');
+                app.setWizardHardshipAnswer('no');
+                app.applySeniorityWizard();
+                const cleared = api.getState();
+                assert(cleared.seniorityWizard.hardshipAnswer === 'no' && cleared.seniorityWizard.hardshipTypes.length === 0, 'No conserva la respuesta No');
+                assert(cleared.s1_1_3_years === 0 && cleared.s1_1_3_months === 0, 'No sigue sumando un periodo oculto');
+                near(api.Calculators.calc11(cleared), 4.6666);
+                app.openSeniorityWizard();
+                assert(app.document.getElementById('wizard-hardship-answer').dataset.value === 'no' && app.document.getElementById('wizard-hardship-years').disabled, 'No recupera No y los campos desactivados');
+                app.closeSeniorityWizard();
+            });
+            await test('Especial dificultad cuenta en provisionalidad de carrera con el selector activado', () => {
+                api.setState(fresh({
+                    seniorityWizard: {
+                        status: 'provisional', practiceStartDate: '2023-09-01',
+                        careerStartDate: '2024-09-01', bodyStartDate: '2023-09-01'
+                    }
+                }));
+                app.openSeniorityWizard();
+                app.setWizardHardshipAnswer('yes');
+                app.document.getElementById('wizard-hardship-compensatoria-zts').checked = true;
+                app.document.getElementById('wizard-hardship-years').value = '1';
+                app.document.getElementById('wizard-hardship-months').value = '2';
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(s.seniorityWizard.hardshipAnswer === 'yes' && s.s1_1_3_years === 1 && s.s1_1_3_months === 2, 'Excluye servicios en provisionalidad');
+                near(api.Calculators.calc11(s) - api.Calculators.calc11({ ...s, s1_1_3_years: 0, s1_1_3_months: 0 }), 4.6666);
+            });
             await test('Cuestionario adapta la pregunta de compensatoria a las tres situaciones', () => {
                 for (const status of ['definitive', 'provisional', 'practice']) {
                     app.document.getElementById('wizard-status').value = status;
+                    app.setWizardHardshipAnswer('yes');
                     api.renderSeniorityWizardStep();
                     const title = app.document.getElementById('wizard-hardship-title').textContent;
                     assert(title.includes(status === 'definitive' ? 'último destino definitivo' : status === 'provisional' ? 'provisionalidad' : 'prácticas'), title);
@@ -1335,6 +1433,7 @@
                 app.openSeniorityWizard();
                 assert(app.document.getElementById('wizard-postponed-practice').checked, 'No restaura la casilla');
                 app.document.getElementById('wizard-status').value = 'provisional';
+                app.setWizardHardshipAnswer('no');
                 app.applySeniorityWizard();
                 assert(api.getState().seniorityWizard.practicePostponed === false, 'Mantiene el aplazamiento fuera de practicas');
                 api.setState(fresh({ seniorityWizard: { status: 'practice' } }));
@@ -1375,6 +1474,7 @@
                     api.setState(fresh());
                     app.openSeniorityWizard();
                     app.document.getElementById('wizard-status').value = status;
+                    app.setWizardHardshipAnswer('no');
                     app.setWizardDateValue('wizard-practice-start', '2023-09-01');
                     app.setWizardDateValue('wizard-career-start', '2024-09-01');
                     app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
