@@ -595,6 +595,19 @@
                         <option value="practice">Soy funcionario/a en prácticas</option>
                         <option value="other">Otra situación (rellenaré el 1.1 manualmente)</option>
                     </select>
+                    <label class="mt-4 flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                        <input id="wizard-exceptional-accumulation" type="checkbox" onchange="toggleWizardExceptionalFields()" class="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary">
+                        <span>Tengo derecho a acumular servicios por supresión, pérdida del destino o excedencia forzosa, según los supuestos del BOJA.</span>
+                    </label>
+                    <div id="wizard-exceptional-fields" class="hidden mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100">
+                        <p>Este supuesto no se reconstruye solo con una fecha. Indica los periodos acreditados que correspondan a cada subapartado, sin duplicarlos. No incluyas en 1.1.1 la provisionalidad que el BOJA atribuya a 1.1.2. <a href="https://www.juntadeandalucia.es/boja/2026/210/BOJA26-210-00168-14181-01_00345411.pdf#page=24" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Reglas de acumulación, páginas 24–25</a>.</p>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <label>1.1.1 · Años acumulables<input id="wizard-accumulated-years" type="number" min="0" max="99" step="1" value="0" disabled class="mt-1 w-full rounded border p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"></label>
+                            <label>1.1.1 · Meses<input id="wizard-accumulated-months" type="number" min="0" max="11" step="1" value="0" disabled class="mt-1 w-full rounded border p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"></label>
+                            <label>1.1.2 · Años admisibles<input id="wizard-accumulated-provisional-years" type="number" min="0" max="99" step="1" value="0" disabled class="mt-1 w-full rounded border p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"></label>
+                            <label>1.1.2 · Meses<input id="wizard-accumulated-provisional-months" type="number" min="0" max="11" step="1" value="0" disabled class="mt-1 w-full rounded border p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"></label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- PASO DEFINITIVO -->
@@ -637,7 +650,7 @@
                     </div>
                     
                     <p id="wizard-practice-warning" class="hidden mt-2 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
-                        ⚠️ Han pasado más de 2 años. Las prácticas suelen durar 1 año (o 2 en casos excepcionales). Revisa si las fechas son correctas.
+                        ⚠️ Revisa las fechas de nombramiento y los aplazamientos en tu hoja de servicios.
                     </p>
                 </div>
 
@@ -710,7 +723,7 @@
                     <div id="wizard-postponed-practice-field" class="mb-3 hidden rounded-lg border border-primary/25 bg-primary/5 p-3 dark:bg-primary/10">
                         <label class="flex items-start gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
                             <input id="wizard-postponed-practice" type="checkbox" aria-describedby="wizard-postponed-practice-note" class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary">
-                            <span>He pospuesto las prácticas y las estoy realizando ahora</span>
+                            <span>Participo en mi segundo año de nombramiento en prácticas por aplazamiento o falta de evaluación por conciliación o incapacidad temporal</span>
                         </label>
                         <p id="wizard-postponed-practice-note" class="mt-1 pl-6 text-xs text-gray-600 dark:text-gray-300">Solo si el aplazamiento fue por permisos de conciliación (art. 49 TREBEP) o incapacidad temporal, o no pudiste ser evaluado/a por esos motivos. Entonces se adjudica según tu puntuación. Por otros motivos, o si no superaste las prácticas, se sigue el orden de nombramiento.</p>
                     </div>
@@ -839,7 +852,7 @@
                 ['Oxford Test of English 51–80', 'A2'], ['Oxford Test of English 81–110', 'B1'], ['Oxford Test of English 111–140', 'B2'],
                 ['Oxford Test of English Advanced B2', 'B2'], ['Oxford Test of English Advanced C1', 'C1'],
                 ['Anglia Intermediate', 'B1'], ['Anglia Intermediate Business English', 'B1'], ['Anglia Advanced / Advanced in Business English', 'B2'], ['Anglia Accept Proficiency', 'C1'], ['Anglia Masters Proficiency in Business English', 'C2'],
-                ['LanguageCert International ESOL Communicator (B2)', 'B2'], ['LanguageCert International ESOL Expert (C1)', 'C1'], ['LanguageCert International ESOL Mastery (C2)', 'C2'],
+                ['LanguageCert International ESOL Achiever (B1)', 'B1'], ['LanguageCert International ESOL Communicator (B2)', 'B2'], ['LanguageCert International ESOL Expert (C1)', 'C1'], ['LanguageCert International ESOL Mastery (C2)', 'C2'],
                 ['LanguageCert General B1 (40–59)', 'B1'], ['LanguageCert General B2 (60–74)', 'B2'], ['LanguageCert General C1 (75 o superior)', 'C1'],
                 ['LanguageCert Academic B1 (40–59)', 'B1'], ['LanguageCert Academic B2 (60–74)', 'B2'], ['LanguageCert Academic C1 (75–89)', 'C1'], ['LanguageCert Academic C2 (90 o superior)', 'C2'],
                 ['SERMO Acert B2', 'B2'], ['SERMO Acert C1', 'C1'],
@@ -892,6 +905,7 @@
         const BILINGUAL_LANGUAGES = ['Francés', 'Inglés', 'Alemán'];
         const PUESTOS_BILINGUAL_LANGUAGES = ['Alemán', 'Francés', 'Inglés'];
         const BILINGUAL_POST_CODE_PREFIX = { Francés: '10', Inglés: '11', Alemán: '12' };
+        const BILINGUAL_CPE = { Francés: '1', Inglés: '2', Alemán: '3' };
         const BILINGUAL_SPECIALTIES = [
             ['590001', 'Filosofía', [0, 1, 2]], ['590005', 'Geografía e Historia', [0, 1, 2]],
             ['590006', 'Matemáticas', [0, 1, 2]], ['590007', 'Física y Química', [0, 1, 2]],
@@ -1012,6 +1026,7 @@
                 practicePostponed: false,
                 hardshipAnswer: '',
                 hardshipTypes: [],
+                exceptionalAccumulation: false,
                 practiceOnlyStartDate: '', 
                 bodyStartDate: '', 
                 bodyGapMonths: 0 
@@ -1022,6 +1037,7 @@
             s3_1_3_dea: 0,
             s3_1_4_premio_doctor: false,
             s3_2_1_grados: 0,
+            s3_2_1_grados_adaptacion: 0,
             s3_2_2_primer_ciclo: 0,
             s3_2_3_segundo_ciclo: 0,
             lang33Mode: '',
@@ -1051,6 +1067,11 @@
             s6_1_obras_literarias_autor: 0,
             s6_1_obras_literarias_coautor: 0,
             s6_1_obras_literarias_3autores: 0,
+            s6_1_obras_literarias_4autores: 0,
+            s6_1_obras_literarias_5autores: 0,
+            s6_1_obras_literarias_mas5autores: 0,
+            literaryAuthorsReview: false,
+            artPrizesReview: false,
             s6_1_obras_literarias_ilustrador: 0,
             s6_1_revistas_autor: 0,
             s6_1_revistas_coautor: 0,
@@ -1065,6 +1086,9 @@
             s6_3_premios_intl: 0,
             s6_3_premios_nat: 0,
             s6_3_premios_auto: 0,
+            s6_3_premios_intl_2: 0, s6_3_premios_intl_3: 0,
+            s6_3_premios_nat_2: 0, s6_3_premios_nat_3: 0,
+            s6_3_premios_auto_2: 0, s6_3_premios_auto_3: 0,
             s6_3_espectaculos_gran: 0,
             s6_3_espectaculos_peq: 0,
             s6_3_otras_composiciones: 0,
@@ -1082,11 +1106,7 @@
             s6_6_tutor_aspirantes: 0
         };
 
-        let state = {
-            ...INITIAL_STATE,
-            bilingual: { ...INITIAL_STATE.bilingual },
-            puestos: { ...INITIAL_STATE.puestos, especialidades: [] }
-        };
+        let state = structuredClone(INITIAL_STATE);
         let activeTabId = 1;
 
         function applyTheme() {
@@ -1164,6 +1184,11 @@
             const defaultDate = getDefaultSeptember1st(); // Calcula el 1 de septiembre más reciente
             
             document.getElementById('wizard-status').value = wizard.status || '';
+            document.getElementById('wizard-exceptional-accumulation').checked = Boolean(wizard.exceptionalAccumulation);
+            document.getElementById('wizard-accumulated-years').value = state.s1_1_1_years;
+            document.getElementById('wizard-accumulated-months').value = state.s1_1_1_months;
+            document.getElementById('wizard-accumulated-provisional-years').value = state.s1_1_2_years;
+            document.getElementById('wizard-accumulated-provisional-months').value = state.s1_1_2_months;
             setWizardDateValue('wizard-definitive-start', wizard.definitiveStartDate || defaultDate);
             document.getElementById('wizard-first-definitive').value = wizard.firstDefinitiveParticipation || '';
             document.getElementById('wizard-provisional-years').value = state.s1_1_2_years;
@@ -1299,10 +1324,6 @@
             if (careerDate < practiceDate) {
                 return 'La fecha de nombramiento de carrera no puede ser anterior a la de prácticas. Revisa las fechas.';
             }
-            const latestAllowedDate = addYearsToDateString(practiceDate, 2);
-            if (careerDate > latestAllowedDate) {
-                return 'Han pasado más de 2 años entre prácticas y carrera. Revisa si las fechas son correctas.';
-            }
             return '';
         }
         function autocompletarFechaCarrera() {
@@ -1369,8 +1390,14 @@
             }
             practiceTextInput.classList.toggle('border-red-500', practiceDate > today);
             careerTextInput.classList.toggle('border-red-500', Boolean(errorMessage) && practiceDate <= today);
-            warning.textContent = errorMessage ? `⚠️ ${errorMessage}` : '';
-            warning.classList.toggle('hidden', !errorMessage);
+            const longInterval = practiceDate && careerInput.value > addYearsToDateString(practiceDate, 2);
+            warning.textContent = errorMessage ? `⚠️ ${errorMessage}` : longInterval
+                ? 'Han pasado más de 2 años entre prácticas y carrera. Comprueba los nombramientos y aplazamientos en tu hoja de servicios; este aviso no impide continuar.' : '';
+            warning.classList.toggle('text-red-600', Boolean(errorMessage));
+            warning.classList.toggle('dark:text-red-400', Boolean(errorMessage));
+            warning.classList.toggle('text-amber-700', !errorMessage);
+            warning.classList.toggle('dark:text-amber-300', !errorMessage);
+            warning.classList.toggle('hidden', !errorMessage && !longInterval);
             return errorMessage;
         }
         function getWizardDateError(step) {
@@ -1457,6 +1484,14 @@
             });
             document.getElementById('seniority-wizard-error').classList.add('hidden');
         }
+        function toggleWizardExceptionalFields() {
+            const checkbox = document.getElementById('wizard-exceptional-accumulation');
+            checkbox.disabled = document.getElementById('wizard-status').value === 'practice';
+            const enabled = checkbox.checked && !checkbox.disabled;
+            const fields = document.getElementById('wizard-exceptional-fields');
+            fields.classList.toggle('hidden', !enabled);
+            fields.querySelectorAll('input').forEach(input => { input.disabled = !enabled; });
+        }
         function setWizardHardshipAnswer(answer) {
             if (!['yes', 'no'].includes(answer)) return;
             document.getElementById('wizard-hardship-answer').dataset.value = answer;
@@ -1487,27 +1522,32 @@
             const steps = getSeniorityWizardSteps();
             const stepIndex = Math.min(Number(dialog.dataset.stepIndex) || 0, steps.length - 1);
             const status = document.getElementById('wizard-status').value;
+            toggleWizardExceptionalFields();
+            const exceptional = document.getElementById('wizard-exceptional-accumulation').checked && status !== 'practice';
             const careerStart = document.getElementById('wizard-career-start').value;
             const startDate = parseSeniorityDate(careerStart) ? formatWizardDateText(careerStart) : '';
             document.getElementById('wizard-provisional-history-question').textContent = `¿Cuánto tiempo estuviste en provisionalidad como funcionario/a de carrera desde ${startDate ? `el ${startDate}` : 'tu nombramiento'} hasta obtener tu primer destino definitivo?`;
-            const hardshipContext = status === 'practice'
+            const hardshipContext = exceptional ? 'Durante los periodos excepcionalmente acumulables' : status === 'practice'
                 ? 'No computable para funcionario/a en prácticas'
                 : status === 'provisional' ? 'Durante tu provisionalidad como funcionario/a de carrera' : 'Desde tu último destino definitivo';
             const hardshipTitle = document.getElementById('wizard-hardship-title');
-            hardshipTitle.classList.toggle('font-semibold', status !== 'provisional');
-            hardshipTitle.classList.toggle('font-normal', status === 'provisional');
-            hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria–ZTS y difícil desempeño${status === 'provisional' ? ' ' : ` · ${hardshipContext}`}`;
-            if (status === 'provisional') {
+            const ordinaryProvisional = status === 'provisional' && !exceptional;
+            hardshipTitle.classList.toggle('font-semibold', !ordinaryProvisional);
+            hardshipTitle.classList.toggle('font-normal', ordinaryProvisional);
+            hardshipTitle.textContent = `Apartado 1.1.3 · Compensatoria–ZTS y difícil desempeño${ordinaryProvisional ? ' ' : ` · ${hardshipContext}`}`;
+            if (ordinaryProvisional) {
                 const context = document.createElement('strong');
                 context.textContent = `solo durante tu actual provisionalidad${startDate ? ` desde ${startDate}` : ' (indica la fecha de nombramiento en el paso 2)'}`;
                 hardshipTitle.append(context);
             }
-            document.getElementById('wizard-hardship-definitive-hint').textContent = status === 'practice'
+            document.getElementById('wizard-hardship-definitive-hint').textContent = exceptional
+                ? 'Incluye solo servicios de carrera en centros reconocidos dentro de los periodos que puedas acumular por tu supuesto excepcional (BOJA, páginas 24–25). No dupliques periodos.'
+                : status === 'practice'
                 ? 'Si eres funcionario/a en prácticas, todo el apartado 1.1 queda a cero. Tus servicios se recogen en 1.2.1.'
                 : status === 'provisional'
                     ? 'Sí pueden contar los servicios en especial dificultad durante tu actual provisionalidad como funcionario/a de carrera. No incluyas prácticas ni interinidad.'
                     : 'Indica solo los servicios en especial dificultad desde tu último destino definitivo, como funcionario/a de carrera, también si los prestaste en comisión en otro centro reconocido.';
-            document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', status !== 'definitive');
+            document.getElementById('wizard-hardship-definitive-note').classList.toggle('hidden', status !== 'definitive' || exceptional);
             document.getElementById('wizard-postponed-practice-field').classList.toggle('hidden', status !== 'practice');
             toggleWizardHardshipFields();
             dialog.dataset.stepIndex = String(stepIndex);
@@ -1528,6 +1568,10 @@
             const status = document.getElementById('wizard-status').value;
             if (step.querySelector('#wizard-status')) {
                 if (!status) return 'Selecciona tu situación actual para continuar.';
+                if (status !== 'practice' && document.getElementById('wizard-exceptional-accumulation').checked
+                    && [...document.querySelectorAll('#wizard-exceptional-fields input')].some(input => !input.checkValidity())) {
+                    return 'Introduce años completos y meses entre 0 y 11 para los servicios acumulables.';
+                }
             }
             if (step.querySelector('#wizard-first-definitive')) {
                 const answer = document.getElementById('wizard-first-definitive').value;
@@ -1561,6 +1605,13 @@
                     }
                 }
             }
+            if (step.querySelector('#wizard-postponed-practice') && status === 'practice'
+                && document.getElementById('wizard-postponed-practice').checked
+                && !isSecondPracticeYear(document.getElementById('wizard-practice-only-start').value)) {
+                return 'La excepción por aplazamiento exige participar en el segundo año de nombramiento en prácticas. Revisa la fecha inicial o desmarca la casilla.';
+            }
+            const invalidPeriod = [...step.querySelectorAll('input[type="number"]:not(:disabled)')].find(input => !input.value.trim() || !input.checkValidity());
+            if (invalidPeriod) return 'Introduce cantidades enteras no negativas y meses entre 0 y 11. Revisa los periodos de este paso.';
             
             return getWizardDateError(step);
         }
@@ -1615,6 +1666,7 @@
             const pracStart = isStabilized ? carrStart : document.getElementById('wizard-practice-start').value;
             const pracOnlyStart = document.getElementById('wizard-practice-only-start').value;
             const bodyStart = document.getElementById('wizard-body-start').value;
+            const exceptionalAccumulation = status !== 'practice' && document.getElementById('wizard-exceptional-accumulation').checked;
             const hardshipAnswer = status === 'practice' ? '' : document.getElementById('wizard-hardship-answer').dataset.value;
             const hasHardship = hardshipAnswer === 'yes';
             const hardshipTypes = hasHardship ? ['compensatoria-zts', 'dificil-desempeno']
@@ -1629,12 +1681,11 @@
 
             const dateError = getSeniorityWizardSteps()
                 .map(step => validateSeniorityWizardStep(step))
-                .find(Boolean) || getPracticeCareerDateError(pracStart, carrStart);
+                .find(Boolean) || (status !== 'practice' ? getPracticeCareerDateError(pracStart, carrStart) : '');
             if (dateError) {
-                validarDuracionPracticas();
+                const practiceError = validarDuracionPracticas();
                 const careerStep = document.querySelector('[data-wizard-step="career"]');
-                const practiceWarning = document.getElementById('wizard-practice-warning');
-                if (!careerStep.classList.contains('hidden') && !practiceWarning.classList.contains('hidden')) {
+                if (!careerStep.classList.contains('hidden') && practiceError === dateError) {
                     error.classList.add('hidden');
                 } else {
                     error.textContent = dateError;
@@ -1659,6 +1710,10 @@
                 const months = Number(document.getElementById('wizard-provisional-months').value);
                 setYearMonthFields('s1_1_2', years * 12 + months);
             }
+            if (exceptionalAccumulation) {
+                setYearMonthFields('s1_1_1', Number(document.getElementById('wizard-accumulated-years').value) * 12 + Number(document.getElementById('wizard-accumulated-months').value));
+                setYearMonthFields('s1_1_2', Number(document.getElementById('wizard-accumulated-provisional-years').value) * 12 + Number(document.getElementById('wizard-accumulated-provisional-months').value));
+            }
 
             if (bodyStart) {
                 const bodyGapMonths = Math.max(0, Math.floor(Number(document.getElementById('wizard-body-gap-months').value) || 0));
@@ -1674,6 +1729,7 @@
                 careerStartDate: carrStart, isStabilized,
                 practicePostponed: status === 'practice' && document.getElementById('wizard-postponed-practice').checked,
                 hardshipAnswer, hardshipTypes,
+                exceptionalAccumulation,
                 practiceOnlyStartDate: pracOnlyStart,
                 bodyStartDate: bodyStart, bodyGapMonths: Number(document.getElementById('wizard-body-gap-months').value) || 0
             };
@@ -1688,12 +1744,19 @@
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    state = { ...INITIAL_STATE, ...parsed };
+                    state = { ...structuredClone(INITIAL_STATE), ...parsed };
                     if (!Array.isArray(state.idiomas)) state.idiomas = [];
                     state.seniorityWizard = { ...INITIAL_STATE.seniorityWizard, ...(parsed.seniorityWizard || {}) };
                     state.bilingual = { ...INITIAL_STATE.bilingual, ...(parsed.bilingual || {}) };
                     state.puestos = { ...INITIAL_STATE.puestos, ...(parsed.puestos || {}) };
                     if (!Array.isArray(state.puestos.especialidades)) state.puestos.especialidades = [];
+                    if (!Object.prototype.hasOwnProperty.call(parsed, 's6_1_obras_literarias_4autores') && Number(parsed.s6_1_obras_literarias_3autores) > 0) {
+                        state.literaryAuthorsReview = true;
+                    }
+                    if (!Object.prototype.hasOwnProperty.call(parsed, 's6_3_premios_intl_2')
+                        && ['intl', 'nat', 'auto'].some(scope => Number(parsed[`s6_3_premios_${scope}`]) > 0)) {
+                        state.artPrizesReview = true;
+                    }
                     const hasSection43Breakdown = ['s4_3_jefatura_years', 's4_3_jefatura_months', 's4_3_coordinacion_years', 's4_3_coordinacion_months', 's4_3_tutoria_years', 's4_3_tutoria_months']
                         .some(name => Object.prototype.hasOwnProperty.call(parsed, name));
                     if (!hasSection43Breakdown) {
@@ -1706,7 +1769,7 @@
                     Object.keys(INITIAL_STATE).forEach(name => {
                         if (typeof INITIAL_STATE[name] === 'number') {
                             const value = Number(String(state[name]).replace(',', '.'));
-                            state[name] = Number.isFinite(value) ? value : 0;
+                            if (Number.isFinite(value) && state[name] !== '' && state[name] !== null) state[name] = value;
                         }
                     });
                     state.idiomas.forEach(language => {
@@ -1736,7 +1799,7 @@
             dialog.classList.remove('flex');
         }
         function confirmResetAll() {
-            state = { ...INITIAL_STATE, idiomas: [], bilingual: { ...INITIAL_STATE.bilingual } };
+            state = structuredClone(INITIAL_STATE);
             saveState();
             closeResetConfirmation();
             renderMainContent();
@@ -1759,13 +1822,20 @@
             timestamp.textContent = `Calculado el ${time.date} a las ${time.hour} h ${time.minute} min ${time.second} s. Hora: ${time.source}.`;
         }
         function printReport() {
+            if (getNumericValidationIssues(state).length) {
+                switchTab(8);
+                document.getElementById('numeric-validation-notice').scrollIntoView();
+                return;
+            }
             updatePrintTimestamp({ ...formatPrintTime(new Date()), source: 'reloj del dispositivo' });
             window.print();
         }
 
         const MAX_TUTORING_MONTHS = (19 * 12) + 2;
         const calcTime = (years, months, ptsPerYear, ptsPerMonth) => (years * ptsPerYear) + (months * ptsPerMonth);
-        const getDurationMonths = (s, prefix) => (Number(s[`${prefix}_years`]) || 0) * 12 + (Number(s[`${prefix}_months`]) || 0);
+        const getDurationMonths = (s, prefix) => getNumericValidationError(`${prefix}_years`, s[`${prefix}_years`])
+            || getNumericValidationError(`${prefix}_months`, s[`${prefix}_months`])
+            ? NaN : Number(s[`${prefix}_years`]) * 12 + Number(s[`${prefix}_months`]);
         const SERVICE_PERIODS = {
             s1_1_1: '1.1.1 Permanencia en destino definitivo',
             s1_1_2: '1.1.2 Provisionalidad',
@@ -1784,7 +1854,14 @@
             s6_6_tutor_master_grado: '6.6 Cursos de tutorización de máster/grado',
             s6_6_tutor_aspirantes: '6.6 Cursos de tutorización de funcionario/a en prácticas'
         };
-        const hasZeroPracticeScore = (s) => s.seniorityWizard?.status === 'practice' && !s.seniorityWizard.practicePostponed;
+        const getAcademicYear = (value) => {
+            const date = parseSeniorityDate(value);
+            return date ? date.getFullYear() - (date.getMonth() < 8 ? 1 : 0) : null;
+        };
+        const isSecondPracticeYear = (start) => getAcademicYear(start) === getAcademicYear(CUTOFF_DATE) - 1;
+        const hasEligiblePostponedPractice = (s) => s.seniorityWizard?.status === 'practice'
+            && s.seniorityWizard.practicePostponed && isSecondPracticeYear(s.seniorityWizard.practiceOnlyStartDate);
+        const hasZeroPracticeScore = (s) => s.seniorityWizard?.status === 'practice' && !hasEligiblePostponedPractice(s);
         const getCareerServiceMonths = (s) => {
             if (s.seniorityWizard?.status === 'practice') return 0;
             const bodyMonths = getDurationMonths(s, 's1_2_1');
@@ -1796,8 +1873,8 @@
         const CATEDRATICOS_ORDER_URL = 'https://www.juntadeandalucia.es/boja/2026/183/c01/BOJA26-218301-00030-12327-01_00343557.pdf';
         const hasCatedraticosAccessYears = (s) => getCareerServiceMonths(s) >= CATEDRATICOS_ACCESS_YEARS * 12;
         const showCatedraticosWarning = (s) => !!s.s2_catedratico && !hasCatedraticosAccessYears(s);
-        // Ticked with 8+ career years: already in the Catedráticos body, so no access estimate.
-        const showCatedraticosTimeline = (s) => !s.s2_catedratico || !hasCatedraticosAccessYears(s);
+        const isCatedraticosScoreBlocked = (s) => !!s.s2_catedratico && s.seniorityWizard?.status === 'practice';
+        const showCatedraticosTimeline = (s) => !s.s2_catedratico || isCatedraticosScoreBlocked(s);
         const SPANISH_MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         const toIsoDate = (date) => `${String(date.getFullYear()).padStart(4, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         const formatSpanishLongDate = (value) => {
@@ -1814,34 +1891,34 @@
         const canAccumulateHistoricalProvisionality = (s) => s.seniorityWizard?.status === 'definitive'
             && s.seniorityWizard.firstDefinitiveParticipation === 'yes';
         const getServicePeriodLimit = (s, prefix) => {
-            const bodyMonths = getDurationMonths(s, 's1_2_1');
             const status = s.seniorityWizard?.status;
             if (prefix.startsWith('s1_1_')) {
                 const careerMonths = getCareerServiceMonths(s);
-                if (prefix === 's1_1_1') return status === 'provisional' ? 0 : careerMonths;
+                const exceptional = !!s.seniorityWizard?.exceptionalAccumulation;
+                if (prefix === 's1_1_1') return status === 'provisional' && !exceptional ? 0 : careerMonths;
                 if (prefix === 's1_1_2') {
+                    if (exceptional) return Math.max(0, careerMonths - getDurationMonths(s, 's1_1_1'));
                     if (status !== 'definitive') return careerMonths;
                     if (!canAccumulateHistoricalProvisionality(s)) return 0;
                     const remainingMonths = Math.max(0, careerMonths - getDurationMonths(s, 's1_1_1'));
                     const previousMonths = completeMonthsBetween(s.seniorityWizard.careerStartDate, s.seniorityWizard.definitiveStartDate);
                     return Math.min(remainingMonths, previousMonths === null ? remainingMonths : previousMonths);
                 }
-                const centreMonths = status === 'definitive' ? getDurationMonths(s, 's1_1_1')
+                const centreMonths = exceptional ? getDurationMonths(s, 's1_1_1') + getDurationMonths(s, 's1_1_2')
+                    : status === 'definitive' ? getDurationMonths(s, 's1_1_1')
                     : status === 'provisional' ? getDurationMonths(s, 's1_1_2')
                     : Math.max(getDurationMonths(s, 's1_1_1'), getDurationMonths(s, 's1_1_2'));
                 return Math.min(careerMonths, centreMonths);
             }
-            return prefix === 's4_3_tutoria' ? Math.min(bodyMonths, MAX_TUTORING_MONTHS) : bodyMonths;
+            return prefix === 's4_3_tutoria' ? MAX_TUTORING_MONTHS : Infinity;
         };
         const needsTutorHistoryQuestion = (s, cutoff, careerOnly = false) => {
             if (careerOnly && s.seniorityWizard?.status === 'practice') return false;
             const start = careerOnly ? s.seniorityWizard?.careerStartDate : s.seniorityWizard?.bodyStartDate;
             return !parseSeniorityDate(start) || completeMonthsSince(start) === null || start < cutoff;
         };
-        const getServiceCountLimit = (s, name) => Math.min(
-            Math.floor((name === 's6_6_tutor_aspirantes' ? getCareerServiceMonths(s) : getDurationMonths(s, 's1_2_1')) / 12),
-            name === 's6_6_tutor_aspirantes' ? 3 : Infinity
-        );
+        const getServiceCountLimit = (s, name) => name === 's6_6_tutor_aspirantes'
+            ? s.seniorityWizard?.status === 'practice' ? 0 : 3 : Infinity;
         const getLimitedMeritState = (s) => {
             const limited = { ...s };
             Object.keys(SERVICE_PERIODS).forEach(prefix => {
@@ -1865,7 +1942,17 @@
             return calcTime(Math.floor(months / 12), months % 12, 1.5, 0.1250);
         };
         const PTS_IDIOMA = { B1: 1, B2: 2, C1: 3, C2: 4 };
-        const formatPoints = (value) => Number(value).toFixed(4).replace('.', ',');
+        const PRIZE_RATES = [
+            { scope: 'intl', label: 'Internacional', short: 'Internac.', rates: [1.5, 0.75, 0.5] },
+            { scope: 'nat', label: 'Nacional', short: 'Nacional', rates: [1, 0.5, 0.25] },
+            { scope: 'auto', label: 'Autonómico', short: 'Autonóm.', rates: [0.5, 0.25, 0.1] }
+        ];
+        const getPrizeField = (section, scope, rank) => section === 's6_3'
+            ? `${section}_premios_${scope}${rank === 1 ? '' : `_${rank}`}` : `${section}_${scope}_${rank}`;
+        const calcPrizePoints = (s, section) => section === 's6_3' && s.artPrizesReview ? 0
+            : PRIZE_RATES.reduce((sum, { scope, rates }) => sum + rates.reduce((points, rate, index) =>
+                points + Number(s[getPrizeField(section, scope, index + 1)] || 0) * rate, 0), 0);
+        const formatPoints = (value) => Number.isFinite(Number(value)) ? Number(value).toFixed(4).replace('.', ',') : '—';
         const formatDecimal = (value) => String(value).replace('.', ',');
 
         const calc111 = (s) => {
@@ -1916,7 +2003,7 @@
                            calcTime(s.s1_2_2_years, s.s1_2_2_months, 1.5, 0.1250) +
                            calcTime(s.s1_2_3_years, s.s1_2_3_months, 0.75, 0.0625),
             section1: (s) => parseFloat((Calculators.calc11(s) + Calculators.calc12(s)).toFixed(4)),
-            section2: (s) => s.s2_catedratico && hasCatedraticosAccessYears(s) ? 5.0000 : 0,
+            section2: (s) => s.s2_catedratico && !isCatedraticosScoreBlocked(s) ? 5.0000 : 0,
             calc31: (s) => {
                 let pts = 0;
                 pts += s.s3_1_1_doctor * 6.0;
@@ -1925,7 +2012,7 @@
                 if (s.s3_1_4_premio_doctor) pts += 1.0;
                 return pts;
             },
-            calc32: (s) => (s.s3_2_1_grados * 5.0) + (s.s3_2_2_primer_ciclo * 3.0) + (s.s3_2_3_segundo_ciclo * 3.0),
+            calc32: (s) => (s.s3_2_1_grados * 5.0) + (s.s3_2_1_grados_adaptacion * 2.5) + (s.s3_2_2_primer_ciclo * 3.0) + (s.s3_2_3_segundo_ciclo * 3.0),
             calc33: (s) => {
                 const { eoi } = getIdiomasBreakdown(s);
                 return eoi + (PTS_IDIOMA[s.s3_3_dlse] || 0) + (s.s3_3_titulo_arte * 2.0) + (s.s3_3_titulo_musica * 2.0);
@@ -1968,7 +2055,10 @@
                 pts += s.s6_1_libros_mas5autores * 0.1;
                 pts += s.s6_1_obras_literarias_autor * 1.0;
                 pts += s.s6_1_obras_literarias_coautor * 0.5;
-                pts += s.s6_1_obras_literarias_3autores * 0.4;
+                if (!s.literaryAuthorsReview) pts += s.s6_1_obras_literarias_3autores * 0.4;
+                pts += s.s6_1_obras_literarias_4autores * 0.3;
+                pts += s.s6_1_obras_literarias_5autores * 0.2;
+                pts += s.s6_1_obras_literarias_mas5autores * 0.1;
                 pts += s.s6_1_obras_literarias_ilustrador * 0.2;
                 pts += s.s6_1_revistas_autor * 0.2;
                 pts += s.s6_1_revistas_coautor * 0.1;
@@ -1977,9 +2067,7 @@
             },
             calc62: (s) => {
                 s = getLimitedMeritState(s);
-                let pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
-                          (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
-                          (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1) +
+                let pts = calcPrizePoints(s, 's6_2') +
                           (s.s6_2_coord_plan_igualdad_years * 1.0) +
                           (s.s6_2_coord_proyectos_years * 0.5) +
                           (s.s6_2_part_proyectos_years * 0.2) +
@@ -1987,12 +2075,12 @@
                 return Math.min(pts, 2.5);
             },
             calc63: (s) => Math.min(
-                (s.s6_3_premios_intl * 1.5) + (s.s6_3_premios_nat * 1.0) + (s.s6_3_premios_auto * 0.5) +
+                calcPrizePoints(s, 's6_3') +
                 (s.s6_3_espectaculos_gran * 1.0) + (s.s6_3_espectaculos_peq * 0.5) + (s.s6_3_otras_composiciones * 0.25) +
                 (s.s6_3_actuaciones_destacadas * 0.5) + (s.s6_3_actuaciones_secundarias * 0.2) +
                 (s.s6_3_exposiciones * 0.5) +
                 (s.s6_3_conservador_dir * 0.5) + (s.s6_3_conservador_part * 0.2) +
-                (s.s6_3_deportista_nivel * 1.0) + (s.s6_3_deportista_rendimiento * 0.5),
+                (Number(s.s6_3_deportista_nivel) >= 1 ? 1 : 0) + (Number(s.s6_3_deportista_rendimiento) >= 1 ? 0.5 : 0),
                 2.5
             ),
             calc64: (s) => calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125),
@@ -2004,6 +2092,57 @@
             section6: (s) => Math.min(Calculators.calc61(s) + Calculators.calc62(s) + Calculators.calc63(s) + Calculators.calc64(s) + Calculators.calc65(s) + Calculators.calc66(s), 15.0),
             total: (s) => Calculators.section1(s) + Calculators.section2(s) + Calculators.section3(s) + Calculators.section4(s) + Calculators.section5(s) + Calculators.section6(s)
         };
+        function allowsFractionalMerits(name) {
+            return ['s5_1_horas', 's5_2_horas'].includes(name)
+                || /^s6_2_(intl|nat|auto)_/.test(name)
+                || (name.startsWith('s6_3_') && !name.includes('deportista'));
+        }
+        function getNumericValidationError(name, value) {
+            if (typeof INITIAL_STATE[name] !== 'number') return '';
+            if (name.includes('deportista') && typeof value === 'boolean') return '';
+            const text = String(value).trim();
+            const number = Number(text.replace(',', '.'));
+            if (value === null || !text || !Number.isFinite(number) || number < 0) return 'Introduce un número finito no negativo.';
+            if (!allowsFractionalMerits(name) && !Number.isInteger(number)) return 'Introduce una cantidad entera; no se admiten fracciones de títulos, cursos, años o meses.';
+            if (name.endsWith('_months') && number > 11) return 'Introduce entre 0 y 11 meses; expresa los años completos en la casilla de años.';
+            return '';
+        }
+        function getNumericValidationIssues(s, prefix = '') {
+            return Object.keys(INITIAL_STATE).filter(name => name.startsWith(prefix) && typeof INITIAL_STATE[name] === 'number')
+                .map(name => ({ name, message: getNumericValidationError(name, s[name]) })).filter(issue => issue.message);
+        }
+        function renderNumericValidationNotice() {
+            const issues = getNumericValidationIssues(state);
+            if (!issues.length) return '';
+            return `<div class="mx-auto mb-4 max-w-2xl rounded-r border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-900 dark:bg-red-900/30 dark:text-red-100" role="alert">
+                <p class="font-semibold">Hay datos numéricos pendientes de corregir. El total y el informe quedan pendientes; no se redondean ni se borran tus cifras.</p>
+                <ul class="mt-2 list-disc space-y-1 pl-4">${issues.map(({ name, message }) => {
+                    const code = name.match(/^s(\d)_(\d)(?:_(\d)(?=_))?/).slice(1).filter(Boolean).join('.');
+                    const detail = name.replace(/^s\d_\d_(?:\d_)?/, '').replace(/_/g, ' ').replace(/\byears\b/g, 'años').replace(/\bmonths\b/g, 'meses');
+                    return `<li><button type="button" class="font-semibold underline" onclick="switchTab(${Number(name[1])})">${code} (${detail})</button>: ${message}</li>`;
+                }).join('')}</ul>
+            </div>`;
+        }
+        function updateNumericValidation() {
+            const notice = document.getElementById('numeric-validation-notice');
+            if (notice) notice.innerHTML = renderNumericValidationNotice();
+            document.querySelectorAll('input[name]').forEach(input => {
+                if (typeof INITIAL_STATE[input.name] !== 'number' || input.type === 'checkbox') return;
+                const message = getNumericValidationError(input.name, state[input.name]);
+                input.setCustomValidity(message);
+                input.setAttribute('aria-invalid', String(Boolean(message)));
+                const error = document.querySelector(`[data-numeric-error="${input.name}"]`);
+                if (error) {
+                    error.textContent = message;
+                    error.classList.toggle('hidden', !message);
+                }
+            });
+        }
+        Object.entries(Calculators).forEach(([name, calculate]) => {
+            const subsection = /^calc(\d)(\d)$/.exec(name);
+            const prefix = subsection ? `s${subsection[1]}_${subsection[2]}_` : name === 'total' ? '' : `s${name.slice(-1)}_`;
+            Calculators[name] = s => getNumericValidationIssues(s, prefix).length ? NaN : calculate(s);
+        });
 
         const Tabs = [
             { id: 1, label: '1. Antigüedad' },
@@ -2019,6 +2158,7 @@
         const Icons = { help: `<svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>` };
 
         const ProgressBar = (title, ptsId, maxPoints, currentPoints = 0, blocked = false) => {
+            blocked = blocked || !Number.isFinite(currentPoints);
             const progressId = `progress-${ptsId}`;
             const barId = `progress-bar-${ptsId}`;
             const badgeId = `progress-badge-${ptsId}`;
@@ -2046,6 +2186,7 @@
 
         // blocked: the merit is ticked but a requirement is missing, so the bar is drawn full but dashed grey and scores 0.
         function updateProgress(ptsId, currentPoints, maxPoints, blocked = false) {
+            blocked = blocked || !Number.isFinite(currentPoints);
             const progress = document.getElementById(`progress-${ptsId}`);
             const bar = document.getElementById(`progress-bar-${ptsId}`);
             const badge = document.getElementById(`progress-badge-${ptsId}`);
@@ -2069,15 +2210,18 @@
             ${maxPoints !== null ? ProgressBar(title, ptsId, maxPoints, currentPoints) : ''}`;
 
         const InfoBox = (text) => `<div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-4 text-sm text-blue-700 dark:text-blue-200">${text}</div>`;
+        const escapeInputValue = value => String(value ?? '').replace(/[&"<>]/g, character => ({ '&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;' })[character]);
+        const numericErrorMessage = name => `<p data-numeric-error="${name}" class="${getNumericValidationError(name, state[name]) ? '' : 'hidden'} mt-1 text-xs text-red-700 dark:text-red-300" role="alert">${getNumericValidationError(name, state[name])}</p>`;
 
         const NumInput = (label, name, step=1, max=999, className="flex-col", disabled=false) => {
             const decimalInput = step === 'any';
             return `
             <div class="flex min-w-0 ${className}">
-                ${label ? `<label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${label}</label>` : ''}
-                <input type="${decimalInput ? 'text' : 'number'}" name="${name}" ${decimalInput ? 'inputmode="decimal" autocomplete="off"' : `min="0" max="${max}" step="${step}"`} value="${state[name] || 0}" ${disabled ? 'disabled' : ''}
+                ${label ? `<label for="${name}" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${label}</label>` : ''}
+                <input id="${name}" type="${decimalInput ? 'text' : 'number'}" name="${name}" ${decimalInput ? 'inputmode="decimal" autocomplete="off"' : `min="0" max="${max}" step="${step}"`} value="${escapeInputValue(state[name])}" ${disabled ? 'disabled' : ''}
                     class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800 dark:disabled:text-gray-400"
                     oninput="handleInput(this)">
+                ${numericErrorMessage(name)}
                 ${SERVICE_COUNTS[name] ? `<p data-service-count="${name}" class="${Number(state[name]) > getServiceCountLimit(state, name) ? '' : 'hidden'} mt-2 text-sm text-gray-600 dark:text-gray-300" aria-live="polite">${getServiceCountNotice(state, name)}</p>` : ''}
             </div>`;
         };
@@ -2088,26 +2232,32 @@
             <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-100 dark:border-gray-600">
                 <div class="merit-card-label text-xs text-gray-600 dark:text-gray-300 font-medium mb-1 min-h-8 break-words flex items-end">${label}</div>
                 <div class="flex items-center gap-2">
-                    <input type="${fractional ? 'text' : 'number'}" name="${name}" ${fractional ? 'inputmode="decimal" autocomplete="off"' : 'min="0" step="1"'} value="${state[name] || 0}" class="w-full p-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" oninput="handleInput(this)">
+                    <input type="${fractional ? 'text' : 'number'}" name="${name}" ${fractional ? 'inputmode="decimal" autocomplete="off"' : 'min="0" step="1"'} value="${escapeInputValue(state[name])}" class="w-full p-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" oninput="handleInput(this)">
                     <span class="text-xs text-primary font-bold whitespace-nowrap">${formatDecimal(pts)} ${suffix}</span>
                 </div>
+                ${numericErrorMessage(name)}
             </div>`;
         };
 
         const getServiceCountNotice = (s, name) => {
             const limit = getServiceCountLimit(s, name);
+            if (!Number.isFinite(limit)) return 'Introduce las convocatorias o cursos efectivamente acreditados. No se limitan a los años completos escritos en 1.2.1.';
             const exceeded = Number(s[name]) > limit;
-            return `${exceeded ? 'Revisa la cifra: el exceso no se suma. ' : ''}Máximo computable: ${limit} ${name === 's6_5_tribunales' ? 'convocatorias' : 'cursos'}, con referencia a los años completos de 1.2.1${name === 's6_6_tutor_aspirantes' ? ', solo como funcionario/a de carrera, y al máximo de 3 cursos desde 2023/24' : ''}.`;
+            return `${exceeded ? 'Revisa la cifra: el exceso no se suma. ' : ''}Máximo computable: ${limit} cursos de tutorización de aspirantes. Solo como funcionario/a de carrera y desde 2023/24: hasta el cierre se han completado 3 cursos.`;
         };
         const getServicePeriodNotice = (s, prefix) => {
             const months = getServicePeriodLimit(s, prefix);
+            if (!Number.isFinite(months)) return 'Introduce únicamente periodos admisibles, sin solapar cargos. Pueden proceder de otros cuerpos docentes.';
+            if (s.seniorityWizard?.exceptionalAccumulation && prefix.startsWith('s1_1_')) {
+                return `Comprueba los servicios acumulables según las páginas 24–25 del BOJA. Máximo temporal computable: ${formatDuration(Math.floor(months / 12), months % 12)}, sin duplicar periodos entre 1.1.1 y 1.1.2.`;
+            }
             if (prefix === 's1_1_2' && s.seniorityWizard?.status === 'definitive') {
                 if (!canAccumulateHistoricalProvisionality(s)) {
                     return 'La provisionalidad anterior no se suma salvo participación voluntaria desde el primer destino definitivo obtenido por concurso. Las cifras se conservan para su revisión, pero no puntúan.';
                 }
                 return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. Solo cuenta la provisionalidad como funcionario/a de carrera anterior al primer destino definitivo, sin superar 1.2.1 ni duplicar el tiempo de 1.1.1; si constan las fechas del cuestionario, también se limita al periodo entre carrera y primer destino definitivo.`;
             }
-            return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. La referencia es ${prefix === 's4_3_tutoria' ? 'la que has escrito en el 1.2.1' : '1.2.1'}${prefix.startsWith('s1_1_') ? ', solo como funcionario/a de carrera y según tu situación; en 1.1.3, también el periodo de 1.1.1 o 1.1.2 que corresponda' : ''}${prefix === 's4_3_tutoria' ? ', sin superar el tiempo transcurrido desde septiembre de 2007' : ''}.`;
+            return `Revisa las cifras: el exceso no se suma. Máximo computable: ${formatDuration(Math.floor(months / 12), months % 12)}. ${prefix === 's4_3_tutoria' ? 'Solo cuenta la función tutorial desde el 1 de septiembre de 2007, sin limitarla al cuerpo actual.' : 'Solo servicios de carrera, según 1.2.1 y las fechas declaradas; en 1.1.3, dentro del periodo de destino o provisionalidad admisible.'}`;
         };
         const YMInput = (label, yName, mName, disabled=false) => {
             const prefix = yName.replace(/_years$/, '');
@@ -2118,7 +2268,7 @@
                     ${NumInput('Años', yName, 1, 99, 'flex-1 flex-col', disabled)}
                     ${NumInput('Meses', mName, 1, 11, 'flex-1 flex-col', disabled)}
                 </div>
-                ${SERVICE_PERIODS[prefix] ? `<p data-service-period="${prefix}" class="${getDurationMonths(state, prefix) > getServicePeriodLimit(state, prefix) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">${getServicePeriodNotice(state, prefix)}</p>` : ''}
+                ${SERVICE_PERIODS[prefix] && Number.isFinite(getServicePeriodLimit(state, prefix)) ? `<p data-service-period="${prefix}" class="${getDurationMonths(state, prefix) > getServicePeriodLimit(state, prefix) ? '' : 'hidden'} mt-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">${getServicePeriodNotice(state, prefix)}</p>` : ''}
             </div>`;
         };
 
@@ -2130,6 +2280,102 @@
                 <span class="ml-2 text-sm text-gray-800 dark:text-gray-200">${label}</span>
             </label>`;
 
+        function renderPrizeMatrix(section) {
+            return `<div class="grid grid-cols-4 gap-2 text-center text-xs">
+                <span>Ámbito</span><span>1.º premio</span><span>2.º premio</span><span>3.º premio</span>
+                ${PRIZE_RATES.map(({ scope, label, short, rates }) => `
+                    <span class="self-center text-left font-semibold text-gray-700 dark:text-gray-200">${short}</span>
+                    ${rates.map((rate, index) => `<div class="min-w-0">
+                        <label for="${getPrizeField(section, scope, index + 1)}" class="sr-only">${label}, ${index + 1}.º premio (${section === 's6_2' ? '6.2' : '6.3'})</label>
+                        ${NumInput('', getPrizeField(section, scope, index + 1), 'any', 99, 'w-full')}
+                        <span class="text-gray-500 dark:text-gray-400">${formatDecimal(rate)} ptos.</span>
+                    </div>`).join('')}`).join('')}
+            </div><p class="mt-2 text-xs text-gray-600 dark:text-gray-300">Introduce el número de premios individuales. Para premios compartidos, usa las unidades equivalentes calculadas con el asistente de reparto, respetando los mínimos cuando procedan.</p>`;
+        }
+        function renderMeritReviewNotices() {
+            const notices = [
+                ['literaryAuthorsReview', 'La antigua casilla «3+ autores» no distinguía 3, 4, 5 o más autores. Redistribuye tus cifras en la tabla literaria y confirma. Hasta entonces, la cifra antigua de ese grupo no suma puntos.'],
+                ['artPrizesReview', 'Los premios artísticos guardados solo indicaban el ámbito. Revisa si fueron primeros, segundos o terceros y redistribúyelos. Estos premios no puntúan hasta que confirmes la revisión.']
+            ];
+            const sportsNotice = ['s6_3_deportista_nivel', 's6_3_deportista_rendimiento'].some(name => Number(state[name]) > 1)
+                ? '<p class="my-3 rounded border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100" role="alert">Habías guardado varias acreditaciones deportivas. Cada condición se valora una sola vez, no por años ni por certificados: se conserva tu cifra anterior, pero no se multiplica su puntuación.</p>' : '';
+            return sportsNotice + notices.filter(([key]) => state[key]).map(([key, text]) => `
+                <div data-merit-review="${key}" class="my-3 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100" role="alert">
+                    <p>${text}</p>
+                    <button type="button" onclick="confirmMeritReview('${key}')" class="mt-2 font-semibold underline no-print">He revisado y distribuido estas cifras</button>
+                </div>`).join('');
+        }
+        function confirmMeritReview(key) {
+            if (!['literaryAuthorsReview', 'artPrizesReview'].includes(key)) return;
+            state[key] = false;
+            saveState();
+            renderMainContent();
+            updateCalculations();
+        }
+        const PRORATABLE_MERITS = [
+            ...['s6_2', 's6_3'].flatMap(section => PRIZE_RATES.flatMap(({ scope, label, rates }) =>
+                rates.map((rate, index) => ({
+                    name: getPrizeField(section, scope, index + 1), rate,
+                    label: `${section === 's6_2' ? '6.2' : '6.3'} · ${label}, ${index + 1}.º premio`
+                })))),
+            { name: 's6_3_espectaculos_gran', label: '6.3 · Autoría compartida, gran formato', rate: 1, minimum: 0.05 },
+            { name: 's6_3_espectaculos_peq', label: '6.3 · Autoría compartida, cámara / pequeños grupos', rate: 0.5, minimum: 0.05 },
+            { name: 's6_3_otras_composiciones', label: '6.3 · Otras composiciones, autoría compartida', rate: 0.25, minimum: 0.05 },
+            { name: 's6_3_actuaciones_secundarias', label: '6.3 · Varios intérpretes que no forman agrupación', rate: 0.2, minimum: 0.05 },
+            { name: 's6_3_exposiciones', label: '6.3 · Exposición colectiva', rate: 0.5, minimum: 0.05 },
+            { name: 's6_3_conservador_part', label: '6.3 · Conservación-restauración participante', rate: 0.2, minimum: 0.05 }
+        ];
+        function getProrationResult(name, participants, centrePrize = false) {
+            const merit = PRORATABLE_MERITS.find(item => item.name === name);
+            if (!merit || !Number.isInteger(participants) || participants < 1) return { error: 'Selecciona un mérito e introduce un número entero de participantes, como mínimo 1.' };
+            const minimum = merit.minimum || (centrePrize && name.startsWith('s6_2_') ? 0.05 : 0);
+            const points = Math.max(merit.rate / participants, minimum);
+            return { points, units: points / merit.rate, label: merit.label };
+        }
+        function renderProrationHelper() {
+            return `<details class="mb-4 rounded-lg border border-primary/30 bg-white p-4 text-sm dark:bg-gray-800 no-print">
+                <summary class="cursor-pointer font-semibold text-primary dark:text-emerald-400">Asistente de reparto de méritos compartidos</summary>
+                <p class="mt-3 text-gray-700 dark:text-gray-200">Añade <strong>un mérito nuevo</strong> repartido. No lo añadas también como premio completo ni vuelvas a repartir una cifra ya ajustada. Las casillas muestran unidades equivalentes, no puntos. No modifica las cifras anteriores.</p>
+                <label for="proration-merit" class="mt-3 block">Mérito</label>
+                <select id="proration-merit" onchange="updateProrationPreview()" class="mt-1 w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+                    <option value="">Selecciona el mérito...</option>${PRORATABLE_MERITS.map(({ name, label }) => `<option value="${name}">${label}</option>`).join('')}
+                </select>
+                <label for="proration-participants" class="mt-3 block">Número de participantes (o profesores del centro, en el supuesto indicado debajo)</label>
+                <input id="proration-participants" type="number" min="1" step="1" value="2" oninput="updateProrationPreview()" class="mt-1 w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+                <label class="mt-3 flex items-start gap-2"><input id="proration-centre" type="checkbox" disabled onchange="updateProrationPreview()" class="mt-1 shrink-0"><span>Premio de proyecto de centro de 6.2 sin relación de participantes: divido por el profesorado del centro, con mínimo de 0,05 puntos.</span></label>
+                <p id="proration-preview" class="mt-3 text-gray-700 dark:text-gray-200" role="status">Selecciona la categoría y el número de participantes.</p>
+                <button id="proration-add" type="button" disabled onclick="addProratedMerit()" class="mt-3 rounded bg-primary px-3 py-2 font-semibold text-white disabled:opacity-40">Añadir este mérito repartido</button>
+                <p class="mt-3 text-xs text-gray-600 dark:text-gray-300">El mínimo de 0,05 no es general para todos los premios. Se aplica únicamente a los supuestos indicados en las páginas 45–46 del BOJA: proyecto de centro sin relación, autorías compartidas y determinadas interpretaciones, exposiciones y conservación.</p>
+            </details>`;
+        }
+        function updateProrationPreview() {
+            const name = document.getElementById('proration-merit').value;
+            const centre = document.getElementById('proration-centre');
+            centre.disabled = !name.startsWith('s6_2_');
+            if (centre.disabled) centre.checked = false;
+            const result = getProrationResult(name, Number(document.getElementById('proration-participants').value), centre.checked);
+            document.getElementById('proration-preview').textContent = result.error
+                || `${formatDecimal(result.units)} unidades equivalentes = ${formatPoints(result.points)} puntos, antes de topes.`;
+            document.getElementById('proration-add').disabled = Boolean(result.error);
+            return result;
+        }
+        function addProratedMerit() {
+            const result = updateProrationPreview();
+            if (result.error) return;
+            const name = document.getElementById('proration-merit').value;
+            const error = getNumericValidationError(name, state[name]);
+            if (error) {
+                document.getElementById('proration-preview').textContent = `Corrige primero la cifra guardada en ${result.label}: ${error}`;
+                return;
+            }
+            state[name] = Number(state[name]) + result.units;
+            const input = document.querySelector(`input[name="${name}"]`);
+            if (input) input.value = formatDecimal(state[name]);
+            saveState();
+            updateCalculations();
+            document.getElementById('proration-preview').textContent = `Añadido a ${result.label}: ${formatPoints(result.points)} puntos antes de topes. No lo introduzcas de nuevo en otra casilla.`;
+            document.getElementById('proration-add').disabled = true;
+        }
         const compareCertificateNames = (left, right) => left.localeCompare(right, 'es', { sensitivity: 'base', numeric: true });
         // Certificate names are saved identifiers; presentation must not rename them.
         const CERTIFICATE_NAME_RULES = [
@@ -2254,7 +2500,8 @@
             if (merit.origen !== 'ACLES') return null;
             const valid = (ACLES_CERTIFICATES[merit.idioma] || [])
                 .some(([name, level]) => name === merit.certificado && level === merit.nivel);
-            return valid ? certificates.find(item => item.level === merit.nivel && item.aliases?.includes(merit.certificado) && !item.before) || null : null;
+            return valid ? certificates.filter(item => PTS_IDIOMA[item.level] <= PTS_IDIOMA[merit.nivel] && item.aliases?.includes(merit.certificado) && !item.before)
+                .sort((left, right) => PTS_IDIOMA[right.level] - PTS_IDIOMA[left.level])[0] || null : null;
         }
         function getExistingBilingualCertificate(s, language) {
             return (s.idiomas || []).filter(merit => !merit.fromBilingual && merit.idioma === language)
@@ -2343,7 +2590,7 @@
                 if (answer.issuedDate >= certificate.before) return { status: 'no', message: 'No puedes solicitar puestos bilingües con esta versión del certificado y esta fecha de expedición. Comprueba si tienes otra acreditación del anexo XVI.' };
             }
             if (certificate.condition && !answer.conditionsConfirmed) return { status: 'pending', message: 'Confirma los requisitos específicos del certificado o titulación antes de obtener el resultado.' };
-            const practiceNote = s.seniorityWizard?.status === 'practice' ? ' La adjudicación queda supeditada a que superes la fase de prácticas.' : '';
+            const practiceNote = s.seniorityWizard?.status === 'practice' ? ' La adjudicación queda supeditada a que superes la fase de prácticas. Solo puedes pedir por la especialidad de ingreso; esta herramienta no verifica tu nombramiento.' : '';
             return { status: 'yes', message: `¡Enhorabuena! Sí, puedes solicitar puestos bilingües de ${answer.language.toLowerCase()} de tu especialidad con la acreditación indicada.${practiceNote}`, certificate, specialty };
         }
         function renderBilingualResult(s, compact = false) {
@@ -2360,8 +2607,9 @@
                 : result.status === 'no' ? 'M6 6l12 12M6 18 18 6' : 'M12 8v5m0 3h.01';
             return `<div data-bilingual-result="${result.status}" class="mt-4 rounded-r border-l-4 p-4 text-sm ${color}" role="status" aria-live="polite">
                 <p class="flex items-start gap-2 font-semibold"><svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/></svg><span>${message}</span></p>
+                ${result.status === 'yes' ? `<p class="mt-2">Solicitud CGT: especialidad <strong>${result.specialty[0].slice(3)}</strong> y CPE <strong>${BILINGUAL_CPE[s.bilingual.language]}</strong> (${s.bilingual.language}). Código técnico de referencia: ${BILINGUAL_POST_CODE_PREFIX[s.bilingual.language]}${result.specialty[0]}; no sustituye los campos de especialidad y CPE de la solicitud.</p>` : ''}
                 ${result.status === 'yes' && !compact ? `<p class="mt-2">Una vez <a href="https://educaweb.juntadeandalucia.es/public/?x=FA9EDDF6" target="_blank" rel="noopener noreferrer" class="font-semibold underline">finalices tu instancia<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>, si has seleccionado peticiones bilingües y aún no consta tu acreditación, al firmar y presentar telemáticamente el propio programa te pedirá que adjuntes documentación justificativa bilingüe: tu título o certificado de <strong>${certificateLabel}</strong>.</p>` : ''}
-                <p class="mt-2 text-xs">Comprobación orientativa, independiente de los puntos de 3.3 y 5.5. <a href="${BILINGUAL_BOJA_URL}#page=166" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Consulta el anexo XVI del BOJA</a> y las bases 4.1.4, 4.2.1 y 4.6.6.</p>
+                <p class="mt-2 text-xs">Comprobación orientativa, independiente de los puntos de 3.3 y 5.5.${s.seniorityWizard?.status === 'practice' ? ' En prácticas, únicamente por la especialidad de ingreso; no se verifica tu nombramiento.' : ''} <a href="${BILINGUAL_BOJA_URL}#page=166" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Consulta el anexo XVI del BOJA</a> y las bases 4.1.4, 4.2.1 y 4.6.6.</p>
             </div>`;
         }
         function renderBilingualMeritWarning(s) {
@@ -2727,15 +2975,15 @@
         function renderPracticeScoreNotice() {
             if (state.seniorityWizard.status !== 'practice') return '';
             const icon = '<svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
-            if (state.seniorityWizard.practicePostponed) return `
+            if (hasEligiblePostponedPractice(state)) return `
                 <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-blue-500 bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200" role="note">
                     ${icon}
-                    <span>Prácticas aplazadas por conciliación o incapacidad temporal: se adjudica según tu puntuación. El apartado 1.1 sigue a cero y la adjudicación queda supeditada a que superes las prácticas.</span>
+                    <span>Segundo año de nombramiento en prácticas por aplazamiento o falta de evaluación debidos a conciliación o incapacidad temporal: se adjudica según tu puntuación. El apartado 1.1 sigue a cero y la adjudicación queda supeditada a que superes las prácticas.</span>
                 </div>`;
             return `
                 <div class="mb-4 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
                     ${icon}
-                    <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.</span>
+                    <span>Aviso: si estás en prácticas, la puntuación real considerada en el concurso es 0; durante el primer año, la adjudicación se realiza según el orden de nombramiento. Esta puntuación es solo orientativa.${state.seniorityWizard.practicePostponed ? ' Has marcado aplazamiento, pero la fecha guardada no acredita el segundo año de nombramiento exigido para la excepción: revisa el cuestionario.' : ''}</span>
                 </div>`;
         }
         function renderSection1() {
@@ -2764,14 +3012,18 @@
                             <p class="mb-2"><strong>En 1.1.1, si tienes destino definitivo, cuenta el tiempo transcurrido desde tu <span class="underline decoration-2 underline-offset-2">ÚLTIMO destino definitivo (el más reciente)</span>.</strong> Si participas voluntariamente desde el primero obtenido por concurso, puedes sumar además la provisionalidad anterior en 1.1.2. Una vez obtenido otro destino definitivo, esa puntuación histórica ya no se acumula.</p>
                             <ul class="list-disc list-inside space-y-1 ml-1 mb-2">
                                 <li><strong>Tienes destino definitivo ahora</strong> → rellena <strong>1.1.1</strong> con el tiempo desde la toma de posesión de ese último destino y, solo si participas voluntariamente desde el primero obtenido por concurso, <strong>1.1.2</strong> con la provisionalidad anterior como funcionario/a de carrera.</li>
-                                <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → deja 1.1.1 en blanco y rellena solo <strong>1.1.2</strong>.</li>
-                                <li><strong>Eres funcionario/a en prácticas</strong> → deja <strong>todo el 1.1 en blanco</strong>; tu antigüedad va íntegra al <strong>1.2</strong>.</li>
+                                <li><strong>Estás en provisionalidad</strong> (funcionario/a de carrera) → mantén 1.1.1 en cero y rellena <strong>1.1.2</strong>, salvo el supuesto excepcional explicado debajo.</li>
+                                <li><strong>Eres funcionario/a en prácticas</strong> → <strong>todo el 1.1 está deshabilitado y no puntúa</strong>; tu antigüedad va al <strong>1.2</strong>.</li>
                                 <li><strong>1.1.3</strong> (especial dificultad) se añade al 1.1.1 o al 1.1.2, según corresponda, solo por servicios como funcionario/a de carrera; no cuenta prácticas ni interinidad. Desde un destino definitivo, no recupera la especial dificultad de la provisionalidad anterior.</li>
                             </ul>
-                            <p class="text-xs italic mt-2 pt-2 border-t border-blue-200 dark:border-blue-800"><strong>Excepción:</strong> si perdiste tu destino por <strong>supresión del puesto</strong>, <strong>sentencia o resolución de recurso</strong>, o vienes de <strong>excedencia forzosa</strong>, la normativa permite acumular también el destino anterior (o los anteriores suprimidos). Si es tu caso, añade esos meses acumulados en <strong>1.1.1</strong>.</p>
+                            <p class="text-xs italic mt-2 pt-2 border-t border-blue-200 dark:border-blue-800"><strong>Excepción:</strong> supresión, pérdida del destino por sentencia o recurso y excedencia forzosa tienen reglas específicas. Comprueba tu supuesto en las páginas 24–25 del BOJA, <strong>marca la casilla de acumulación excepcional</strong> y distribuye los servicios admisibles entre 1.1.1 y 1.1.2 sin duplicarlos.</p>
                         </div>
                     </div>
-                    ${YMInput('1.1.1 Permanencia ininterrumpida (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_1_years', 's1_1_1_months', ['provisional', 'practice'].includes(state.seniorityWizard.status))}
+                    <label class="mb-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100">
+                        <input type="checkbox" ${state.seniorityWizard.exceptionalAccumulation ? 'checked' : ''} ${state.seniorityWizard.status === 'practice' ? 'disabled' : ''} onchange="setExceptionalAccumulation(this.checked)" class="mt-1 h-4 w-4 shrink-0 rounded text-primary">
+                        <span>Tengo derecho a acumulación por supresión, pérdida del destino o excedencia forzosa. Revisa los supuestos de las páginas 24–25 del BOJA y distribuye manualmente los servicios admisibles entre 1.1.1 y 1.1.2, sin duplicarlos.</span>
+                    </label>
+                    ${YMInput(state.seniorityWizard.exceptionalAccumulation ? '1.1.1 Servicios acumulables en el supuesto especial del BOJA' : '1.1.1 Permanencia ininterrumpida (solo desde el <span class="underline decoration-2 underline-offset-2">último destino definitivo</span>)', 's1_1_1_years', 's1_1_1_months', state.seniorityWizard.status === 'practice' || (state.seniorityWizard.status === 'provisional' && !state.seniorityWizard.exceptionalAccumulation))}
                     ${state.seniorityWizard.status === 'definitive' ? `
                     <div class="mb-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4">
                         <label for="first-definitive-participation" class="block text-sm font-semibold text-gray-800 dark:text-gray-200">¿Participas voluntariamente desde tu primer destino definitivo obtenido por concurso?</label>
@@ -2780,10 +3032,10 @@
                             <option value="yes" ${state.seniorityWizard.firstDefinitiveParticipation === 'yes' ? 'selected' : ''}>Sí, participo desde mi primer destino definitivo</option>
                             <option value="no" ${state.seniorityWizard.firstDefinitiveParticipation === 'no' ? 'selected' : ''}>No</option>
                         </select>
-                        <p id="first-definitive-participation-note" class="mt-2 text-xs text-gray-600 dark:text-gray-300">Solo en este supuesto se habilita 1.1.2 para sumar la provisionalidad anterior como funcionario/a de carrera. Una vez obtenido otro destino definitivo, deja de acumularse.</p>
+                        <p id="first-definitive-participation-note" class="mt-2 text-xs text-gray-600 dark:text-gray-300">Esta es la regla general de acumulación de la provisionalidad anterior como funcionario/a de carrera. Una vez obtenido otro destino definitivo, deja de acumularse, salvo el supuesto excepcional que hayas comprobado y marcado arriba.</p>
                     </div>` : ''}
-                    ${YMInput(canAccumulateHistoricalProvisionality(state) ? '1.1.2 Provisionalidad anterior al primer destino definitivo (solo funcionario/a de carrera)' : '1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', state.seniorityWizard.status === 'practice' || (state.seniorityWizard.status === 'definitive' && !canAccumulateHistoricalProvisionality(state)))}
-                    ${YMInput(`1.1.3 Compensatoria, ZTS y especial dificultad (${state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
+                    ${YMInput(state.seniorityWizard.exceptionalAccumulation ? '1.1.2 Provisionalidad admisible en el supuesto especial del BOJA' : canAccumulateHistoricalProvisionality(state) ? '1.1.2 Provisionalidad anterior al primer destino definitivo (solo funcionario/a de carrera)' : '1.1.2 Situación de provisionalidad (solo funcionario/a de carrera)', 's1_1_2_years', 's1_1_2_months', state.seniorityWizard.status === 'practice' || (state.seniorityWizard.status === 'definitive' && !canAccumulateHistoricalProvisionality(state) && !state.seniorityWizard.exceptionalAccumulation))}
+                    ${YMInput(`1.1.3 Compensatoria, ZTS y especial dificultad (${state.seniorityWizard.exceptionalAccumulation ? 'solo en los periodos excepcionalmente acumulables, comprobados en el BOJA' : state.seniorityWizard.status === 'provisional' ? 'durante la provisionalidad como funcionario/a de carrera' : state.seniorityWizard.status === 'practice' ? 'no computable para funcionario/a en prácticas' : 'desde el último destino definitivo, como funcionario/a de carrera; en provisionalidad, durante ese periodo'})`, 's1_1_3_years', 's1_1_3_months', state.seniorityWizard.status === 'practice')}
                     ${InfoBox('En 1.1.1, 1.1.2 y 1.1.3 solo cuentan servicios como <strong>funcionario/a de carrera</strong>: no incluyas prácticas ni interinidad.')}
 
                     ${SubTitle('1.2 Antigüedad en el cuerpo', 'score-s12', 'Incluye servicios como funcionario/a de carrera, en prácticas o interino. Da igual la especialidad: todo servicio en el MISMO cuerpo va a 1.2.1.')}
@@ -2792,14 +3044,14 @@
                         <strong>¡Atención!</strong> Si trabajaste como profesor/a de Religión (católica, evangélica u otra confesión) con <strong>contrato laboral</strong>, esa experiencia no cuenta en 1.2.1. El baremo exige servicios como funcionario/a de carrera, en prácticas o interino/a en el cuerpo correspondiente: <a href="${BILINGUAL_BOJA_URL}#page=26" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Resolución de 23 de octubre de 2026, anexo II, 1.2.1</a>. La relación laboral de Religión se regula en el <a href="https://www.boe.es/buscar/act.php?id=BOE-A-2007-11450#a1" target="_blank" rel="noopener noreferrer" class="font-semibold underline">RD 696/2007, artículos 1 y 2</a>. Esto no excluye otros periodos que sí hayas prestado como funcionario/a en un cuerpo docente.
                     </div>
                     ${YMInput('1.2.1 Servicio activo en el cuerpo (carrera, prácticas o interino — cualquier especialidad del mismo cuerpo)', 's1_2_1_years', 's1_2_1_months')}
-                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios como funcionario/a de carrera, sin superar 1.2.1. La provisionalidad anterior solo se acumula desde el primer destino definitivo obtenido por concurso con participación voluntaria, sin duplicar tiempo de 1.1.1. En 1.1.3 tampoco se puede superar el periodo correspondiente de 1.1.1 o 1.1.2. Los excesos no se suman.</p>
+                    <p id="s1-1-body-service-warning" class="${section11ExceedsBodyService(state) ? '' : 'hidden'} mt-3 mb-3 text-sm font-medium text-red-600 dark:text-red-400" role="alert">Revisa las cifras: 1.1 solo computa servicios de carrera, sin superar 1.2.1. La provisionalidad anterior se acumula desde el primer definitivo obtenido por concurso con participación voluntaria, salvo los supuestos excepcionales que hayas comprobado y marcado. No dupliques tiempo entre 1.1.1 y 1.1.2. La especial dificultad se limita a los periodos admisibles que correspondan. Los excesos no se suman.</p>
                     ${YMInput('1.2.2 Otros cuerpos (mismo o superior subgrupo)', 's1_2_2_years', 's1_2_2_months')}
                     ${YMInput('1.2.3 Otros cuerpos (subgrupo inferior)', 's1_2_3_years', 's1_2_3_months')}
                 </div>`;
         }
 
         function renderCatedraticosTimeline() {
-            if (['maestros', 'sectores'].includes(state.puestos?.cuerpo)) return '';
+            if (['maestros', 'sectores', 'ptfp', 'musica'].includes(state.puestos?.cuerpo)) return '';
             const wizard = state.seniorityWizard || {};
             const careerStartDate = wizard.careerStartDate;
             let content;
@@ -2826,6 +3078,7 @@
             return `
                 <div id="catedraticos-timeline" class="${showCatedraticosTimeline(state) ? '' : 'hidden'} mt-3 rounded-r border-l-4 border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                     ${content}
+                    <p class="mt-2 text-xs">Estimación del requisito temporal, no del derecho a participar. Supone servicio continuo y cumplir los demás requisitos. Este procedimiento corresponde a los cuerpos de Profesores de Secundaria, EOI y Artes Plásticas y Diseño; no a Maestros de Taller.</p>
                     <p class="mt-2">
                         <a id="catedraticos-order-link" href="${CATEDRATICOS_ORDER_URL}" target="_blank" rel="noopener noreferrer" class="font-semibold underline underline-offset-2 hover:text-yellow-900 dark:hover:text-yellow-100" title="Orden de 18 de septiembre de 2026 de acceso a Catedráticos, BOJA n.º 183 (PDF, se abre en nueva pestaña)">Orden de 18 de septiembre de 2026 de acceso a Catedráticos (BOJA n.º 183)<span aria-hidden="true" class="ml-1 inline-block no-underline">↗</span></a>
                     </p>
@@ -2835,12 +3088,12 @@
         function renderSection2() {
             return `
                 <div class="max-w-2xl mx-auto">
-                    ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2', 5, Calculators.section2(state), showCatedraticosWarning(state))}
+                    ${SectionTitle('2. Cuerpos de Catedráticos', 'score-s2', 5, Calculators.section2(state), isCatedraticosScoreBlocked(state))}
                     ${InfoBox('Pertenencia a los Cuerpos de Catedráticos de Enseñanza Secundaria, Música y Artes Escénicas, EOI y Artes Plásticas y Diseño.')}
                     ${Checkbox('Soy funcionario/a de carrera del Cuerpo de Catedráticos (5 ptos.)', 's2_catedratico')}
-                    <div id="catedraticos-eligibility-warning" class="${showCatedraticosWarning(state) ? '' : 'hidden'} mt-3 flex items-start gap-2 rounded-r border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-200" role="alert">
+                    <div id="catedraticos-eligibility-warning" class="${showCatedraticosWarning(state) ? '' : 'hidden'} mt-3 flex items-start gap-2 rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200" role="alert">
                         <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>El acceso al Cuerpo de Catedráticos exige al menos <strong>8 años de antigüedad como funcionario/a de carrera</strong>; sin ellos, este apartado cuenta <strong>0 puntos</strong>. Es un procedimiento independiente del concurso de traslados y la convocatoria de 2026 finalizó el <strong>13 de octubre de 2026</strong>. <a href="https://www.juntadeandalucia.es/educacion/portales/web/educacion/w/acceso-a-catedras-2026-procedimiento" target="_blank" rel="noopener noreferrer" class="font-semibold underline">Consulta la información oficial del procedimiento<svg class="ml-1 inline-block h-3 w-3 align-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M8 7h9v9"/></svg></a>.</span>
+                        <span>Comprueba la pertenencia al cuerpo que has declarado. Los <strong>5 puntos se conceden por pertenecer al cuerpo</strong>, no por volver a acreditar aquí los 8 años del procedimiento de acceso. Las fechas incompletas no anulan ese mérito. Si actualmente eres funcionario/a en prácticas, la declaración es incompatible y este apartado no puntúa. El acceso a Cátedras es un procedimiento independiente: <a href="https://www.juntadeandalucia.es/educacion/portales/web/educacion/w/acceso-a-catedras-2026-procedimiento" target="_blank" rel="noopener noreferrer" class="font-semibold underline">información oficial</a>.</span>
                     </div>
                     ${renderCatedraticosTimeline()}
                 </div>`;
@@ -2850,19 +3103,21 @@
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('3. Méritos académicos (máx. 10)', 'score-s3', 10, Calculators.section3(state))}
-                    ${InfoBox('<strong>Importante:</strong> no se puede valorar el título alegado para el ingreso en el cuerpo. En 3.1.1-3.1.3 se valoran todos los títulos aportados.')}
-                    ${SubTitle('3.1 Doctorado, postgrados y premios extraordinarios', 'score-s31', 'El máster de secundaria (antiguo CAP) no puntúa si fue requisito de acceso. No se barema el máster que sea requisito de acceso al doctorado alegado.')}
+                    ${InfoBox('<strong>Importante:</strong> no se valoran los títulos exigidos actualmente con carácter general para ingresar en el cuerpo, aunque se hayan obtenido después. Solo títulos oficiales y admisibles; los extranjeros requieren homologación o equivalencia. En 3.1.1–3.1.3 pueden valorarse todos los títulos que cumplan sus condiciones.')}
+                    ${SubTitle('3.1 Doctorado, postgrados y premios extraordinarios', 'score-s31', 'Excluye el máster requerido para ingresar y los másteres o DEA utilizados para obtener el doctorado alegado. No se excluyen otros títulos independientes que sean admisibles.')}
                     <div class="space-y-3">
                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
                         ${NumInput('3.1.1 Títulos de Doctor (6 ptos. cada uno)', 's3_1_1_doctor')}
-                        ${NumInput('3.1.2 Másteres universitarios oficiales, distintos al de acceso y con ≥60 créditos (3 ptos. cada uno)', 's3_1_2_masters')}
-                        ${NumInput('3.1.3 Certificados de suficiencia investigadora / DEA (2 ptos. cada uno)', 's3_1_3_dea')}
-                        ${Checkbox('3.1.4 Premio extraordinario de doctorado o grado (1 pto. — solo uno)', 's3_1_4_premio_doctor')}
+                        ${NumInput('3.1.2 Másteres oficiales universitarios o de enseñanzas artísticas, admisibles y con ≥60 créditos (3 ptos. cada uno)', 's3_1_2_masters')}
+                        ${NumInput('3.1.3 Suficiencia investigadora / DEA no utilizados para el doctorado alegado (2 ptos. cada uno)', 's3_1_3_dea')}
+                        ${Checkbox('3.1.4 Premio extraordinario de doctorado, licenciatura o grado, o premio/mención honorífica artística prevista en el BOJA (1 pto. — solo uno)', 's3_1_4_premio_doctor')}
                     </div>
                     ${SubTitle('3.2 Titulaciones de nivel superior', 'score-s32', 'En subgrupo A1 no cuentan los estudios necesarios para la primera licenciatura; en A2 no cuenta la primera diplomatura.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
-                        ${NumInput('3.2.1 Grados universitarios adicionales (5 ptos. cada uno)', 's3_2_1_grados')}
-                        ${NumInput('3.2.2 Diplomaturas / primer ciclo (3 ptos. cada uno — la 1.ª no puntúa)', 's3_2_2_primer_ciclo')}
+                        ${NumInput('3.2.1 Grados universitarios o de enseñanzas artísticas superiores cursados completos (5 ptos. cada uno)', 's3_2_1_grados')}
+                        ${NumInput('3.2.1 Grados obtenidos desde otras titulaciones sin cursar todas sus enseñanzas (2,5 ptos. cada uno)', 's3_2_1_grados_adaptacion')}
+                        <p class="text-xs text-gray-600 dark:text-gray-300">Un mismo grado va en una sola modalidad. Revisa los grados que ya tuvieras guardados: antes solo existía la opción de 5 puntos. Un doble grado son dos títulos independientes; las menciones o especialidades de un mismo título no cuentan como títulos distintos.</p>
+                        ${NumInput('3.2.2 Diplomaturas / primer ciclo adicionales admisibles (3 ptos. cada uno)', 's3_2_2_primer_ciclo')}
                         ${NumInput('3.2.3 Licenciaturas / segundo ciclo (3 ptos. cada uno)', 's3_2_3_segundo_ciclo')}
                     </div>
                     ${SubTitle('3.3 Idiomas (EOI) y enseñanzas artísticas', 'score-s33', 'Solo se valora el nivel más alto por idioma.')}
@@ -2895,6 +3150,7 @@
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-4 space-y-3">
                         ${NumInput('Títulos profesionales de Música o Danza (2 ptos. cada uno)', 's3_3_titulo_musica')}
                         ${NumInput('Títulos de Técnico Superior de Artes Plásticas / Diseño, Técnico Deportivo Superior o Técnico Superior de FP (2 ptos. cada uno)', 's3_3_titulo_arte')}
+                        <p class="text-xs text-gray-600 dark:text-gray-300">Para FP superior debes acreditar otros estudios de acceso a la universidad. No se valora el primer título profesional de Música/Danza si el requisito de acceso al cuerpo fue un título superior. Excluye los títulos necesarios para obtener otro título alegado.</p>
                     </div>
                 </div>`;
         }
@@ -2904,7 +3160,7 @@
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('4. Cargos directivos (máx. 30)', 'score-s4', 30, Calculators.section4(state))}
-                    ${InfoBox('No se pueden acumular ptos. por el desempeño simultáneo de varios cargos. Se valora el más ventajoso.')}
+                    ${InfoBox('En <strong>4.1, 4.2 y 4.3</strong> no se acumulan cargos que coincidan en las mismas fechas: conserva el más ventajoso en los periodos solapados. Sí pueden sumarse periodos distintos. Introduce los años/meses ya depurados: la calculadora no conoce las fechas de cada cargo y no detecta automáticamente los solapamientos. No se aplica aquí una incompatibilidad general con 6.4 o 6.6.')}
                     ${SubTitle('4.1 Dirección', 'score-s41', 'Director/a de centros públicos, CEP, Agrupaciones de Lengua y Culturas, primer responsable de CEP.')}
                     ${YMInput('Director/a de centros públicos', 's4_1_director_years', 's4_1_director_months')}
                     ${SubTitle('4.2 Vicedirección, jefatura, secretaría...', 'score-s42')}
@@ -2946,17 +3202,22 @@
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('5. Formación (máx. 15)', 'score-s5', 15, Calculators.section5(state))}
-                    ${SubTitle('5.1 Formación superada (máx. 9)', 'score-s51', 'No puntúan: CAP, TED, máster de secundaria (cuando sea requisito), cursos de formación novel, ni los cursos para la acreditación de competencia digital docente.', 9, Calculators.calc51(state))}
-                    ${InfoBox('0,1 ptos. por cada 10 horas. Los títulos propios y másteres no valorados en 3.1.2 se computan aquí por sus horas: <strong>1 crédito tradicional = 10 horas</strong>; <strong>1 crédito ECTS = 25 horas</strong>.')}
+                    ${SubTitle('5.1 Formación superada (máx. 9)', 'score-s51', 'Excluye la formación novel, cursos de CDD y formación directiva de quienes desempeñen o hayan desempeñado la dirección. CAP/TED/máster de secundaria no cuentan cuando se exigen para ingresar ni si ya se valoran en 3.1.2.', 9, Calculators.calc51(state))}
+                    ${InfoBox('0,1 puntos por cada 10 horas acreditadas; el baremo prevé 10 horas por crédito. <strong>No conviertas automáticamente los ECTS a 25 horas:</strong> utiliza las horas certificadas o la equivalencia oficialmente admitida. Los títulos propios y másteres no valorados en 3.1.2 pueden contar por sus horas si cumplen los requisitos de formación.')}
+                    <details class="mb-4 text-sm text-gray-700 dark:text-gray-200"><summary class="cursor-pointer font-semibold">Requisitos y excepciones de formación (BOJA, páginas 42–43)</summary>
+                        <p class="mt-2">Comprueba la entidad convocante, reconocimiento u homologación y firma exigida. En cursos universitarios no basta la firma del departamento u organizador. Si no constan horas, no se valora la actividad, salvo los grupos de trabajo o seminarios permanentes convocados por CEP: 40 horas.</p>
+                        <p class="mt-2">En los cuerpos 593, 594, 595, 596 y 597, CAP y TED pueden contar por las horas certificadas; si no constan, CAP: 180 horas y TED: 600 horas. No los dupliques con 3.1.2.</p>
+                        <p class="mt-2">La coordinación ordinaria de formación se valora como asistencia en 5.1, salvo el personal que preste servicios en CEP. Solo las coordinaciones pedagógicas expresamente indicadas corresponden a 5.2.</p>
+                    </details>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                        ${NumInput('Total de horas de cursos recibidos', 's5_1_horas', 10)}
+                        ${NumInput('Total de horas acreditadas de formación recibida', 's5_1_horas', 'any')}
                     </div>
-                    ${SubTitle('5.2 Impartición de formación (máx. 3)', 'score-s52', 'Incluye dirección, impartición, tutorización y ponencias. La coordinación de formación va aquí.', 3, Calculators.calc52(state))}
+                    ${SubTitle('5.2 Impartición de formación (máx. 3)', 'score-s52', 'Dirección, impartición, tutorización y ponencias, sin duplicar distintas funciones en una misma actividad. Incluye la coordinación pedagógica de formación inicial para la dirección, proyectos de formación en centro y grupos de trabajo; no la coordinación ordinaria de actividades formativas.', 3, Calculators.calc52(state))}
                     ${InfoBox('0,1 ptos. por cada 3 horas.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                        ${NumInput('Total de horas impartidas', 's5_2_horas', 3)}
+                        ${NumInput('Total de horas acreditadas de impartición admisible', 's5_2_horas', 'any')}
                     </div>
-                    ${SubTitle('5.3 Nuevas especialidades', 'score-s53')}
+                    ${SubTitle('5.3 Nuevas especialidades', 'score-s53', 'Solo las adquiridas mediante el procedimiento reglamentario de adquisición de nuevas especialidades. No cualquier titulación, habilitación o especialidad alegada.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         ${NumInput('N.º de nuevas especialidades adquiridas (1 pto. cada una)', 's5_3_especialidades')}
                     </div>
@@ -2996,15 +3257,13 @@
         function renderSection6() {
             const askPracticeTutorHistory = needsTutorHistoryQuestion(state, '2023-09-01', true);
             const isPractice = state.seniorityWizard.status === 'practice';
-            const GridInputSmall = (name, pts) => `
-                <div class="flex flex-col items-center">
-                    ${NumInput('', name, 'any', 99, 'w-full mb-0')}
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">${pts} ptos.</span>
-                </div>`;
             return `
                 <div class="max-w-2xl mx-auto">
                     ${SectionTitle('6. Otros méritos (máx. 15)', 'score-s6', 15, Calculators.section6(state))}
-                    ${SubTitle('6.1 Publicaciones (máx. 8)', 'score-s61', 'Libros con ISBN, revistas con ISSN, obras literarias. La autoría de obras literarias sigue la misma tabla que los libros, más ilustraciones a 0,2.', 8, Calculators.calc61(state))}
+                    ${renderMeritReviewNotices()}
+                    ${renderProrationHelper()}
+                    ${SubTitle('6.1 Publicaciones (máx. 8)', 'score-s61', 'Estimación de máximos, no puntuación garantizada. La comisión valora calidad, difusión, originalidad y documentación. Obras literarias e ilustraciones según la tabla del BOJA.', 8, Calculators.calc61(state))}
+                    ${InfoBox('Las cantidades de 6.1 son <strong>«hasta» esos puntos por publicación</strong>. Excluye autoediciones, temarios de oposición, programaciones, unidades didácticas, trabajos de asignaturas, duplicados y demás exclusiones de la página 44. Los libros escolares pueden admitirse si cumplen las exigencias; ISBN/ISSN por sí solos no garantizan la valoración.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
                         <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1">6.1 a) Libros didácticos / científicos</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -3025,61 +3284,37 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${GridInput('Autor único', 's6_1_obras_literarias_autor', 1.0)}
                             ${GridInput('Coautor', 's6_1_obras_literarias_coautor', 0.5)}
-                            ${GridInput('3+ autores', 's6_1_obras_literarias_3autores', 0.4)}
+                            ${GridInput('3 autores', 's6_1_obras_literarias_3autores', 0.4)}
+                            ${GridInput('4 autores', 's6_1_obras_literarias_4autores', 0.3)}
+                            ${GridInput('5 autores', 's6_1_obras_literarias_5autores', 0.2)}
+                            ${GridInput('Más de 5 autores', 's6_1_obras_literarias_mas5autores', 0.1)}
                             ${GridInput('Ilustrador/a', 's6_1_obras_literarias_ilustrador', 0.2)}
                         </div>
                     </div>
 
-                    ${SubTitle('6.2 Premios y proyectos (máx. 2,5)', 'score-s62', 'Los premios se dividen por n.º de participantes. Si no se relacionan los participantes, se divide por el n.º de profesores del centro (mín. 0,05).', 2.5, Calculators.calc62(state))}
+                    ${SubTitle('6.2 Premios y proyectos (máx. 2,5)', 'score-s62', 'Premios divididos por participantes. Solo en premios de proyecto de centro sin relación de participantes se divide por el profesorado del centro con mínimo de 0,05. Acredita tu participación.', 2.5, Calculators.calc62(state))}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
                         <div>
                             <h4 class="text-sm font-bold text-secondary dark:text-gray-200 mb-2">6.2 a) - Premios convocados por una Administración educativa y participación en proyectos de investigación o innovación educativa</h4>
-                            <div class="grid grid-cols-4 gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-center bg-gray-50 dark:bg-gray-700 rounded-t py-2">
-                                <div class="text-left pl-2">Ámbito</div>
-                                <div>1.º premio</div>
-                                <div>2.º premio</div>
-                                <div>3.º premio</div>
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 dark:border-gray-700 pb-2">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Internac.</div>
-                                ${GridInputSmall('s6_2_intl_1', '1,5')}
-                                ${GridInputSmall('s6_2_intl_2', '0,75')}
-                                ${GridInputSmall('s6_2_intl_3', '0,5')}
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 items-center mb-2 border-b border-gray-50 dark:border-gray-700 pb-2">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Nacional</div>
-                                ${GridInputSmall('s6_2_nat_1', '1,0')}
-                                ${GridInputSmall('s6_2_nat_2', '0,5')}
-                                ${GridInputSmall('s6_2_nat_3', '0,25')}
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 items-center">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 pl-2">Autonóm.</div>
-                                ${GridInputSmall('s6_2_auto_1', '0,5')}
-                                ${GridInputSmall('s6_2_auto_2', '0,25')}
-                                ${GridInputSmall('s6_2_auto_3', '0,1')}
-                            </div>
+                            ${renderPrizeMatrix('s6_2')}
                             <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                                 ${NumInput('Proyectos de investigación o innovación educativa en los que has participado (0,2 ptos./proyecto)', 's6_2_investigacion_projects')}
                             </div>
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
                             <h4 class="text-sm font-bold text-secondary dark:text-gray-200">6.2 b) - Coordinación y participación en planes y proyectos educativos aprobados por la Consejería de Educación</h4>
-                            ${NumInput('Cursos coordinando Plan de Igualdad (1,0 pto./año)', 's6_2_coord_plan_igualdad_years')}
+                            ${NumInput('Cursos coordinando el Plan de Igualdad (III Plan; 1,0 pto./curso)', 's6_2_coord_plan_igualdad_years')}
                             ${NumInput('Cursos coordinando otros proyectos/planes (0,5 ptos./año)', 's6_2_coord_proyectos_years')}
                             ${NumInput('Cursos participando en proyectos/planes (0,2 ptos./año)', 's6_2_part_proyectos_years')}
                         </div>
                     </div>
 
                     ${SubTitle('6.3 Méritos artísticos y deportivos (máx. 2,5)', 'score-s63', 'Las exposiciones colectivas y conservador-restaurador participante se dividen por n.º de participantes (mín. 0,05). No puntúan si >25 % del programa coincide con otro alegado.', 2.5, Calculators.calc63(state))}
-                    ${InfoBox('Estructura completa del BOJA (DC Quinta.5). Los premios se dividen por n.º de participantes.')}
+                    ${InfoBox('Premios por ámbito y categoría, divididos por participantes. El reparto de otras actividades se aplica solo cuando lo exige el BOJA. No se valoran repeticiones, actividades vinculadas a la enseñanza y aprendizaje reglados, programas coincidentes en más del 25 %, ni grabaciones en que autoría y producción coincidan. Comprueba los justificantes y el depósito legal cuando proceda.')}
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
                         <div>
                             <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Premios en exposiciones, concursos o certámenes</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                ${GridInput('Internacionales', 's6_3_premios_intl', 1.5, true)}
-                                ${GridInput('Nacionales', 's6_3_premios_nat', 1.0, true)}
-                                ${GridInput('Autonómicos', 's6_3_premios_auto', 0.5, true)}
-                            </div>
+                            ${renderPrizeMatrix('s6_3')}
                         </div>
                         <div>
                             <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Espectáculos, composiciones y grabaciones</h4>
@@ -3107,9 +3342,10 @@
                         <div>
                             <h4 class="text-sm font-bold text-secondary dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-1 mb-3">Deportista</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                ${GridInput('Deportista de alto nivel', 's6_3_deportista_nivel', 1.0)}
-                                ${GridInput('Deportista de alto rendimiento', 's6_3_deportista_rendimiento', 0.5)}
+                                ${Checkbox('Ostento o he ostentado la condición de deportista de alto nivel (1 pto.)', 's6_3_deportista_nivel')}
+                                ${Checkbox('Ostento o he ostentado la condición de deportista de alto rendimiento (0,5 ptos.)', 's6_3_deportista_rendimiento')}
                             </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">Condiciones acreditadas por el organismo competente, no número de años ni de reconocimientos. La misma condición se valora una sola vez; comprueba la admisibilidad de tus acreditaciones.</p>
                         </div>
                     </div>
 
@@ -3171,13 +3407,14 @@
         }
 
         function renderBreakdown() {
+            if (getNumericValidationIssues(state).length) return renderNumericValidationNotice();
             const s = getLimitedMeritState(state);
             const blocks = [];
             const push = (arr, label, pts) => { if (pts > 0.00005) arr.push({ label, pts }); };
             const addBlock = (title, rows, max, total) => blocks.push({ title, rows, max, total });
 
             const b1 = [];
-            push(b1, `1.1.1 Permanencia ininterrumpida en destino definitivo (${formatDuration(s.s1_1_1_years, s.s1_1_1_months)})`, calc111(s));
+            push(b1, `1.1.1 ${s.seniorityWizard?.exceptionalAccumulation ? 'Servicios acumulables en supuesto especial' : 'Permanencia ininterrumpida en destino definitivo'} (${formatDuration(s.s1_1_1_years, s.s1_1_1_months)})`, calc111(s));
             push(b1, `1.1.2 ${canAccumulateHistoricalProvisionality(s) ? 'Provisionalidad anterior al primer destino definitivo' : 'Provisionalidad'} (${formatDuration(s.s1_1_2_years, s.s1_1_2_months)})`, calcTime(s.s1_1_2_years, s.s1_1_2_months, 4.0, 0.3333));
             push(b1, `1.1.3 Especial dificultad (${formatDuration(s.s1_1_3_years, s.s1_1_3_months)})`, calcTime(s.s1_1_3_years, s.s1_1_3_months, 4.0, 0.3333));
             push(b1, `1.2.1 Servicio activo en el cuerpo (${formatDuration(s.s1_2_1_years, s.s1_2_1_months)})`, calcTime(s.s1_2_1_years, s.s1_2_1_months, 2.0, 0.1666));
@@ -3191,10 +3428,11 @@
 
             const b3 = [];
             push(b3, `3.1.1 ${formatMeritQuantity(s.s3_1_1_doctor, 'Título de Doctor/a', 'Títulos de Doctor/a')}`, s.s3_1_1_doctor * 6.0);
-            push(b3, `3.1.2 ${formatMeritQuantity(s.s3_1_2_masters, 'Máster universitario oficial', 'Másteres universitarios oficiales')}`, s.s3_1_2_masters * 3.0);
+            push(b3, `3.1.2 ${formatMeritQuantity(s.s3_1_2_masters, 'Máster oficial universitario o artístico', 'Másteres oficiales universitarios o artísticos')}`, s.s3_1_2_masters * 3.0);
             push(b3, `3.1.3 ${formatMeritQuantity(s.s3_1_3_dea, 'Certificado de suficiencia investigadora / DEA', 'Certificados de suficiencia investigadora / DEA')}`, s.s3_1_3_dea * 2.0);
-            if (s.s3_1_4_premio_doctor) push(b3, '3.1.4 Premio extraordinario de doctorado o grado', 1.0);
-            push(b3, `3.2.1 ${formatMeritQuantity(s.s3_2_1_grados, 'Grado universitario adicional', 'Grados universitarios adicionales')}`, s.s3_2_1_grados * 5.0);
+            if (s.s3_1_4_premio_doctor) push(b3, '3.1.4 Premio extraordinario o mención honorífica admisible', 1.0);
+            push(b3, `3.2.1 ${formatMeritQuantity(s.s3_2_1_grados, 'Grado adicional completo', 'Grados adicionales completos')}`, s.s3_2_1_grados * 5.0);
+            push(b3, `3.2.1 ${formatMeritQuantity(s.s3_2_1_grados_adaptacion, 'Grado desde otra titulación (2,5 puntos)', 'Grados desde otras titulaciones (2,5 puntos)')}`, s.s3_2_1_grados_adaptacion * 2.5);
             push(b3, `3.2.2 ${formatMeritQuantity(s.s3_2_2_primer_ciclo, 'Diplomatura / título de primer ciclo', 'Diplomaturas / títulos de primer ciclo')}`, s.s3_2_2_primer_ciclo * 3.0);
             push(b3, `3.2.3 ${formatMeritQuantity(s.s3_2_3_segundo_ciclo, 'Licenciatura / título de segundo ciclo', 'Licenciaturas / títulos de segundo ciclo')}`, s.s3_2_3_segundo_ciclo * 3.0);
             const { grouped } = getIdiomasBreakdown(s);
@@ -3245,22 +3483,26 @@
             push(b6, `6.1 b) ${formatMeritQuantity(s.s6_1_revistas_3mas, 'Artículo de revista de 3 o más autores', 'Artículos de revista de 3 o más autores')}`, s.s6_1_revistas_3mas * 0.05);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_autor, 'Obra literaria de autor único', 'Obras literarias de autor único')}`, s.s6_1_obras_literarias_autor * 1.0);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_coautor, 'Obra literaria en coautoría', 'Obras literarias en coautoría')}`, s.s6_1_obras_literarias_coautor * 0.5);
-            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_3autores, 'Obra literaria de 3 o más autores', 'Obras literarias de 3 o más autores')}`, s.s6_1_obras_literarias_3autores * 0.4);
+            if (!s.literaryAuthorsReview) push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_3autores, 'Obra literaria de 3 autores', 'Obras literarias de 3 autores')}`, s.s6_1_obras_literarias_3autores * 0.4);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_4autores, 'Obra literaria de 4 autores', 'Obras literarias de 4 autores')}`, s.s6_1_obras_literarias_4autores * 0.3);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_5autores, 'Obra literaria de 5 autores', 'Obras literarias de 5 autores')}`, s.s6_1_obras_literarias_5autores * 0.2);
+            push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_mas5autores, 'Obra literaria de más de 5 autores', 'Obras literarias de más de 5 autores')}`, s.s6_1_obras_literarias_mas5autores * 0.1);
             push(b6, `6.1 c) ${formatMeritQuantity(s.s6_1_obras_literarias_ilustrador, 'Obra literaria ilustrada', 'Obras literarias ilustradas')}`, s.s6_1_obras_literarias_ilustrador * 0.2);
             push(b6, '6.1 Total aplicado (Tope: 8,0000 ptos.)', Calculators.calc61(s));
-            const premios_pts = (s.s6_2_intl_1 * 1.5) + (s.s6_2_intl_2 * 0.75) + (s.s6_2_intl_3 * 0.5) +
-                                (s.s6_2_nat_1 * 1.0) + (s.s6_2_nat_2 * 0.5) + (s.s6_2_nat_3 * 0.25) +
-                                (s.s6_2_auto_1 * 0.5) + (s.s6_2_auto_2 * 0.25) + (s.s6_2_auto_3 * 0.1);
+            const premios_pts = calcPrizePoints(s, 's6_2');
             const premios_count = s.s6_2_intl_1 + s.s6_2_intl_2 + s.s6_2_intl_3 + s.s6_2_nat_1 + s.s6_2_nat_2 + s.s6_2_nat_3 + s.s6_2_auto_1 + s.s6_2_auto_2 + s.s6_2_auto_3;
-            push(b6, `6.2 a) - ${formatMeritQuantity(premios_count, 'Premio', 'Premios')}`, premios_pts);
+            push(b6, `6.2 a) - Premios (${formatQuantity(premios_count, 'unidad computable', 'unidades computables')})`, premios_pts);
             push(b6, `6.2 a) - Participación en proyectos de investigación o innovación educativa (${formatQuantity(s.s6_2_investigacion_projects, 'proyecto', 'proyectos')})`, s.s6_2_investigacion_projects * 0.2);
             push(b6, `6.2 b) - Coordinación del Plan de Igualdad (${formatQuantity(s.s6_2_coord_plan_igualdad_years, 'curso', 'cursos')})`, s.s6_2_coord_plan_igualdad_years * 1.0);
             push(b6, `6.2 b) - Coordinación de otros proyectos (${formatQuantity(s.s6_2_coord_proyectos_years, 'curso', 'cursos')})`, s.s6_2_coord_proyectos_years * 0.5);
             push(b6, `6.2 b) - Participación en proyectos (${formatQuantity(s.s6_2_part_proyectos_years, 'curso', 'cursos')})`, s.s6_2_part_proyectos_years * 0.2);
             push(b6, '6.2 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc62(s));
-            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_intl, 'Premio internacional', 'Premios internacionales')}`, s.s6_3_premios_intl * 1.5);
-            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_nat, 'Premio nacional', 'Premios nacionales')}`, s.s6_3_premios_nat * 1.0);
-            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_premios_auto, 'Premio autonómico', 'Premios autonómicos')}`, s.s6_3_premios_auto * 0.5);
+            if (!s.artPrizesReview) PRIZE_RATES.forEach(({ scope, label, rates }) => {
+                rates.forEach((rate, index) => {
+                    const count = s[getPrizeField('s6_3', scope, index + 1)];
+                    push(b6, `6.3 ${label}: ${index + 1}.º premio (${formatQuantity(count, 'unidad computable', 'unidades computables')})`, count * rate);
+                });
+            });
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_espectaculos_gran, 'Espectáculo de gran formato', 'Espectáculos de gran formato')}`, s.s6_3_espectaculos_gran * 1.0);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_espectaculos_peq, 'Espectáculo de cámara o pequeño grupo', 'Espectáculos de cámara o pequeños grupos')}`, s.s6_3_espectaculos_peq * 0.5);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_otras_composiciones, 'Otra composición', 'Otras composiciones')}`, s.s6_3_otras_composiciones * 0.25);
@@ -3269,8 +3511,8 @@
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_exposiciones, 'Exposición', 'Exposiciones')}`, s.s6_3_exposiciones * 0.5);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_conservador_dir, 'Participación como conservador-restaurador director', 'Participaciones como conservador-restaurador director')}`, s.s6_3_conservador_dir * 0.5);
             push(b6, `6.3 ${formatMeritQuantity(s.s6_3_conservador_part, 'Participación como conservador-restaurador', 'Participaciones como conservador-restaurador')}`, s.s6_3_conservador_part * 0.2);
-            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_deportista_nivel, 'Mérito como deportista de alto nivel', 'Méritos como deportista de alto nivel')}`, s.s6_3_deportista_nivel * 1.0);
-            push(b6, `6.3 ${formatMeritQuantity(s.s6_3_deportista_rendimiento, 'Mérito como deportista de alto rendimiento', 'Méritos como deportista de alto rendimiento')}`, s.s6_3_deportista_rendimiento * 0.5);
+            push(b6, '6.3 Condición de deportista de alto nivel', Number(s.s6_3_deportista_nivel) >= 1 ? 1 : 0);
+            push(b6, '6.3 Condición de deportista de alto rendimiento', Number(s.s6_3_deportista_rendimiento) >= 1 ? 0.5 : 0);
             push(b6, '6.3 Total aplicado (Tope: 2,5000 ptos.)', Calculators.calc63(s));
             push(b6, `6.4 Puestos en la administración (${formatDuration(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months)})`, calcTime(s.s6_4_puestos_admin_years, s.s6_4_puestos_admin_months, 1.5, 0.125));
             push(b6, `6.5 Tribunales (${formatQuantity(s.s6_5_tribunales, 'convocatoria', 'convocatorias')})`, s.s6_5_tribunales * 0.5);
@@ -3282,7 +3524,7 @@
                 <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 print-breakdown-card">
                     <div class="bg-secondary p-4 print-breakdown-header">
                         <h3 class="text-lg font-bold text-white print-breakdown-title">Desglose de méritos</h3>
-                        <p class="text-xs text-gray-300 print-breakdown-subtitle">Desglose de méritos (con topes aplicados)</p>
+                        <p class="text-xs text-gray-300 print-breakdown-subtitle">Las líneas muestran importes brutos estimados; los totales aplican los topes de cada subapartado y apartado.</p>
                     </div>
                     <div class="p-4 sm:p-6 space-y-4 print-breakdown-grid">
                         ${blocks.map(b => `
@@ -3347,6 +3589,7 @@
                         </div>
                         <div class="p-6">
                             ${renderPracticeScoreNotice()}
+                            ${renderMeritReviewNotices()}
                             <table class="w-full text-left border-collapse print-summary-table">
                                 <thead>
                                     <tr class="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wider print-summary-table-heading">
@@ -3441,7 +3684,11 @@
                 notice.classList.toggle('text-gray-600', !exceeded);
                 notice.classList.toggle('dark:text-gray-300', !exceeded);
                 const input = document.querySelector(`input[name="${name}"]`);
-                if (input) input.max = getServiceCountLimit(state, name);
+                if (input) {
+                    const limit = getServiceCountLimit(state, name);
+                    if (Number.isFinite(limit)) input.max = limit;
+                    else input.removeAttribute('max');
+                }
             });
         }
         function handleInput(element) {
@@ -3449,9 +3696,12 @@
             const numeric = element.type === 'number' || element.inputMode === 'decimal';
             if (element.inputMode === 'decimal') element.value = element.value.replace('.', ',');
             const parsed = numeric ? Number(element.value.replace(',', '.')) : NaN;
-            let value = numeric ? (Number.isFinite(parsed) ? parsed : 0) : element.value;
-            if (numeric && value < 0) { value = 0; element.value = 0; }
-            if (name.endsWith('_months') && element.type === 'number' && value > 11) { value = 11; element.value = 11; }
+            const error = numeric ? getNumericValidationError(name, element.value) : '';
+            const value = numeric && !error ? parsed : element.value;
+            if (numeric) {
+                element.setCustomValidity(error);
+                element.setAttribute('aria-invalid', String(Boolean(error)));
+            }
             state[name] = value;
             if (['s1_1_1_years', 's1_1_1_months', 's1_1_2_years', 's1_1_2_months', 's1_1_3_years', 's1_1_3_months', 's1_2_1_years', 's1_2_1_months'].includes(name)) {
                 const warning = document.getElementById('s1-1-body-service-warning');
@@ -3488,6 +3738,12 @@
             renderMainContent();
             updateCalculations();
         }
+        function setExceptionalAccumulation(value) {
+            state.seniorityWizard.exceptionalAccumulation = value;
+            saveState();
+            renderMainContent();
+            updateCalculations();
+        }
         const SECONDARY_SUPPORT_SPECIALTIES = [...new Map([
             ['001', 'Filosofía'], ['002', 'Griego'], ['003', 'Latín'], ['004', 'Lengua Castellana y Literatura'],
             ['005', 'Geografía e Historia'], ['006', 'Matemáticas'], ['007', 'Física y Química'],
@@ -3500,9 +3756,13 @@
             ['034', 'Educación Física'], ['035', 'Música'], ['036', 'Pedagogía Terapéutica'],
             ['037', 'Audición y Lenguaje'], ['038', 'Educación Primaria'], ['039', 'Lengua Extranjera: Alemán']
         ];
-        const SECTORES_SPECIALTIES = BILINGUAL_SPECIALTIES
-            .filter(([code]) => code.startsWith('598'))
-            .map(([code, label]) => [code.slice(3), label]);
+        const SECTORES_SPECIALTIES = [
+            ['001', 'Cocina y Pastelería'], ['002', 'Estética'],
+            ['003', 'Fabricación e Instalación de Carpintería y Mueble'], ['004', 'Mantenimiento de Vehículos'],
+            ['005', 'Mecanizado y Mantenimiento de Máquinas'], ['006', 'Patronaje y Confección'],
+            ['007', 'Peluquería'], ['008', 'Producción de Artes Gráficas'],
+            ['009', 'Servicios de Restauración'], ['010', 'Soldadura']
+        ];
         const EOI_VOLUNTARY_SPECIALTIES = [['002', 'Árabe']];
         const MUSIC_SPECIFIC_POSTS_2025_26 = [
             ['CH593006', 'Canto Histórico'], ['BA593014', 'Contrabajo Barroco'],
@@ -3723,6 +3983,19 @@
                 }
             }
             if (body === 'maestros') {
+                concurso.push('Colegios Públicos Rurales (CPR), con petición expresa y comprobación de la especialidad; salvo Primaria, pueden implicar itinerancia.');
+                if (selected.has('036')) concurso.push('Pedagogía Terapéutica en Educación Secundaria (060).');
+                if (selected.has('037')) concurso.push('Audición y Lenguaje en Educación Secundaria (061).');
+                if (answer.maestrosEso) concurso.push('1.º y 2.º de ESO (021–028), según la adscripción definitiva o supresión y la especialidad que hayas confirmado.');
+                else pending.push('1.º y 2.º de ESO: solo con la adscripción definitiva o supresión de esos puestos prevista en el BOJA.');
+                if (selected.has('032') || selected.has('038')) {
+                    if (answer.maestrosEducacionPermanente) concurso.push('Centros y Secciones de Educación Permanente y centros penitenciarios: especialidad compatible y 2 años de carrera declarados.');
+                    else pending.push('Educación Permanente y centros penitenciarios: Inglés o Primaria y 2 años como funcionario/a de carrera.');
+                }
+                if (selected.has('037')) {
+                    if (answer.maestrosEoe) concurso.push('Audición y Lenguaje en EOE: 2 años de carrera en el cuerpo y especialidad declarados.');
+                    else pending.push('Audición y Lenguaje en EOE: confirma los 2 años de carrera en el cuerpo y especialidad.');
+                }
                 if (['032', '033', '034', '035', '038', '039'].some(code => selected.has(code))) {
                     placement.push('Programas de Cooperación Territorial de competencia lectora (CL597PCT) y razonamiento matemático (CM597PCT), según los anexos II/VII 2025-26.');
                 }
@@ -3735,7 +4008,7 @@
                 const result = getBilingualResult(state);
                 if (result.status === 'yes') {
                     const bilingualPostCode = `${BILINGUAL_POST_CODE_PREFIX[state.bilingual.language]}${bilingualSpecialty[0]}`;
-                    concurso.push(`${bilingualSpecialty[1]} (${state.bilingual.language}) — código ${bilingualPostCode}; especialidad ${bilingualSpecialty[0]}.`);
+                    concurso.push(`${bilingualSpecialty[1]} (${state.bilingual.language}) — código técnico ${bilingualPostCode}; especialidad ${bilingualSpecialty[0].slice(3)} y CPE ${BILINGUAL_CPE[state.bilingual.language]}.`);
                 }
                 else pending.push(`${bilingualSpecialty[1]} bilingüe: ${result.message}`);
                 ['additionalPost', 'thirdPost'].forEach(slot => {
@@ -3748,7 +4021,7 @@
                     const additionalResult = getBilingualResult({ ...state, bilingual: { ...additionalPost, enabled: true, specialty: bilingualSpecialty[0] } });
                     if (additionalResult.status === 'yes') {
                         const additionalCode = `${BILINGUAL_POST_CODE_PREFIX[additionalPost.language]}${bilingualSpecialty[0]}`;
-                        concurso.push(`${bilingualSpecialty[1]} (${additionalPost.language}) — código ${additionalCode}; especialidad ${bilingualSpecialty[0]}.`);
+                        concurso.push(`${bilingualSpecialty[1]} (${additionalPost.language}) — código técnico ${additionalCode}; especialidad ${bilingualSpecialty[0].slice(3)} y CPE ${BILINGUAL_CPE[additionalPost.language]}.`);
                     } else {
                         pending.push(`${bilingualSpecialty[1]} (${additionalPost.language}) bilingüe: ${additionalResult.message}`);
                     }
@@ -3756,6 +4029,7 @@
             }
             return `<section aria-labelledby="puestos-final-summary" class="rounded-xl border border-primary/30 bg-white p-4 shadow-sm dark:bg-gray-800">
                 <h3 id="puestos-final-summary" class="text-lg font-bold text-gray-900 dark:text-gray-100">¿Qué puedes pedir?</h3>
+                <p class="mt-2 text-xs text-gray-600 dark:text-gray-300">Selección orientativa, no catálogo exhaustivo ni consulta de vacantes o acreditaciones. «Sin coincidencias» no significa que no existan puestos. Los códigos técnicos bilingües no sustituyen especialidad y CPE en la solicitud. En prácticas, solo procede la especialidad de ingreso y las condiciones de la convocatoria.</p>
                 <details class="mt-4 rounded-lg border border-gray-200 p-3 text-sm dark:border-gray-700">
                     <summary class="cursor-pointer font-semibold text-gray-800 dark:text-gray-200">Ver otros puestos del Anexo VII de 2025-26</summary>
                     <ul class="mt-3 list-disc space-y-2 pl-5 text-gray-700 dark:text-gray-300">${VOLUNTARY_POSTS_2025_26.map(item => `<li>${item}</li>`).join('')}</ul>
@@ -3772,8 +4046,8 @@
                     <ul class="mt-2 space-y-2">${concurso.length ? concurso.map(item => renderPuestoAvailability(item)).join('') : '<li class="rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-700 dark:text-gray-300">Marca tus especialidades y, si te interesa, activa una casilla de bilingüismo para ver los puestos que coinciden.</li>'}</ul>
                 </div>
                 <div class="mt-4">
-                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">Colocación de efectivos / comisiones de servicio (previsiblemente, se abrirá entre mayo y junio de 2027)</h4>
-                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Referencia histórica de 2025-26; confirma la vigencia en la convocatoria actual.</p>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">Colocación de efectivos / comisiones de servicio</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Referencia histórica de 2025-26, no oferta vigente de 2026-27. No se presupone fecha de apertura para 2027: confirma la convocatoria oficial.</p>
                     <ul class="mt-2 space-y-2">${placement.length ? placement.map(item => renderPuestoAvailability(item)).join('') : '<li class="rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-700 dark:text-gray-300">Sin coincidencias para esta selección.</li>'}</ul>
                 </div>
                 ${body === 'musica' ? `<div class="mt-4">
@@ -3878,6 +4152,7 @@
             </div>`;
         }
         function updateCalculations() {
+            updateNumericValidation();
             const bilingualChecker = document.getElementById('bilingual-checker');
             if (bilingualChecker) {
                 const focusedId = bilingualChecker.contains(document.activeElement) && document.activeElement.tagName !== 'SELECT'
@@ -3912,7 +4187,7 @@
             } else if (activeTabId === 2) {
                 const points = Calculators.section2(state);
                 updateText('score-s2', points);
-                updateProgress('score-s2', points, 5, showCatedraticosWarning(state));
+                updateProgress('score-s2', points, 5, isCatedraticosScoreBlocked(state));
             } else if (activeTabId === 3) {
                 const points = Calculators.section3(state);
                 updateText('score-s3', points);
@@ -4036,6 +4311,10 @@
                 case 6: c.innerHTML = renderSection6(); break;
                 case 7: c.innerHTML = renderPositionsSection(); break;
                 case 8: c.innerHTML = renderSummary(); break;
+            }
+            c.insertAdjacentHTML('afterbegin', '<div id="numeric-validation-notice"></div>');
+            if (![6, 8].includes(activeTabId) && (state.literaryAuthorsReview || state.artPrizesReview)) {
+                c.insertAdjacentHTML('afterbegin', '<div data-pending-merit-review class="mx-auto mb-4 max-w-2xl rounded-r border-l-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100" role="alert">Hay publicaciones o premios guardados pendientes de redistribuir. Las cifras ambiguas no puntúan todavía. <button type="button" onclick="switchTab(6)" class="font-semibold underline">Revisar el apartado 6</button>.</div>');
             }
             c.insertAdjacentHTML('beforeend', renderSectionNavigation());
             if (activeTabId === 1 || activeTabId === 8) {
