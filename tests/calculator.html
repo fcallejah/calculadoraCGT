@@ -31,6 +31,7 @@
             const api = app.eval(`({
                 INITIAL_STATE, Calculators, SERVICE_PERIODS, SERVICE_COUNTS, ACLES_CERTIFICATES,
                 getLimitedMeritState, getServiceCountLimit, getIdiomasBreakdown, completeMonthsBetween,
+                getProrationResult, getNumericValidationIssues, hasEligiblePostponedPractice,
                 renderSection1, renderSection3, renderSection4, renderSection5, renderSection6, renderPositionsSection, renderSummary, renderBreakdown,
                 renderServiceLimitSummary, addIdiomaForOrigin, updateIdioma, handleInput,
                 renderSeniorityWizardStep, applySeniorityWizard,
@@ -218,7 +219,7 @@
                         assert(link && link.textContent === 'finalices tu instancia', 'Falta enlace de presentacion');
                         assert(link.target === '_blank' && link.rel.includes('noopener') && link.rel.includes('noreferrer'), 'Enlace externo inseguro');
                         assert(link.querySelector('svg[aria-hidden="true"]'), 'Falta flecha de enlace externo');
-                        assert(result.querySelector('strong').textContent.includes(label), 'No utiliza el titulo seleccionado');
+                        assert(link.closest('p').querySelector('strong').textContent.includes(label), 'No utiliza el titulo seleccionado');
                         assert(result.textContent.includes('aún no consta tu acreditación'), 'Falta condicion de acreditacion registrada');
                         assert(!result.textContent.includes('Esto no garantiza'), 'Mantiene el texto sustituido');
                     }
@@ -729,8 +730,9 @@
                 additionalCertificate.value = 'eoi-B2';
                 additionalCertificate.dispatchEvent(new app.Event('change', { bubbles: true }));
                 const summary = app.document.querySelector('#puestos-final-summary').parentElement.textContent;
-                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código 11590005')
-                    && summary.includes('Geografía e Historia (Francés)') && summary.includes('código 10590005'), 'No comprueba ni incluye ambos puestos con sus códigos');
+                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código técnico 11590005')
+                    && summary.includes('Geografía e Historia (Francés)') && summary.includes('código técnico 10590005')
+                    && summary.includes('CPE 2') && summary.includes('CPE 1'), 'No comprueba ni incluye ambos puestos con sus códigos y CPE');
                 api.setState(fresh({
                     puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'secundaria', especialidades: ['105'] },
                     bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590105', language: 'Inglés', certificate: 'eoi-B2', certificateLevel: 'B2' }
@@ -767,7 +769,7 @@
                 thirdCertificate.value = 'eoi-B2';
                 thirdCertificate.dispatchEvent(new app.Event('change', { bubbles: true }));
                 const summary = app.document.querySelector('#puestos-final-summary').parentElement.textContent;
-                assert(summary.includes('código 11590005') && summary.includes('código 10590005') && summary.includes('código 12590005'), 'No incluye los tres puestos bilingües');
+                assert(summary.includes('código técnico 11590005') && summary.includes('código técnico 10590005') && summary.includes('código técnico 12590005') && summary.includes('CPE 3'), 'No incluye los tres puestos bilingües');
                 assert(!api.INITIAL_STATE.bilingual.thirdPost.enabled, 'Muta el estado inicial del tercer puesto');
                 api.setPuestoAdditionalBilingualAnswer('language', 'Alemán');
                 assert(!api.getState().bilingual.thirdPost.enabled, 'No limpia el tercer puesto si el segundo pasa a usar su idioma');
@@ -790,10 +792,10 @@
                 const summaryView = parsed(api.renderPuestoFinalSummary());
                 const summary = summaryView.textContent;
                 assert(summary.includes('¿Qué puedes pedir?') && summary.includes('Concurso de traslados 2026-27'), 'No identifica qué se puede pedir en el concurso actual');
-                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código 11590005') && summary.includes('especialidad 590005'), 'No muestra la denominación y los códigos técnicos de GEH bilingüe inglés');
+                assert(summary.includes('Geografía e Historia (Inglés)') && summary.includes('código técnico 11590005') && summary.includes('especialidad 005 y CPE 2'), 'No diferencia los códigos técnicos y los campos de la solicitud');
                 assert(summary.includes('Apoyo al área sociolingüística') && summary.includes('(058)'), 'No recoge apoyo sociolingüístico');
                 assert(summary.includes('Competencia lectora para Secundaria (CL590PCT,'), 'No recoge competencia lectora');
-                assert(summary.includes('previsiblemente, se abrirá entre mayo y junio de 2027'), 'Falta la previsión de apertura de colocación de efectivos');
+                assert(!summary.includes('previsiblemente, se abrirá') && summary.includes('No se presupone fecha de apertura'), 'Publica una fecha no confirmada de colocacion de efectivos');
                 assert(summary.includes('Apoyo al ámbito socio-lingüístico en ZTS (ZT590058'), 'No recoge ZTS');
                 assert(summary.includes('30 h de tutoría virtual Moodle') && summary.includes('No es un curso conjunto de 100 h'), 'No refleja el requisito exacto de Geografía e Historia a distancia');
                 assert(summary.includes('Ver otros puestos del Anexo VII de 2025-26'), 'Falta la lista de referencia del Anexo VII');
@@ -868,7 +870,7 @@
                     app.Math.random = originalRandom;
                 }
             });
-            await test('Aviso de acceso a catedraticos depende de los 8 anos de carrera', () => {
+            await test('Catedraticos puntua por pertenencia; los 8 anos solo generan consejo de acceso', () => {
                 for (const [serviceYears, careerStartDate, shouldWarn] of [
                     [7, '', true],
                     [8, '', false],
@@ -883,12 +885,12 @@
                     const section2 = parsed(app.renderSection2());
                     const warning = section2.querySelector('#catedraticos-eligibility-warning');
                     assert(warning.classList.contains('hidden') !== shouldWarn, 'Aviso no coincide con los años de carrera');
-                    assert(warning.classList.contains('bg-red-50') && warning.classList.contains('border-red-500'), 'El aviso debe ser rojo');
-                    assert(api.Calculators.section2(api.getState()) === (shouldWarn ? 0 : 5), 'Sin 8 años de carrera debe puntuar 0; con 8 o más, 5');
+                    assert(warning.classList.contains('bg-amber-50'), 'Debe ser un consejo, no un bloqueo');
+                    near(api.Calculators.section2(api.getState()), 5);
                     const bar = section2.querySelector('#progress-bar-score-s2');
-                    assert(bar.classList.contains('progress-bar-blocked') === shouldWarn && bar.style.width === '100%', 'Barra discontinua incorrecta');
-                    assert(section2.querySelector('#progress-score-s2').getAttribute('aria-valuenow') === (shouldWarn ? '0' : '5'), 'Progreso accesible incorrecto');
-                    assert(section2.querySelector('#progress-badge-score-s2').classList.contains('invisible') === shouldWarn, 'Máximo alcanzado incorrecto');
+                    assert(!bar.classList.contains('progress-bar-blocked') && bar.style.width === '100%', 'La pertenencia no debe bloquearse por las fechas');
+                    assert(section2.querySelector('#progress-score-s2').getAttribute('aria-valuenow') === '5', 'Progreso accesible incorrecto');
+                    assert(!section2.querySelector('#progress-badge-score-s2').classList.contains('invisible'), 'Máximo alcanzado incorrecto');
                     if (shouldWarn) assert(section2.querySelector('#catedraticos-eligibility-warning a').href.includes('/acceso-a-catedras-2026-procedimiento'), 'Falta enlace oficial');
                 }
                 api.setState(fresh({ s2_catedratico: true, s1_2_1_years: 20, seniorityWizard: { status: 'practice' } }));
@@ -928,7 +930,7 @@
                 timeline = timelineFor({ seniorityWizard: { status: 'practice', careerStartDate: '2026-09-01' } });
                 assert(timeline.querySelector('#catedraticos-access-date').textContent.includes('8 años después de tu nombramiento') && !timeline.textContent.includes('2034'), 'En prácticas no debe estimar con una fecha de carrera');
                 assertOrderLink(timeline);
-                assert(!timelineFor({ s2_catedratico: true, s1_2_1_years: 6, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } }).classList.contains('hidden'), 'Marcada sin 8 años debe seguir mostrando las fechas junto al aviso rojo');
+                assert(timelineFor({ s2_catedratico: true, s1_2_1_years: 6, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } }).classList.contains('hidden'), 'La estimacion de acceso no debe condicionar una pertenencia ya declarada');
                 assert(timelineFor({ s2_catedratico: true, s1_2_1_years: 20, seniorityWizard: { status: 'definitive', careerStartDate: '2006-09-01' } }).classList.contains('hidden'), 'Debe ocultarse si ya es catedrático/a');
                 assert(!timelineFor({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'maestros' }, seniorityWizard: { status: 'definitive', careerStartDate: '2020-09-01' } }), 'Maestros no accede a Catedráticos');
             });
@@ -952,7 +954,7 @@
                 assert(parsed(api.renderSection6()).querySelector('[name="s6_6_tutor_aspirantes"]').disabled, 'En practicas puede tutorizar');
                 near(api.Calculators.calc66(s), 0);
                 s.seniorityWizard = { status: 'provisional', careerStartDate: '2025-09-01' };
-                near(api.Calculators.calc66(s), 0.2);
+                near(api.Calculators.calc66(s), 0.6);
             });
             await test('EOI no selecciona B1 ni puntua sin elegir nivel', () => {
                 api.setState(fresh({ lang33Mode: 'eoi' }));
@@ -993,44 +995,44 @@
                 assert(api.renderBreakdown().includes('3.3 d)'), 'Falta letra EOI en desglose');
                 assert(api.renderBreakdown().includes('5.4 f)'), 'Falta letra CDD en desglose');
             });
-            await test('Todos los periodos del 4 dependen solo de 1.2.1', () => {
+            await test('Cargos admisibles anteriores no se limitan a 1.2.1 del cuerpo actual', () => {
                 const s = fresh({ s1_2_1_years: 2, s1_2_1_months: 2, s1_2_2_years: 99 });
                 Object.keys(api.SERVICE_PERIODS).filter(p => p.startsWith('s4_')).forEach(p => { s[`${p}_years`] = 9; });
                 const limited = api.getLimitedMeritState(s);
                 Object.keys(api.SERVICE_PERIODS).filter(p => p.startsWith('s4_')).forEach(p => {
-                    assert(limited[`${p}_years`] === 2 && limited[`${p}_months`] === 2, `Limite incorrecto: ${p}`);
+                    assert(limited[`${p}_years`] === 9 && limited[`${p}_months`] === 0, `Descarta servicios de otros cuerpos: ${p}`);
                 });
-                near(api.Calculators.calc41(s), 9.75);
-                near(api.Calculators.calc42(s), 6.5);
-                near(api.Calculators.calc43(s), 9.75);
+                near(api.Calculators.calc41(s), 40.5);
+                near(api.Calculators.calc42(s), 27);
+                near(api.Calculators.calc43(s), 10);
                 s.s1_2_2_years = 0;
-                near(api.Calculators.calc41(s), 9.75);
+                near(api.Calculators.calc41(s), 40.5);
                 assert(s.s4_1_director_years === 9, 'Se borraron los datos introducidos');
             });
-            await test('6.2, 6.5 y 6.6 usan anos completos y mantienen topes', () => {
+            await test('Proyectos, tribunales y tutorizaciones no se recortan por 1.2.1; aspirantes conserva el limite desde 2023', () => {
                 const s = fresh({ s1_2_1_years: 2, s1_2_1_months: 11 });
                 Object.keys(api.SERVICE_COUNTS).forEach(name => { s[name] = 9; });
                 const limited = api.getLimitedMeritState(s);
-                Object.keys(api.SERVICE_COUNTS).forEach(name => assert(limited[name] === 2, name));
+                Object.keys(api.SERVICE_COUNTS).forEach(name => assert(limited[name] === (name === 's6_6_tutor_aspirantes' ? 3 : 9), name));
                 near(api.Calculators.calc62(s), 2.5);
-                near(api.Calculators.calc65(s), 1);
-                near(api.Calculators.calc66(s), 0.6);
+                near(api.Calculators.calc65(s), 4.5);
+                near(api.Calculators.calc66(s), 1.5);
                 s.s1_2_1_years = 10;
                 assert(api.getServiceCountLimit(s, 's6_6_tutor_aspirantes') === 3, 'Supera 3 cursos');
             });
-            await test('Sin servicios de 1.2.1 no se computan periodos o cursos dependientes', () => {
+            await test('Sin 1.2.1, 1.1 sigue limitado pero otros meritos acreditados no se anulan', () => {
                 const s = fresh({ s1_2_2_years: 99 });
                 Object.keys(api.SERVICE_PERIODS).forEach(p => { s[`${p}_years`] = 9; });
                 Object.keys(api.SERVICE_COUNTS).forEach(name => { s[name] = 9; });
                 near(api.Calculators.calc11(s), 0);
-                near(api.Calculators.section4(s), 0);
-                near(api.Calculators.calc62(s), 0);
-                near(api.Calculators.calc65(s), 0);
-                near(api.Calculators.calc66(s), 0);
+                near(api.Calculators.section4(s), 30);
+                near(api.Calculators.calc62(s), 2.5);
+                near(api.Calculators.calc65(s), 4.5);
+                near(api.Calculators.calc66(s), 1.5);
             });
             await test('Meses sueltos no completan un ano y se mantiene el tope de tutoria de 2007', () => {
                 const s = fresh({ s1_2_1_months: 11, s6_6_tutor_master_grado: 1 });
-                near(api.Calculators.calc66(s), 0);
+                near(api.Calculators.calc66(s), 0.1);
                 s.s1_2_1_years = 1;
                 near(api.Calculators.calc66(s), 0.1);
                 s.s1_2_1_years = 40;
@@ -1219,6 +1221,7 @@
                 app.document.getElementById('wizard-provisional-years').value = '1';
                 app.document.getElementById('wizard-provisional-months').value = '0';
                 assert(!app.validateSeniorityWizardStep(history), 'Rechaza respuestas validas');
+                app.setWizardHardshipAnswer('no');
                 app.applySeniorityWizard();
                 const s = api.getState();
                 assert(s.seniorityWizard.firstDefinitiveParticipation === 'yes', 'No guarda la confirmacion');
@@ -1303,9 +1306,106 @@
                 const input = parsed(api.renderSection1()).querySelector('[name="s1_1_3_years"]');
                 assert(input.disabled, 'Compensatoria en practicas habilitada');
             });
+            await test('Especial dificultad: Si/No habilita tipos y duracion y valida las respuestas', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'provisional';
+                api.renderSeniorityWizardStep();
+                const step = app.getSeniorityWizardSteps().find(item => item.querySelector('#wizard-hardship-answer'));
+                const fields = app.document.getElementById('wizard-hardship-fields');
+                const controls = [...fields.querySelectorAll('input')];
+                const years = app.document.getElementById('wizard-hardship-years');
+                const months = app.document.getElementById('wizard-hardship-months');
+                assert(controls.every(input => input.disabled) && fields.classList.contains('opacity-60'), 'Los campos no empiezan grises y desactivados');
+                assert(app.validateSeniorityWizardStep(step).includes('Indica si'), 'Permite omitir Si/No');
+                app.document.querySelector('[data-hardship-answer="yes"]').click();
+                assert(controls.every(input => !input.disabled) && !fields.classList.contains('opacity-60'), 'Si no ilumina y habilita los campos');
+                assert(app.document.querySelector('[data-hardship-answer="yes"]').getAttribute('aria-pressed') === 'true', 'No comunica la seleccion');
+                assert(app.validateSeniorityWizardStep(step).includes('Marca'), 'Permite omitir el tipo');
+                app.document.getElementById('wizard-hardship-compensatoria-zts').checked = true;
+                years.value = '1';
+                for (const value of ['12', '-1', '1.5']) {
+                    months.value = value;
+                    assert(app.validateSeniorityWizardStep(step).includes('meses completos'), 'Acepta meses invalidos');
+                }
+                months.value = '2';
+                years.value = '1.5';
+                assert(app.validateSeniorityWizardStep(step).includes('años completos'), 'Acepta años fraccionarios');
+                years.value = '1';
+                assert(!app.validateSeniorityWizardStep(step), 'Rechaza un periodo valido');
+                app.document.querySelector('[data-hardship-answer="no"]').click();
+                assert(controls.every(input => input.disabled) && fields.classList.contains('opacity-60'), 'No mantiene campos activos');
+                assert(!app.validateSeniorityWizardStep(step), 'No exige responder tipos con No');
+                app.setWizardHardshipAnswer('yes');
+                assert(years.value === '1' && months.value === '2', 'Pierde el borrador al alternar Si/No');
+                assert(app.document.getElementById('wizard-hardship-compensatoria-zts').checked, 'Pierde el tipo al alternar Si/No');
+                const warning = app.document.getElementById('wizard-hardship-eligibility-note');
+                assert(warning.classList.contains('bg-amber-50') && warning.textContent.includes('No cuentan interinidad ni prácticas'), 'Falta el aviso amarillo');
+                assert(app.document.getElementById('wizard-hardship-definitive-hint').textContent.includes('Sí pueden contar'), 'Excluye la provisionalidad admisible');
+                app.document.getElementById('wizard-status').value = 'practice';
+                api.renderSeniorityWizardStep();
+                assert(controls.every(input => input.disabled), 'Habilita tipos o duracion en practicas');
+                assert([...app.document.querySelectorAll('[data-hardship-answer]')].every(button => button.disabled), 'Permite responder Si en practicas');
+                app.closeSeniorityWizard();
+            });
+            await test('Especial dificultad recupera datos antiguos y suma ambas categorias una sola vez', () => {
+                api.setState(fresh({
+                    s1_1_3_years: 1, s1_1_3_months: 2,
+                    seniorityWizard: {
+                        status: 'definitive', definitiveStartDate: '2025-09-01', firstDefinitiveParticipation: 'no',
+                        practiceStartDate: '2023-09-01', careerStartDate: '2024-09-01', bodyStartDate: '2023-09-01'
+                    }
+                }));
+                app.openSeniorityWizard();
+                const step = app.getSeniorityWizardSteps().find(item => item.querySelector('#wizard-hardship-answer'));
+                assert(app.document.getElementById('wizard-hardship-answer').dataset.value === 'yes', 'No recupera el Si a partir del periodo antiguo');
+                assert(app.document.getElementById('wizard-hardship-years').value === '1' && app.document.getElementById('wizard-hardship-months').value === '2', 'Altera el periodo antiguo');
+                assert(app.validateSeniorityWizardStep(step).includes('Marca'), 'Inventa un tipo para datos antiguos');
+                for (const type of ['compensatoria-zts', 'dificil-desempeno']) {
+                    app.document.getElementById(`wizard-hardship-${type}`).checked = true;
+                }
+                assert(!app.validateSeniorityWizardStep(step), 'Rechaza marcar ambas categorias');
+                const definitiveNote = app.document.getElementById('wizard-hardship-definitive-note');
+                assert(!definitiveNote.classList.contains('hidden') && definitiveNote.textContent.includes('comisión'), 'No explica la comision desde destino definitivo');
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(app.document.getElementById('seniority-wizard').classList.contains('hidden'), 'No aplica las respuestas validas');
+                assert(s.seniorityWizard.hardshipAnswer === 'yes' && s.seniorityWizard.hardshipTypes.length === 2, 'No guarda respuesta y tipos');
+                assert(s.s1_1_3_years === 1 && s.s1_1_3_months === 2, 'Duplica o pierde la duracion al marcar ambas categorias');
+                near(api.Calculators.calc11(s), 9.3332);
+                app.openSeniorityWizard();
+                assert(['compensatoria-zts', 'dificil-desempeno'].every(type => app.document.getElementById(`wizard-hardship-${type}`).checked), 'No restaura ambas categorias');
+                app.setWizardHardshipAnswer('no');
+                app.applySeniorityWizard();
+                const cleared = api.getState();
+                assert(cleared.seniorityWizard.hardshipAnswer === 'no' && cleared.seniorityWizard.hardshipTypes.length === 0, 'No conserva la respuesta No');
+                assert(cleared.s1_1_3_years === 0 && cleared.s1_1_3_months === 0, 'No sigue sumando un periodo oculto');
+                near(api.Calculators.calc11(cleared), 4.6666);
+                app.openSeniorityWizard();
+                assert(app.document.getElementById('wizard-hardship-answer').dataset.value === 'no' && app.document.getElementById('wizard-hardship-years').disabled, 'No recupera No y los campos desactivados');
+                app.closeSeniorityWizard();
+            });
+            await test('Especial dificultad cuenta en provisionalidad de carrera con el selector activado', () => {
+                api.setState(fresh({
+                    seniorityWizard: {
+                        status: 'provisional', practiceStartDate: '2023-09-01',
+                        careerStartDate: '2024-09-01', bodyStartDate: '2023-09-01'
+                    }
+                }));
+                app.openSeniorityWizard();
+                app.setWizardHardshipAnswer('yes');
+                app.document.getElementById('wizard-hardship-compensatoria-zts').checked = true;
+                app.document.getElementById('wizard-hardship-years').value = '1';
+                app.document.getElementById('wizard-hardship-months').value = '2';
+                app.applySeniorityWizard();
+                const s = api.getState();
+                assert(s.seniorityWizard.hardshipAnswer === 'yes' && s.s1_1_3_years === 1 && s.s1_1_3_months === 2, 'Excluye servicios en provisionalidad');
+                near(api.Calculators.calc11(s) - api.Calculators.calc11({ ...s, s1_1_3_years: 0, s1_1_3_months: 0 }), 4.6666);
+            });
             await test('Cuestionario adapta la pregunta de compensatoria a las tres situaciones', () => {
                 for (const status of ['definitive', 'provisional', 'practice']) {
                     app.document.getElementById('wizard-status').value = status;
+                    app.setWizardHardshipAnswer('yes');
                     api.renderSeniorityWizardStep();
                     const title = app.document.getElementById('wizard-hardship-title').textContent;
                     assert(title.includes(status === 'definitive' ? 'último destino definitivo' : status === 'provisional' ? 'provisionalidad' : 'prácticas'), title);
@@ -1335,6 +1435,7 @@
                 app.openSeniorityWizard();
                 assert(app.document.getElementById('wizard-postponed-practice').checked, 'No restaura la casilla');
                 app.document.getElementById('wizard-status').value = 'provisional';
+                app.setWizardHardshipAnswer('no');
                 app.applySeniorityWizard();
                 assert(api.getState().seniorityWizard.practicePostponed === false, 'Mantiene el aplazamiento fuera de practicas');
                 api.setState(fresh({ seniorityWizard: { status: 'practice' } }));
@@ -1375,6 +1476,7 @@
                     api.setState(fresh());
                     app.openSeniorityWizard();
                     app.document.getElementById('wizard-status').value = status;
+                    app.setWizardHardshipAnswer('no');
                     app.setWizardDateValue('wizard-practice-start', '2023-09-01');
                     app.setWizardDateValue('wizard-career-start', '2024-09-01');
                     app.setWizardDateValue('wizard-definitive-start', '2025-09-01');
@@ -1518,18 +1620,20 @@
                 heading.dispatchEvent(new app.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
                 assert(dialog.dataset.stepIndex === '0', 'Avanza con el cuestionario cerrado');
             });
-            await test('Aviso de exceso y puntuacion se actualizan sin borrar la entrada', () => {
+            await test('Limite real de tutorizacion se avisa sin borrar; tribunales no tiene maximo por anos', () => {
                 api.setState(fresh({ s1_2_1_years: 2 }));
                 app.switchTab(6);
-                const input = app.document.querySelector('[name="s6_5_tribunales"]');
-                const notice = app.document.querySelector('[data-service-count="s6_5_tribunales"]');
+                const input = app.document.querySelector('[name="s6_6_tutor_aspirantes"]');
+                const notice = app.document.querySelector('[data-service-count="s6_6_tutor_aspirantes"]');
                 assert(notice.classList.contains('hidden'), 'Aviso visible sin exceso');
                 input.value = '5';
                 api.handleInput(input);
-                assert(api.getState().s6_5_tribunales === 5, 'Entrada borrada');
+                assert(api.getState().s6_6_tutor_aspirantes === 5, 'Entrada borrada');
                 assert(notice.classList.contains('text-red-600'), 'No muestra aviso rojo');
                 assert(!notice.classList.contains('hidden'), 'Aviso oculto con exceso');
-                near(api.Calculators.calc65(api.getState()), 1);
+                near(api.Calculators.calc66(api.getState()), 0.6);
+                assert(!app.document.querySelector('[name="s6_5_tribunales"]').hasAttribute('max'), 'Mantiene un maximo artificial de tribunales');
+                assert(!app.document.querySelector('#main-content').textContent.includes('Infinity'), 'Muestra un limite infinito');
                 input.value = '2';
                 api.handleInput(input);
                 assert(notice.classList.contains('hidden'), 'Aviso visible al corregir el exceso');
@@ -1539,9 +1643,271 @@
                 const summary = parsed(api.renderSummary());
                 assert(summary.querySelector('.simulation-notice'), 'Falta aviso de simulacion');
                 assert(!summary.querySelector('.simulation-notice').classList.contains('no-print'), 'Aviso oculto al imprimir');
-                assert(api.renderServiceLimitSummary().includes('4.1 Dirección'), 'Falta explicacion del limite');
-                assert(parsed(api.renderBreakdown()).textContent.includes('Dirección (2 años y 0 meses)'), 'Desglose incluye exceso');
+                assert(api.renderServiceLimitSummary().includes('6.6 Cursos de tutorización'), 'Falta explicacion del limite real');
+                assert(!api.renderServiceLimitSummary().includes('4.1 Dirección'), 'Mantiene un limite artificial de cargos');
+                assert(parsed(api.renderBreakdown()).textContent.includes('Dirección (9 años y 0 meses)'), 'Desglose recorta cargos anteriores admisibles');
+                assert(summary.textContent.includes('importes brutos estimados') && summary.textContent.includes('los totales aplican los topes'), 'No distingue lineas brutas y totales limitados');
                 assert(api.renderBreakdown().includes('funcionario/a en prácticas'), 'Terminologia no uniforme');
+            });
+            await test('Grados completos y obtenidos desde otra titulacion tienen distinta tarifa y comparten tope', () => {
+                const s = fresh({ s3_2_1_grados: 1, s3_2_1_grados_adaptacion: 1 });
+                near(api.Calculators.calc32(s), 7.5);
+                near(api.Calculators.section3({ ...s, s3_1_1_doctor: 1 }), 10);
+                api.setState(s);
+                app.switchTab(3);
+                const input = app.document.querySelector('[name="s3_2_1_grados_adaptacion"]');
+                input.value = '2';
+                api.handleInput(input);
+                near(api.Calculators.calc32(api.getState()), 10);
+                const breakdown = parsed(api.renderBreakdown()).textContent;
+                assert(breakdown.includes('Grado adicional completo') && breakdown.includes('Grados desde otras titulaciones'), 'No conserva ambas modalidades en el informe');
+            });
+            await test('Literatura distingue 3, 4, 5 y mas autores; premios artisticos distinguen las nueve categorias', () => {
+                for (const [field, expected] of [
+                    ['s6_1_obras_literarias_3autores', 0.4], ['s6_1_obras_literarias_4autores', 0.3],
+                    ['s6_1_obras_literarias_5autores', 0.2], ['s6_1_obras_literarias_mas5autores', 0.1]
+                ]) near(api.Calculators.calc61(fresh({ [field]: 1 })), expected);
+                for (const [scope, rates] of [['intl', [1.5, 0.75, 0.5]], ['nat', [1, 0.5, 0.25]], ['auto', [0.5, 0.25, 0.1]]]) {
+                    rates.forEach((rate, index) => {
+                        const name = `s6_3_premios_${scope}${index ? `_${index + 1}` : ''}`;
+                        near(api.Calculators.calc63(fresh({ [name]: 1 })), rate);
+                    });
+                }
+                api.setState(fresh({ s6_3_premios_nat_2: 1, s6_1_obras_literarias_4autores: 1 }));
+                const breakdown = parsed(api.renderBreakdown()).textContent;
+                assert(breakdown.includes('Nacional: 2.º premio') && breakdown.includes('Obra literaria de 4 autores'), 'El informe no distingue las categorias nuevas');
+                near(api.Calculators.calc63(fresh({ s6_3_premios_intl: 5 })), 2.5);
+            });
+            await test('Datos antiguos ambiguos conservan las cifras y requieren revision antes de puntuarlas', () => {
+                const nativeGetItem = app.Storage.prototype.getItem;
+                const key = app.eval('STORAGE_KEY');
+                let saved = { s6_1_obras_literarias_3autores: 1, s6_3_premios_nat: 1 };
+                app.Storage.prototype.getItem = function(name) { return name === key ? JSON.stringify(saved) : nativeGetItem.call(this, name); };
+                try {
+                    api.loadState();
+                    const s = api.getState();
+                    assert(s.literaryAuthorsReview && s.artPrizesReview, 'Interpreta los grupos antiguos sin avisar');
+                    assert(s.s6_1_obras_literarias_3autores === 1 && s.s6_3_premios_nat === 1, 'Borra las cifras antiguas');
+                    near(api.Calculators.calc61(s), 0);
+                    near(api.Calculators.calc63(s), 0);
+                    app.switchTab(1);
+                    assert(app.document.querySelector('[data-pending-merit-review]'), 'No avisa de la revision al entrar por otra pestana');
+                    assert(parsed(api.renderSummary()).querySelectorAll('[data-merit-review]').length === 2, 'El informe oculta las revisiones pendientes');
+                    s.s6_1_obras_literarias_3autores = 0;
+                    s.s6_1_obras_literarias_4autores = 1;
+                    s.s6_3_premios_nat = 0;
+                    s.s6_3_premios_nat_2 = 1;
+                    app.confirmMeritReview('literaryAuthorsReview');
+                    app.confirmMeritReview('artPrizesReview');
+                    near(api.Calculators.calc61(api.getState()), 0.3);
+                    near(api.Calculators.calc63(api.getState()), 0.5);
+                    saved = structuredClone(api.getState());
+                    api.loadState();
+                    assert(!api.getState().literaryAuthorsReview && !api.getState().artPrizesReview, 'Vuelve a bloquear datos ya revisados');
+                    near(api.Calculators.calc63(api.getState()), 0.5);
+                } finally {
+                    app.Storage.prototype.getItem = nativeGetItem;
+                }
+            });
+            await test('Condiciones deportivas se valoran una vez, no por certificados o anos', () => {
+                near(api.Calculators.calc63(fresh({ s6_3_deportista_nivel: 8 })), 1);
+                near(api.Calculators.calc63(fresh({ s6_3_deportista_rendimiento: 8 })), 0.5);
+                const s = fresh({ s6_3_deportista_nivel: true, s6_3_deportista_rendimiento: true });
+                near(api.Calculators.calc63(s), 1.5);
+                api.setState(s);
+                app.switchTab(6);
+                const input = app.document.querySelector('[name="s6_3_deportista_nivel"]');
+                assert(input.type === 'checkbox' && input.checked, 'Mantiene un contador deportivo');
+                input.click();
+                near(api.Calculators.calc63(api.getState()), 0.5);
+                api.setState(fresh({ s6_3_deportista_nivel: 8 }));
+                assert(api.renderSummary().includes('no se multiplica su puntuación'), 'Corrige datos repetidos sin informar');
+            });
+            await test('Reparto de meritos aplica el minimo solo en los supuestos previstos', () => {
+                near(api.getProrationResult('s6_2_intl_1', 100).points, 0.015);
+                near(api.getProrationResult('s6_2_intl_1', 100, true).points, 0.05);
+                near(api.getProrationResult('s6_3_premios_intl', 100, true).points, 0.015);
+                for (const field of ['s6_3_espectaculos_gran', 's6_3_actuaciones_secundarias', 's6_3_exposiciones', 's6_3_conservador_part']) {
+                    near(api.getProrationResult(field, 100).points, 0.05);
+                }
+                for (const number of [0, -1, 1.5, NaN]) assert(api.getProrationResult('s6_3_exposiciones', number).error, 'Acepta participantes invalidos');
+                api.setState(fresh({ s6_3_exposiciones: 1 }));
+                app.switchTab(6);
+                app.document.querySelector('#proration-merit').value = 's6_3_exposiciones';
+                app.document.querySelector('#proration-participants').value = '20';
+                app.updateProrationPreview();
+                const add = app.document.querySelector('#proration-add');
+                add.click();
+                near(api.getState().s6_3_exposiciones, 1.1);
+                near(api.Calculators.calc63(api.getState()), 0.55);
+                add.click();
+                near(api.getState().s6_3_exposiciones, 1.1);
+                assert(app.document.querySelector('[name="s6_3_exposiciones"]').value === '1,1', 'No muestra las unidades equivalentes acumuladas');
+            });
+            await test('Numeros invalidos no se redondean, borran ni convierten en puntuaciones plausibles', () => {
+                for (const [name, value] of [
+                    ['s3_1_1_doctor', '0.5'], ['s3_2_1_grados_adaptacion', '1.25'],
+                    ['s4_1_director_years', '1.5'], ['s4_1_director_months', '12'],
+                    ['s6_6_tutor_master_grado', '-2']
+                ]) {
+                    api.setState(fresh());
+                    app.switchTab(Number(name[1]));
+                    const input = app.document.querySelector(`[name="${name}"]`);
+                    input.value = value;
+                    api.handleInput(input);
+                    assert(String(api.getState()[name]) === value, `Altera el dato invalido ${name}`);
+                    assert(input.getAttribute('aria-invalid') === 'true' && !input.checkValidity(), 'No senala el error');
+                    assert(app.document.querySelector('#numeric-validation-notice').textContent.includes('pendientes de corregir'), 'No explica el total pendiente');
+                    assert(Number.isNaN(api.Calculators.total(api.getState())), 'Suma una cantidad invalida');
+                    assert(app.document.querySelector('#header-total-score').textContent === '—', 'El total parece una puntuacion valida');
+                    input.value = '1';
+                    api.handleInput(input);
+                    assert(!api.getNumericValidationIssues(api.getState()).length, 'El error no se resuelve al corregir');
+                    assert(!app.document.querySelector('#numeric-validation-notice').textContent, 'Conserva el aviso despues de corregir');
+                }
+                near(api.Calculators.calc51(fresh({ s5_1_horas: 19.5 })), 0.1);
+                near(api.Calculators.calc52(fresh({ s5_2_horas: 5.5 })), 0.1);
+                near(api.Calculators.calc62(fresh({ s6_2_intl_1: 0.5 })), 0.75);
+                assert(Number.isNaN(api.Calculators.calc31(fresh({ s3_1_1_doctor: 0.5 }))), 'La funcion de calculo acepta medio doctorado');
+            });
+            await test('Datos numericos antiguos invalidos permanecen pendientes, no se sustituyen por cero', () => {
+                const nativeGetItem = app.Storage.prototype.getItem;
+                const key = app.eval('STORAGE_KEY');
+                app.Storage.prototype.getItem = function(name) {
+                    return name === key ? JSON.stringify({ s3_1_1_doctor: 0.5, s4_1_director_months: 12, s5_1_horas: 'incorrecto' }) : nativeGetItem.call(this, name);
+                };
+                try {
+                    api.loadState();
+                    assert(api.getState().s3_1_1_doctor === 0.5 && api.getState().s5_1_horas === 'incorrecto', 'Borra un dato antiguo invalido');
+                    assert(api.getNumericValidationIssues(api.getState()).length === 3, 'No identifica todos los datos pendientes');
+                    assert(Number.isNaN(api.Calculators.total(api.getState())), 'Produce un total con datos invalidos');
+                    app.switchTab(8);
+                    assert(app.document.querySelector('#numeric-validation-notice').querySelectorAll('li').length === 3, 'Faltan errores recuperados en el resumen');
+                    assert(!api.renderSummary().includes('NaN'), 'Muestra un NaN en el informe');
+                } finally {
+                    app.Storage.prototype.getItem = nativeGetItem;
+                }
+            });
+            await test('Linguaskill y TOEFL C2 acreditan C1 bilingue sin perder ni regalar puntos ACLES', () => {
+                for (const [certificado, id] of [['Linguaskill C2', 'linguaskill-c1'], ['TOEFL iBT 114–120', 'toefl-c1']]) {
+                    api.setState(fresh({ idiomas: [{ idioma: 'Inglés', origen: 'ACLES', certificado, nivel: 'C2' }] }));
+                    app.switchTab(5);
+                    api.setBilingualAnswer('enabled', true);
+                    api.setBilingualAnswer('specialty', '590005');
+                    assert(api.getState().bilingual.certificate === id && api.getState().bilingual.certificateLevel === 'C1', 'No sincroniza la equivalencia del anexo');
+                    assert(api.getBilingualResult(api.getState()).status === 'pending', 'Omite confirmar las condiciones');
+                    api.setBilingualAnswer('conditionsConfirmed', true);
+                    assert(api.getBilingualResult(api.getState()).status === 'yes', 'No admite el titulo confirmado');
+                    near(api.Calculators.calc55(api.getState()), 4);
+                    assert(api.getState().idiomas.length === 1 && api.getState().idiomas[0].nivel === 'C2', 'Rebaja o duplica el merito C2');
+                }
+                const b1 = fresh({ idiomas: [{ idioma: 'Inglés', origen: 'ACLES', certificado: 'LanguageCert International ESOL Achiever (B1)', nivel: 'B1' }],
+                    bilingual: { ...api.INITIAL_STATE.bilingual, enabled: true, specialty: '590005', language: 'Inglés' } });
+                near(api.Calculators.calc55(b1), 1);
+                assert(api.getBilingualResult(b1).status === 'pending', 'Un B1 basta para el requisito bilingue');
+            });
+            await test('Aplazamiento solo altera la puntuacion real en el segundo ano de nombramiento', () => {
+                for (const [practiceOnlyStartDate, eligible] of [['2025-09-01', true], ['2024-09-01', false], ['2026-09-01', false], ['', false]]) {
+                    api.setState(fresh({ seniorityWizard: { status: 'practice', practicePostponed: true, practiceOnlyStartDate } }));
+                    assert(api.hasEligiblePostponedPractice(api.getState()) === eligible, `Excepcion incorrecta para ${practiceOnlyStartDate}`);
+                    assert(api.renderSection1().includes('se adjudica según tu puntuación') === eligible, 'El aviso no refleja la elegibilidad');
+                }
+                api.setState(fresh({ seniorityWizard: { status: 'practice', practicePostponed: true, practiceOnlyStartDate: '2024-09-01' } }));
+                app.openSeniorityWizard();
+                const step = app.document.getElementById('wizard-postponed-practice').closest('[data-wizard-step]');
+                assert(app.validateSeniorityWizardStep(step).includes('segundo año'), 'El cuestionario acepta la excepcion en otro curso');
+                app.setWizardDateValue('wizard-practice-only-start', '2025-09-01');
+                assert(!app.validateSeniorityWizardStep(step), 'Rechaza un aplazamiento en segundo ano');
+                app.closeSeniorityWizard();
+            });
+            await test('Intervalos largos entre practicas y carrera avisan pero no bloquean fechas validas', () => {
+                api.setState(fresh());
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-status').value = 'provisional';
+                app.setWizardDateValue('wizard-practice-start', '2020-09-01');
+                app.setWizardDateValue('wizard-career-start', '2024-09-01');
+                app.setWizardDateValue('wizard-body-start', '2020-09-01');
+                app.setWizardHardshipAnswer('no');
+                app.renderSeniorityWizardStep();
+                assert(!app.validarDuracionPracticas(), 'Bloquea un aplazamiento prolongado');
+                const warning = app.document.getElementById('wizard-practice-warning');
+                assert(!warning.classList.contains('hidden') && warning.classList.contains('text-amber-700'), 'No avisa del intervalo');
+                app.applySeniorityWizard();
+                assert(api.getState().seniorityWizard.careerStartDate === '2024-09-01', 'No aplica fechas validas');
+                assert(app.getPracticeCareerDateError('2024-09-01', '2020-09-01'), 'Acepta carrera anterior a practicas');
+            });
+            await test('Acumulacion excepcional habilita 1.1.1 provisional sin duplicar servicios', () => {
+                const s = fresh({ s1_2_1_years: 10, s1_1_1_years: 4, s1_1_2_years: 9, s1_1_3_years: 10,
+                    seniorityWizard: { status: 'provisional', exceptionalAccumulation: true } });
+                const limited = api.getLimitedMeritState(s);
+                assert(limited.s1_1_1_years === 4 && limited.s1_1_2_years === 6 && limited.s1_1_3_years === 10, 'No respeta la acumulacion y el limite conjunto');
+                near(api.Calculators.calc11(s), 86);
+                assert(JSON.stringify(api.getLimitedMeritState(limited)) === JSON.stringify(limited), 'La acumulacion no es estable');
+                api.setState(s);
+                app.switchTab(1);
+                assert(!app.document.querySelector('[name="s1_1_1_years"]').disabled, 'No habilita el supuesto especial');
+                app.setExceptionalAccumulation(false);
+                assert(app.document.querySelector('[name="s1_1_1_years"]').disabled && api.getState().s1_1_1_years === 4, 'Borra servicios al desmarcar');
+                assert(api.getLimitedMeritState(api.getState()).s1_1_1_years === 0, 'Extiende la excepcion a toda la provisionalidad');
+                app.openSeniorityWizard();
+                app.document.getElementById('wizard-exceptional-accumulation').checked = true;
+                app.toggleWizardExceptionalFields();
+                app.renderSeniorityWizardStep();
+                assert(app.document.getElementById('wizard-hardship-title').textContent.includes('periodos excepcionalmente acumulables'), 'El titulo contradice la acumulacion excepcional');
+                assert(!app.document.getElementById('wizard-accumulated-years').disabled, 'No permite declarar servicios acumulables');
+                app.setWizardDateValue('wizard-practice-start', '2009-09-01');
+                app.setWizardDateValue('wizard-career-start', '2010-09-01');
+                app.setWizardDateValue('wizard-body-start', '2009-09-01');
+                app.document.getElementById('wizard-accumulated-years').value = '4';
+                app.document.getElementById('wizard-accumulated-provisional-years').value = '2';
+                app.setWizardHardshipAnswer('no');
+                app.applySeniorityWizard();
+                assert(api.getState().seniorityWizard.exceptionalAccumulation && api.getState().s1_1_1_years === 4 && api.getState().s1_1_2_years === 2, 'El cuestionario pierde la distribucion declarada');
+                assert(!api.INITIAL_STATE.seniorityWizard.exceptionalAccumulation, 'La casilla altera el estado inicial');
+            });
+            await test('Sectores incluye diez especialidades sin inventar perfiles bilingues', () => {
+                const codes = Array.from({ length: 10 }, (_, index) => String(index + 1).padStart(3, '0'));
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'sectores', especialidades: codes } }));
+                const section = parsed(api.renderPositionsSection());
+                for (const code of codes) assert(section.textContent.includes(`${code} · `), `Falta la especialidad ${code}`);
+                assert(app.getPuestoBilingualSpecialties().length === 4, 'Confunde el catalogo general con el bilingue');
+                assert(api.renderPuestoFinalSummary().includes('Soldadura'), 'El resumen omite especialidades no bilingues');
+            });
+            await test('Resumen de Maestros conserva CPR, ESO, PT/AL, adultos y EOE con sus condiciones', () => {
+                api.setState(fresh({ puestos: { ...api.INITIAL_STATE.puestos, cuerpo: 'maestros', especialidades: ['032', '036', '037', '038'],
+                    maestrosEso: true, maestrosEducacionPermanente: true, maestrosEoe: true } }));
+                const summary = parsed(api.renderPuestoFinalSummary()).textContent;
+                for (const text of ['Colegios Públicos Rurales', '(060)', '(061)', '021–028', 'Educación Permanente', 'centros penitenciarios', 'Audición y Lenguaje en EOE']) {
+                    assert(summary.includes(text), `Falta ${text} en el resultado final`);
+                }
+                api.getState().puestos.maestrosEducacionPermanente = false;
+                assert(api.renderPuestoFinalSummary().includes('Educación Permanente y centros penitenciarios: Inglés o Primaria y 2 años'), 'No mantiene pendiente el requisito de carrera');
+            });
+            await test('Revisiones, errores y reparto abierto caben en movil claro y oscuro', async () => {
+                const widthBefore = frame.style.width;
+                try {
+                    for (const width of [320, 375, 430]) {
+                        frame.style.width = `${width}px`;
+                        for (const dark of [false, true]) {
+                            app.document.documentElement.classList.toggle('dark', dark);
+                            api.setState(fresh({ s3_1_1_doctor: 0.5, literaryAuthorsReview: true, artPrizesReview: true,
+                                seniorityWizard: { status: 'provisional', exceptionalAccumulation: true } }));
+                            app.switchTab(6);
+                            app.document.getElementById('proration-merit').closest('details').open = true;
+                            await new Promise(resolve => setTimeout(resolve, 50));
+                            const root = app.document.documentElement;
+                            assert(root.scrollWidth <= root.clientWidth, `Los avisos o el reparto desbordan a ${width}px`);
+                            app.openSeniorityWizard();
+                            const fields = app.document.getElementById('wizard-exceptional-fields');
+                            assert(!fields.classList.contains('hidden') && fields.scrollWidth <= fields.clientWidth, 'Los campos especiales desbordan');
+                            app.closeSeniorityWizard();
+                        }
+                    }
+                } finally {
+                    frame.style.width = widthBefore;
+                    app.document.documentElement.classList.remove('dark');
+                    app.closeSeniorityWizard();
+                }
             });
             await test('La caja de ayuda intercepta los toques sobre botones situados debajo', async () => {
                 api.setState(fresh({ s4_3_tutoria_antes_2007: 'no' }));
